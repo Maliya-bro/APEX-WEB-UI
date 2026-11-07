@@ -6,7 +6,6 @@
   <title>Sign In — Apex API</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -108,11 +107,9 @@
     .form-error { display: none; font-size: .78rem; font-weight: 600; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; border-radius: .5rem; padding: .55rem .75rem; margin-top: .7rem; text-align: center; line-height: 1.4; }
     .form-error.show { display: block; }
 
-    /* OTP Input */
     .otp-input { text-align: center; font-size: 1.8rem; letter-spacing: 0.8rem; font-weight: 800; color: var(--indigo); padding: 0.75rem; border: 2px solid #e2e8f0; background: #f8fafc; }
     .otp-input:focus { border-color: var(--indigo); background: #fff; }
 
-    /* True Mark Animation */
     .success-mark-wrap { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 0; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .success-mark-wrap.show { display: flex; }
     .success-circle { width: 80px; height: 80px; border-radius: 50%; background: #ecfdf5; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.1); animation: pulseSuccess 2s infinite; }
@@ -120,7 +117,6 @@
     @keyframes drawCheck { 0% { opacity: 0; transform: rotate(-45deg) scale(0); } 100% { opacity: 1; transform: rotate(-45deg) scale(1); } }
     @keyframes pulseSuccess { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
 
-    /* ★★★ DARKNESS SECURITY MODAL (කළු පාට Box එක) ★★★ */
     #darkness-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
     #darkness-overlay.show { display: flex; opacity: 1; }
     .darkness-box { background: #ffffff; border-radius: 1.2rem; width: 100%; max-width: 22rem; padding: 2rem; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -145,7 +141,6 @@
     <div class="absolute top-1/2 left-1/2 w-[24rem] h-[24rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-fuchsia-200/30 blur-3xl"></div>
   </div>
 
-  <!-- ★★★ DARKNESS SECURITY MODAL (කළු පාට Box එක) ★★★ -->
   <div id="darkness-overlay">
     <div class="darkness-box">
       <div id="darkness-icon"><div class="darkness-spinner"></div></div>
@@ -315,7 +310,6 @@
               </div>
             </form>
 
-            <!-- True Mark Animation -->
             <div id="success-mark" class="success-mark-wrap">
               <div class="success-circle"><div class="success-check"></div></div>
               <h3 class="text-lg font-extrabold text-slate-900 mb-1">Verified Successfully!</h3>
@@ -329,6 +323,9 @@
   </div>
 
   <script>
+    // මෙතන ඔයාගේ Railway URL එක හරිද කියලා අනිවාර්යයෙන්ම බලන්න
+    const API_BASE = 'https://apex-web-backend-production.up.railway.app';
+
     (function () {
       const cardMotion   = document.getElementById('cardMotion');
       const sideLogin    = document.getElementById('sideLogin');
@@ -378,7 +375,7 @@
         }
       }
 
-      function setMode(mode) {
+      window.setMode = function(mode) {
         if (mode === currentMode && mode !== 'verify') return;
         currentMode = mode;
         if (!introDone) { clearTimeout(introTimer); introDone = true; }
@@ -398,7 +395,7 @@
         switchPane(mode);
       }
 
-      tabButtons.forEach((btn) => btn.addEventListener('click', () => setMode(btn.dataset.mode)));
+      tabButtons.forEach((btn) => btn.addEventListener('click', () => window.setMode(btn.dataset.mode)));
 
       const botLogEl = document.getElementById('botLog');
       if (botLogEl) {
@@ -429,20 +426,10 @@
       }
     })();
 
-    /* ═══════════════════════════════════════════════════════════
-       LIVE AUTH, OTP & DARKNESS SECURITY INTEGRATION
-       ═══════════════════════════════════════════════════════════ */
     (function () {
-      const API_BASE = 'https://apex-web-backend-production.up.railway.app';
       const DARKNESS_EXPIRY = 2 * 24 * 60 * 60 * 1000;
 
       function setErr(id, msg) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        if (msg) { el.textContent = msg; el.classList.add('show'); }
-        else { el.classList.remove('show'); }
-      }
-      function setSuccess(id, msg) {
         const el = document.getElementById(id);
         if (!el) return;
         if (msg) { el.textContent = msg; el.classList.add('show'); }
@@ -459,17 +446,29 @@
         localStorage.setItem('apex_user', JSON.stringify(user));
       }
 
+      // 10s Timeout එකක් එක්ක postJSON (Button හිරවෙන එක නවත්තන්න)
       async function postJSON(path, body) {
-        const res = await fetch(API_BASE + path, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json().catch(() => ({}));
-        return { res, data };
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        try {
+          console.log(`[API Request] POST ${API_BASE}${path}`);
+          const res = await fetch(API_BASE + path, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          const data = await res.json().catch(() => ({}));
+          console.log(`[API Response] ${res.status}`, data);
+          return { res, data };
+        } catch (err) {
+          clearTimeout(timeoutId);
+          if (err.name === 'AbortError') throw new Error('Request timed out. Please check your internet connection.');
+          throw err;
+        }
       }
 
-      /* ─── DARKNESS SECURITY LOGIC ─── */
       const overlay = document.getElementById('darkness-overlay');
       const dIcon = document.getElementById('darkness-icon');
       const dTitle = document.getElementById('darkness-title');
@@ -480,7 +479,6 @@
         const webdriver = navigator.webdriver || false;
         const plugins = navigator.plugins ? navigator.plugins.length : 0;
         const hardwareConcurrency = navigator.hardwareConcurrency || 1;
-        
         const canvas = document.createElement('canvas');
         const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
         let webglVendor = "unknown";
@@ -488,16 +486,12 @@
           const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
           if (debugInfo) webglVendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || "";
         }
-        const ctx = canvas.getContext('2d');
-        ctx.textBaseline = "top"; ctx.font = "14px 'Arial'";
-        ctx.fillStyle = "#f60"; ctx.fillRect(125, 1, 62, 20);
-        const canvasHash = canvas.toDataURL().length;
-
-        return { webdriver, plugins, hardwareConcurrency, webglVendor, canvasHash, timeTaken: performance.now() - start };
+        return { webdriver, plugins, hardwareConcurrency, webglVendor, timeTaken: performance.now() - start };
       }
 
       async function solveChallenge() {
         const res = await fetch(API_BASE + '/api/auth/darkness-challenge');
+        if (!res.ok) throw new Error("Failed to fetch challenge");
         const { nonce, difficulty } = await res.json();
         const sha256 = async (str) => {
           const buf = new TextEncoder().encode(str);
@@ -519,6 +513,7 @@
           dIcon.innerHTML = '<div class="darkness-spinner"></div>';
           dTitle.textContent = 'Verifying browser';
           dDesc.textContent = 'Checking device fingerprint & security...';
+          
           setTimeout(() => dDesc.textContent = 'Analyzing hardware signature...', 800);
           setTimeout(() => dDesc.textContent = 'Solving cryptographic proof-of-work...', 1600);
 
@@ -530,7 +525,18 @@
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...pow, fingerprint })
               });
-              if (verifyRes.status === 404) { window.location.href = '/404.html'; return; }
+              
+              if (verifyRes.status === 404) {
+                // Backend එකෙන් Bot කියලා හඳුනාගත්තා
+                console.warn("[Darkness] 404 - Bot detected or invalid challenge");
+                dTitle.textContent = 'Verification Failed';
+                dDesc.textContent = 'Security check failed. Please disable VPN / AdBlocker and try again.';
+                setTimeout(() => { overlay.classList.remove('show'); resolve(null); }, 3000);
+                return;
+              }
+
+              if (!verifyRes.ok) throw new Error("Verification failed");
+              
               const data = await verifyRes.json();
               dIcon.innerHTML = '<div class="darkness-check">✓</div>';
               dTitle.textContent = 'Verified';
@@ -538,15 +544,16 @@
               localStorage.setItem('apex_darkness', JSON.stringify({ token: data.darknessToken, expires: Date.now() + DARKNESS_EXPIRY }));
               setTimeout(() => resolve(data.darknessToken), 1000);
             } catch (err) {
+              console.error("[Darkness Error]:", err);
               dTitle.textContent = 'Verification Failed';
-              dDesc.textContent = 'Please refresh and try again.';
+              dDesc.textContent = err.message || 'Please refresh and try again.';
               setTimeout(() => { overlay.classList.remove('show'); resolve(null); }, 2000);
             }
           })();
         });
       }
 
-      /* ─── LOGIN SUBMIT (With Darkness Check) ─── */
+      // LOGIN
       const loginForm = document.getElementById('login-form');
       if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -572,11 +579,15 @@
             }
             if (!darknessToken) {
               darknessToken = await runDarknessCheck();
-              if (!darknessToken) { btn.disabled = false; btn.textContent = original; return; }
+              if (!darknessToken) { 
+                btn.disabled = false; btn.textContent = original; 
+                setErr('login-error', 'Security check failed. Please check your connection.');
+                return; 
+              }
             }
 
             const { res, data } = await postJSON('/api/auth/login', { email, password, darknessToken });
-            if (res.status === 404) { window.location.href = '/404.html'; return; }
+            if (res.status === 404) { setErr('login-error', 'Security signature rejected by server.'); return; }
             if (!res.ok) throw new Error(data.message || data.error || 'Invalid credentials.');
             
             saveSession(data);
@@ -590,12 +601,12 @@
         });
       }
 
-      /* ─── REGISTER SUBMIT (Gmail Check + OTP) ─── */
+      // REGISTER
       const regForm = document.getElementById('register-form');
       if (regForm) {
         regForm.addEventListener('submit', async (e) => {
           e.preventDefault();
-          setErr('reg-error', ''); setSuccess('reg-success', '');
+          setErr('reg-error', '');
           const name = document.getElementById('reg-name').value.trim();
           const email = document.getElementById('reg-email').value.trim();
           const password = document.getElementById('reg-password').value;
@@ -611,14 +622,12 @@
           
           try {
             const { res, data } = await postJSON('/api/auth/register', { name, email, password });
-            if (!res.ok) throw new Error(data.message || data.error || 'Registration failed.');
+            if (!res.ok) throw new Error(data.error || 'Registration failed.');
             
-            // Switch to Verify Pane
             document.getElementById('verify-email-display').textContent = email;
             document.getElementById('verify-code').value = '';
-            setMode('verify');
+            window.setMode('verify');
             regForm.reset();
-
           } catch (err) {
             setErr('reg-error', err.message || 'Unable to register.');
           } finally {
@@ -628,7 +637,7 @@
         });
       }
 
-      /* ─── VERIFY CODE SUBMIT (Auto Login) ─── */
+      // VERIFY OTP
       const verifyForm = document.getElementById('verify-form');
       if (verifyForm) {
         verifyForm.addEventListener('submit', async (e) => {
@@ -648,14 +657,11 @@
             const { res, data } = await postJSON('/api/auth/verify-code', { email, code });
             if (!res.ok) throw new Error(data.error || 'Invalid or expired code.');
 
-            // TRUE MARK ANIMATION
             verifyForm.style.display = 'none';
             document.getElementById('success-mark').classList.add('show');
             
-            // Save Session & Auto Login
             saveSession(data);
             setTimeout(() => { window.location.href = 'dashboard.html'; }, 1800);
-
           } catch (err) {
             setErr('verify-error', err.message || 'Verification failed.');
             btn.disabled = false;
@@ -664,7 +670,7 @@
         });
       }
 
-      /* ─── RESEND CODE ─── */
+      // RESEND CODE
       const resendLink = document.getElementById('resend-code-link');
       if (resendLink) {
         resendLink.addEventListener('click', async (e) => {
@@ -681,7 +687,7 @@
         });
       }
 
-      /* ─── GOOGLE CALLBACK HANDLER ─── */
+      // GOOGLE CALLBACK
       const params  = new URLSearchParams(window.location.search);
       const token   = params.get('token');
       const apiKey  = params.get('apiKey');
