@@ -436,6 +436,54 @@
         testPlaceholder: 'https://www.1tamilmv.lease/index.php?/forums/topic/12345-movie/',
         usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/tamilmv/dl?url=TOPIC_URL&api=<YOUR_API_KEY>"`
       },
+            {
+        id: 'animeheaven-search',
+        category: 'movie',
+        categoryLabel: 'Movie',
+        name: 'AnimeHeaven · Search',
+        method: 'GET',
+        path: '/api/v1/media/animeheaven/search?q={query}&api=<YOUR_API_KEY>',
+        description: 'Searches anime series on AnimeHeaven and returns matched show pages.',
+        testParam: 'q',
+        testPlaceholder: 'Magical Explorer',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/animeheaven/search?q=Magical+Explorer&api=<YOUR_API_KEY>"`
+      },
+      {
+        id: 'animeheaven-dl',
+        category: 'movie',
+        categoryLabel: 'Movie',
+        name: 'AnimeHeaven · All Episodes DL',
+        method: 'GET',
+        path: '/api/v1/media/animeheaven/dl?url={pageUrl}&api=<YOUR_API_KEY>',
+        description: 'Extracts direct MP4 download and streaming links for every available episode in an anime series.',
+        testParam: 'url',
+        testPlaceholder: 'https://animeheaven.me/anime.php?gve9a',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/animeheaven/dl?url=https://animeheaven.me/anime.php?gve9a&api=<YOUR_API_KEY>"`
+      },
+      {
+        id: 'yts-search',
+        category: 'movie',
+        categoryLabel: 'Movie',
+        name: 'YTS MOVIES· Search',
+        method: 'GET',
+        path: '/api/v1/movies/yts/search?q={query}&api=<YOUR_API_KEY>',
+        description: 'Searches movies and TV shows on YTS official catalog with artwork and ratings.',
+        testParam: 'q',
+        testPlaceholder: 'avatar',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/yts/search?q=avatar&api=<YOUR_API_KEY>"`
+      },
+      {
+        id: 'yts-dl',
+        category: 'movie',
+        categoryLabel: 'Movie',
+        name: 'YTS MOVIES · Torrents & Magnets',
+        method: 'GET',
+        path: '/api/v1/movies/yts/dl?title={title}&year={year}%api=<YOUR_API_KEY>',
+        description: 'Fetches high-speed torrent files and direct magnet URLs for all qualities (720p, 1080p, 4K).',
+        testParam: 'title',
+        testPlaceholder: 'Avatar: The Way of Water',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/yts/dl?title=Avatar&year=2022&api=<YOUR_API_KEY>"`
+      },
       {
         id: 'yt-search',
         category: 'media',
@@ -519,31 +567,8 @@
         testParam: 'url',
         testPlaceholder: 'https://www.slmix.lk/song.php?id=123',
         usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/slmix/dl?url=TRACK_PAGE_URL&api=<YOUR_API_KEY>"`
-      },
-      {
-        id: 'animeheaven-search',
-        category: 'movie',
-        categoryLabel: 'Movie',
-        name: 'AnimeHeaven · Search',
-        method: 'GET',
-        path: '/api/v1/media/animeheaven/search?q={query}&api=<YOUR_API_KEY>',
-        description: 'Searches anime series on AnimeHeaven and returns matched show pages.',
-        testParam: 'q',
-        testPlaceholder: 'Magical Explorer',
-        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/animeheaven/search?q=Magical+Explorer&api=<YOUR_API_KEY>"`
-      },
-      {
-        id: 'animeheaven-dl',
-        category: 'movie',
-        categoryLabel: 'Movie',
-        name: 'AnimeHeaven · All Episodes DL',
-        method: 'GET',
-        path: '/api/v1/media/animeheaven/dl?url={pageUrl}&api=<YOUR_API_KEY>',
-        description: 'Extracts direct MP4 download and streaming links for every available episode in an anime series.',
-        testParam: 'url',
-        testPlaceholder: 'https://animeheaven.me/anime.php?gve9a',
-        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/animeheaven/dl?url=https://animeheaven.me/anime.php?gve9a&api=<YOUR_API_KEY>"`
       }
+
     ];
 
     function escapeHtml(s) {
