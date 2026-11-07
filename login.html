@@ -6,6 +6,9 @@
   <title>Sign In — Apex API</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Cloudflare Turnstile Script -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -119,18 +122,6 @@
     .success-check { width: 40px; height: 20px; border-left: 5px solid #10b981; border-bottom: 5px solid #10b981; transform: rotate(-45deg); margin-top: -10px; animation: drawCheck 0.6s ease forwards; opacity: 0; }
     @keyframes drawCheck { 0% { opacity: 0; transform: rotate(-45deg) scale(0); } 100% { opacity: 1; transform: rotate(-45deg) scale(1); } }
     @keyframes pulseSuccess { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
-
-    #darkness-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
-    #darkness-overlay.show { display: flex; opacity: 1; }
-    .darkness-box { background: #ffffff; border-radius: 1.2rem; width: 100%; max-width: 22rem; padding: 2rem; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-    #darkness-overlay.show .darkness-box { transform: scale(1); }
-    .darkness-spinner { width: 3rem; height: 3rem; border: 3px solid #e2e8f0; border-top-color: #6366f1; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
-    .darkness-check { width: 3rem; height: 3rem; background: #ecfdf5; color: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem; font-weight: bold; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-    .darkness-title { font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem; }
-    .darkness-desc { font-size: 0.8rem; color: #64748b; line-height: 1.5; }
-    .darkness-brand { font-size: 0.65rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 1.5rem; }
   </style>
 </head>
 
@@ -142,15 +133,6 @@
     <div class="absolute top-1/3 -right-40 w-[30rem] h-[30rem] rounded-full bg-violet-300/40 blur-3xl"></div>
     <div class="absolute bottom-0 left-1/3 w-[26rem] h-[26rem] rounded-full bg-sky-200/60 blur-3xl"></div>
     <div class="absolute top-1/2 left-1/2 w-[24rem] h-[24rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-fuchsia-200/30 blur-3xl"></div>
-  </div>
-
-  <div id="darkness-overlay">
-    <div class="darkness-box">
-      <div id="darkness-icon"><div class="darkness-spinner"></div></div>
-      <h3 class="darkness-title" id="darkness-title">Verifying browser</h3>
-      <p class="darkness-desc" id="darkness-desc">Checking your connection and device security...</p>
-      <div class="darkness-brand">DARKNESS SECURITY · TURNSTILE</div>
-    </div>
   </div>
 
   <header class="fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 py-3.5 flex items-center justify-between pointer-events-none">
@@ -250,6 +232,10 @@
                 <label>Password</label>
                 <input type="password" id="login-password" class="input" placeholder="••••••••" autocomplete="current-password" required>
               </div>
+              
+              <!-- Cloudflare Turnstile Widget -->
+              <div class="cf-turnstile flex justify-center mt-4 mb-2" data-sitekey="YOUR_TURNSTILE_SITE_KEY_HERE" data-theme="light"></div>
+              
               <div class="flex items-center justify-between stagger" style="animation-delay: 2.55s">
                 <label class="checkbox"><input type="checkbox"> Remember me</label>
                 <a href="#" class="link text-xs">Forgot password?</a>
@@ -411,8 +397,6 @@
 
     // ─── API & Logic Functions ───
     (function () {
-      const DARKNESS_EXPIRY = 2 * 24 * 60 * 60 * 1000;
-
       function setErr(id, msg) {
         const el = document.getElementById(id);
         if (!el) return;
@@ -447,87 +431,7 @@
         }
       }
 
-      // Darkness Security Logic
-      const overlay = document.getElementById('darkness-overlay');
-      const dIcon = document.getElementById('darkness-icon');
-      const dTitle = document.getElementById('darkness-title');
-      const dDesc = document.getElementById('darkness-desc');
-
-      async function gatherFingerprint() {
-        const start = performance.now();
-        const webdriver = navigator.webdriver || false;
-        const plugins = navigator.plugins ? navigator.plugins.length : 0;
-        const hardwareConcurrency = navigator.hardwareConcurrency || 1;
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        let webglVendor = "unknown";
-        if (gl) {
-          const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-          if (debugInfo) webglVendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || "";
-        }
-        return { webdriver, plugins, hardwareConcurrency, webglVendor, timeTaken: performance.now() - start };
-      }
-
-      async function solveChallenge() {
-        const res = await fetch(API_BASE + '/api/auth/darkness-challenge');
-        if (!res.ok) throw new Error("Failed to fetch challenge");
-        const { nonce, difficulty } = await res.json();
-        const sha256 = async (str) => {
-          const buf = new TextEncoder().encode(str);
-          const hash = await crypto.subtle.digest('SHA-256', buf);
-          return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-        };
-        let solution = 0;
-        while (true) {
-          const hash = await sha256(nonce + solution);
-          if (hash.startsWith(difficulty)) break;
-          solution++;
-        }
-        return { nonce, solution };
-      }
-
-      async function runDarknessCheck() {
-        return new Promise((resolve) => {
-          overlay.classList.add('show');
-          dIcon.innerHTML = '<div class="darkness-spinner"></div>';
-          dTitle.textContent = 'Verifying browser';
-          dDesc.textContent = 'Checking device fingerprint & security...';
-          setTimeout(() => dDesc.textContent = 'Analyzing hardware signature...', 800);
-          setTimeout(() => dDesc.textContent = 'Solving cryptographic proof-of-work...', 1600);
-
-          (async () => {
-            try {
-              const fingerprint = await gatherFingerprint();
-              const pow = await solveChallenge();
-              const verifyRes = await fetch(API_BASE + '/api/auth/darkness-verify', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...pow, fingerprint })
-              });
-              if (verifyRes.status === 404) {
-                overlay.classList.remove('show');
-                setErr('login-error', 'Security check failed. Please try again.');
-                resolve(null);
-                return;
-              }
-              if (!verifyRes.ok) throw new Error("Verification failed");
-              
-              const data = await verifyRes.json();
-              dIcon.innerHTML = '<div class="darkness-check">✓</div>';
-              dTitle.textContent = 'Verified';
-              dDesc.textContent = 'Proceeding to login...';
-              
-              localStorage.setItem('apex_darkness', JSON.stringify({ token: data.darknessToken, expires: Date.now() + DARKNESS_EXPIRY }));
-              setTimeout(() => resolve(data.darknessToken), 1000);
-            } catch (err) {
-              overlay.classList.remove('show');
-              setErr('login-error', err.message || 'Please refresh and try again.');
-              resolve(null);
-            }
-          })();
-        });
-      }
-
-      // LOGIN
+      // LOGIN (Cloudflare Turnstile)
       const loginForm = document.getElementById('login-form');
       if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -540,52 +444,37 @@
           if (!email || !password) { setErr('login-error', 'Please enter your email and password.'); return; }
           if (!email.toLowerCase().endsWith('@gmail.com')) { setErr('login-error', 'Only @gmail.com emails are allowed.'); return; }
 
+          // Cloudflare Turnstile Token එක ගන්නවා
+          const turnstileToken = document.querySelector('[name="cf-turnstile-response"]').value;
+          if (!turnstileToken) {
+            setErr('login-error', 'Please complete the security check (Cloudflare).');
+            return;
+          }
+
           const original = btn.textContent;
           btn.disabled = true;
           btn.textContent = 'Authenticating...';
 
           try {
-            let darknessToken = null;
-            const saved = localStorage.getItem('apex_darkness');
-            if (saved) {
-              const { token, expires } = JSON.parse(saved);
-              if (Date.now() < expires) darknessToken = token;
-            }
-            if (!darknessToken) {
-              darknessToken = await runDarknessCheck();
-              if (!darknessToken) { btn.disabled = false; btn.textContent = original; return; }
-            }
-
-            // 🔥 Bot Check පාස් වුනාට පස්සේ ලොගින් වෙන කොටස
-            overlay.classList.add('show');
-            dIcon.innerHTML = '<div class="darkness-spinner"></div>';
-            dTitle.textContent = 'Authenticating';
-            dDesc.textContent = 'Signing in...';
-
-            const { res, data } = await postJSON('/api/auth/login', { email, password, darknessToken });
-            
-            if (res.status === 404) { 
-              overlay.classList.remove('show');
-              setErr('login-error', 'Security signature rejected by server.'); 
-              btn.disabled = false; btn.textContent = original;
-              return; 
-            }
+            const { res, data } = await postJSON('/api/auth/login', { email, password, turnstileToken });
             
             if (!res.ok) {
-              overlay.classList.remove('show');
               throw new Error(data.message || data.error || 'Invalid credentials.');
             }
             
-            // SUCCESS! 
+            // SUCCESS!
             saveSession(data);
-            overlay.classList.remove('show');
             window.location.href = 'dashboard.html';
 
           } catch (err) {
-            overlay.classList.remove('show');
             setErr('login-error', err.message || 'Unable to sign in.');
             btn.disabled = false;
             btn.textContent = original;
+            
+            // Turnstile එක ආයේ Reset කරනවා (Token එක expire වෙච්ච නිසා)
+            if (window.turnstile) {
+              window.turnstile.reset();
+            }
           }
         });
       }
