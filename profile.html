@@ -260,7 +260,8 @@
         <a href="profile.html" class="nav-link active">Profile</a>
       </nav>
 
-      <a href="login.html" id="logout-btn" class="text-xs font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 px-4 py-2 rounded-xl transition">Log out</a>
+      <!-- Logout button (Href empty to prevent loop) -->
+      <button id="logout-btn" class="text-xs font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 px-4 py-2 rounded-xl transition cursor-pointer">Log out</button>
     </div>
   </header>
 
@@ -423,7 +424,7 @@
             <div class="account-item"><div class="account-label">Last login</div><div class="account-value" id="accLastLogin">—</div></div>
             <div class="account-item"><div class="account-label">Region</div><div class="account-value" id="accRegion">—</div></div>
             <div class="account-item"><div class="account-label">Storage used</div><div class="account-value">0 GB <span class="text-slate-400 font-semibold text-xs">/ zero persistent</span></div></div>
-            <div class="account-item"><div class="account-label">Auth method</div><div class="account-value">Google OAuth</div></div>
+            <div class="account-item"><div class="account-label">Auth method</div><div class="account-value">Apex Session</div></div>
             <div class="account-item"><div class="account-label">Account status</div><div class="account-value text-emerald-600">Active</div></div>
           </div>
         </section>
@@ -445,47 +446,97 @@
   </div>
 
   <script>
-const API_BASE = 'https://apex-web-backend-production.up.railway.app';
-
-    (function guard() {
-      if (!localStorage.getItem('apex_token') && !localStorage.getItem('apex_api_key')) {
-        window.location.replace('login.html');
-      }
-    })();
-
+    /* ============ CONFIG ============ */
+    const API_BASE = 'https://apex-web-backend-production.up.railway.app';
     const DAILY_LIMIT = 100;
-    let currentKey = localStorage.getItem('apex_api_key') || '';
 
-    document.getElementById('logout-btn').addEventListener('click', () => {
-      localStorage.removeItem('apex_token');
-      localStorage.removeItem('apex_api_key');
-      localStorage.removeItem('apex_user');
-    });
-
-    function authHeaders() {
-      const token = localStorage.getItem('apex_token');
-      const key   = localStorage.getItem('apex_api_key');
-      const h = { 'Content-Type': 'application/json' };
-      if (token) h['Authorization'] = `Bearer ${token}`;
-      else if (key) h['Authorization'] = `Bearer ${key}`;
-      return h;
-    }
-    function forceLogout() {
-      localStorage.removeItem('apex_token');
-      localStorage.removeItem('apex_api_key');
-      localStorage.removeItem('apex_user');
-      window.location.replace('login.html');
+    /* ============ AUTH CREDENTIALS RETRIEVAL ============ */
+    function cleanBearer(raw) {
+      return raw ? String(raw).replace(/^Bearer\s+/i, '').trim() : '';
     }
 
+    const token  = cleanBearer(localStorage.getItem('apex_token'));
+    const apiKey = cleanBearer(localStorage.getItem('apex_api_key'));
+
+    // SAFE REDIRECT: Redirects ONLY if explicitly missing, without history loop
+    if (!token && !apiKey) {
+      window.location.href = 'login.html';
+    }
+
+    /* ============ LOGOUT HANDLER (LOOP-FREE) ============ */
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Clear all session storage keys
+        localStorage.removeItem('apex_token');
+        localStorage.removeItem('apex_api_key');
+        localStorage.removeItem('apex_user');
+        sessionStorage.clear();
+        // Redirect cleanly to login page
+        window.location.href = 'login.html';
+      });
+    }
+
+    /* ============ ROBUST DATA FETCHING ============ */
+    async function fetchProfileData() {
+      const authKey = apiKey || token;
+      if (!authKey) return null;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/user/profile?api=${encodeURIComponent(authKey)}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${authKey}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        // Backend explicitly rejects authorization
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('apex_token');
+          localStorage.removeItem('apex_api_key');
+          localStorage.removeItem('apex_user');
+          window.location.href = 'login.html';
+          return null;
+        }
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to load profile`);
+        return await res.json();
+      } catch (err) {
+        console.error('[Apex Profile Error]:', err);
+        showAuthError([err.message || 'Network error occurred']);
+        return null;
+      }
+    }
+
+    function showAuthError(errors) {
+      const loading = document.getElementById('loadingState');
+      if (!loading) return;
+      loading.innerHTML = `
+        <div class="panel p-8 text-center">
+          <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          </div>
+          <h2 class="text-lg font-extrabold text-slate-900 mb-1">Session Expired or Connection Failed</h2>
+          <p class="text-sm text-slate-500 mb-5">
+            Unable to communicate with the Apex backend. Please log in again to renew your credentials.
+          </p>
+          <div class="flex gap-3 justify-center">
+            <button onclick="location.reload()" class="btn-copy">Retry</button>
+            <button onclick="localStorage.clear(); location.href='login.html';" class="btn-regenerate">Sign In Again</button>
+          </div>
+        </div>
+      `;
+    }
+
+    /* ============ NORMALIZER ============ */
     function normalizeProfile(raw) {
-      const user = raw.user || raw.profile || raw || {};
-      const key  = raw.key || raw.apiKey || {
-        value: localStorage.getItem('apex_api_key') || '',
-        lastRegenerated: user.lastRegenerated || '—'
-      };
+      const user = raw.user || raw.profile || raw.data || raw || {};
+      const key  = raw.key || raw.apiKey || { value: apiKey || '', lastRegenerated: 'Active' };
       const endpoints = (raw.endpoints || raw.endpointUsage || raw.usage || []).map(ep => ({
-        id:            ep.id || ep._id || ep.endpointId || ep.path,
-        name:          ep.name || ep.endpointName || ep.path || 'Unknown endpoint',
+        id:            ep.id || ep._id || ep.path,
+        name:          ep.name || ep.endpointName || ep.path || 'Endpoint',
         category:      ep.category || (String(ep.path || '').includes('/media/') ? 'media' : 'movie'),
         categoryLabel: ep.categoryLabel || (String(ep.category || ep.path || '').includes('media') ? 'Media' : 'Movie'),
         path:          ep.path || ep.endpointPath || '',
@@ -494,23 +545,16 @@ const API_BASE = 'https://apex-web-backend-production.up.railway.app';
         lastUsed:      ep.lastUsed ?? ep.lastUsedAt ?? '—',
         avgLatency:    ep.avgLatency ?? ep.latency ?? 0
       }));
-      const recentRequests = (raw.recentRequests || raw.recent || raw.activity || []).map(r => ({
+      const recent = (raw.recentRequests || raw.recent || raw.activity || []).map(r => ({
         endpoint: r.endpoint || r.name || r.path || '—',
         status:   r.status ?? r.statusCode ?? 200,
         latency:  r.latency ?? r.duration ?? 0,
         time:     r.time ?? r.createdAt ?? 'just now'
       }));
-      return { user, key, endpoints, recentRequests };
+      return { user, key, endpoints, recent };
     }
 
-    async function fetchProfileData() {
-      const res = await fetch(`${API_BASE}/api/user/profile`, { headers: authHeaders() });
-      if (res.status === 401) { forceLogout(); return null; }
-      if (!res.ok) throw new Error('Failed to load profile.');
-      const raw = await res.json();
-      return normalizeProfile(raw);
-    }
-
+    /* ============ RENDER UI ============ */
     function formatNumber(n) { return Number(n || 0).toLocaleString('en-US'); }
     function getFillClass(pct) { if (pct >= 80) return 'fill-high'; if (pct >= 50) return 'fill-warn'; return 'fill-ok'; }
     function getMiniBadgeClass(pct) { if (pct >= 80) return 'mb-high'; if (pct >= 50) return 'mb-warn'; return 'mb-ok'; }
@@ -528,6 +572,7 @@ const API_BASE = 'https://apex-web-backend-production.up.railway.app';
       const badgeText = getMiniBadgeText(remaining);
       const pathWithApi = ep.path + (ep.path.includes('?') ? '&api=YOUR_KEY' : '?api=YOUR_KEY');
       const highlightPath = pathWithApi.replace('api=YOUR_KEY', '<span class="api-param">api=YOUR_KEY</span>');
+
       const row = document.createElement('div');
       row.className = 'endpoint-row';
       row.innerHTML = `
@@ -567,62 +612,75 @@ const API_BASE = 'https://apex-web-backend-production.up.railway.app';
       return el;
     }
 
+    function setText(id, txt) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = txt;
+    }
+
     function renderProfile(data) {
-      if (!data) return;
-      const u = data.user || {};
-      document.getElementById('heroAvatar').textContent = (u.name || 'U').charAt(0).toUpperCase();
-      document.getElementById('userName').textContent   = u.name || 'Operator';
-      document.getElementById('userId').textContent     = u.userId || u.id || '—';
-      document.getElementById('tierBadge').innerHTML    =
-        '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' +
-        (u.tier || 'Developer');
-      document.getElementById('joinedLabel').textContent    = 'Joined ' + (u.joined || '—');
-      document.getElementById('lastLoginLabel').textContent = 'Last login ' + (u.lastLogin || '—');
-      document.getElementById('regionLabel').textContent    = u.region || '—';
+      const norm = normalizeProfile(data);
+      const u = norm.user || {};
 
-      const serverKey = data.key && data.key.value ? data.key.value : currentKey;
-      if (serverKey) {
-        currentKey = serverKey;
-        localStorage.setItem('apex_api_key', serverKey);
+      const avatarEl = document.getElementById('heroAvatar');
+      if (avatarEl) avatarEl.textContent = (u.name || 'U').charAt(0).toUpperCase();
+      setText('userName', u.name || 'Operator');
+      setText('userId', u.userId || u.id || u._id || '—');
+
+      const tierEl = document.getElementById('tierBadge');
+      if (tierEl) {
+        tierEl.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' + (u.tier || 'Developer');
       }
-      document.getElementById('profile-key').value = currentKey;
-      document.getElementById('lastRegeneratedLabel').textContent =
-        'Last regenerated ' + (data.key && data.key.lastRegenerated ? data.key.lastRegenerated : '—');
 
-      const usedEndpoints = data.endpoints.filter(ep => ep.usedToday > 0 || ep.totalRequests > 0);
+      const joinedStr = u.joined || (u.createdAt
+        ? new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+        : '—');
+      setText('joinedLabel', 'Joined ' + joinedStr);
+      setText('lastLoginLabel', 'Last login ' + (u.lastLogin || '—'));
+      setText('regionLabel', u.region || '—');
+
+      const keyEl = document.getElementById('profile-key');
+      const keyVal = (norm.key && norm.key.value) || apiKey || u.apiKey || '';
+      if (keyEl) keyEl.value = keyVal;
+      setText('lastRegeneratedLabel', 'Status: ' + (norm.key.lastRegenerated || 'Active'));
+
+      const usedEndpoints = (norm.endpoints || []).filter(ep => ep.usedToday > 0 || ep.totalRequests > 0);
       const totalRequests = usedEndpoints.reduce((s, ep) => s + Number(ep.totalRequests || 0), 0);
       const todayRequests = usedEndpoints.reduce((s, ep) => s + Number(ep.usedToday || 0), 0);
       const totalCapacity = usedEndpoints.length * DAILY_LIMIT;
       const remainingToday = Math.max(0, totalCapacity - todayRequests);
 
-      document.getElementById('statTotal').textContent     = formatNumber(totalRequests);
-      document.getElementById('statTotalSub').textContent  = 'across ' + usedEndpoints.length + ' endpoint' + (usedEndpoints.length === 1 ? '' : 's');
-      document.getElementById('statToday').textContent     = formatNumber(todayRequests);
-      document.getElementById('statTodaySub').textContent  = 'limit resets at 00:00 UTC';
-      document.getElementById('statRemaining').textContent = formatNumber(remainingToday);
-      document.getElementById('statRemainingSub').textContent = todayRequests + ' of ' + totalCapacity + ' used';
-      document.getElementById('statSuccess').textContent   = (u.successRate ?? 100) + '%';
-      document.getElementById('usedEndpointCount').textContent =
-        usedEndpoints.length + ' endpoint' + (usedEndpoints.length === 1 ? '' : 's') + ' used';
+      setText('statTotal', formatNumber(totalRequests || u.totalRequests || 0));
+      setText('statTotalSub', 'across ' + usedEndpoints.length + ' endpoint' + (usedEndpoints.length === 1 ? '' : 's'));
+      setText('statToday', formatNumber(todayRequests || u.requestsToday || 0));
+      setText('statTodaySub', 'limit resets at 00:00 UTC');
+      setText('statRemaining', formatNumber(remainingToday));
+      setText('statRemainingSub', todayRequests + ' of ' + totalCapacity + ' used');
+      setText('statSuccess', (u.successRate || 100) + '%');
+      setText('usedEndpointCount', usedEndpoints.length + ' endpoint' + (usedEndpoints.length === 1 ? '' : 's') + ' used');
 
       const usageList = document.getElementById('endpointUsageList');
-      usageList.innerHTML = '';
-      if (usedEndpoints.length === 0) {
-        document.getElementById('noEndpointsState').classList.remove('hidden');
-      } else {
-        document.getElementById('noEndpointsState').classList.add('hidden');
-        usedEndpoints.forEach(ep => usageList.appendChild(renderEndpointRow(ep)));
+      const noState   = document.getElementById('noEndpointsState');
+      if (usageList) {
+        usageList.innerHTML = '';
+        if (usedEndpoints.length === 0) {
+          if (noState) noState.classList.remove('hidden');
+        } else {
+          if (noState) noState.classList.add('hidden');
+          usedEndpoints.forEach(ep => usageList.appendChild(renderEndpointRow(ep)));
+        }
       }
 
       const activityList = document.getElementById('activityList');
-      activityList.innerHTML = '';
-      (data.recentRequests || []).slice(0, 6).forEach(item => activityList.appendChild(renderActivity(item)));
+      if (activityList) {
+        activityList.innerHTML = '';
+        (norm.recent || []).slice(0, 6).forEach(item => activityList.appendChild(renderActivity(item)));
+      }
 
-      document.getElementById('accEmail').textContent    = u.email || '—';
-      document.getElementById('accUserId').textContent   = u.userId || u.id || '—';
-      document.getElementById('accJoined').textContent   = u.joined || '—';
-      document.getElementById('accLastLogin').textContent = u.lastLogin || '—';
-      document.getElementById('accRegion').textContent   = u.region || '—';
+      setText('accEmail', u.email || '—');
+      setText('accUserId', u.userId || u.id || '—');
+      setText('accJoined', joinedStr);
+      setText('accLastLogin', u.lastLogin || '—');
+      setText('accRegion', u.region || '—');
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -632,13 +690,18 @@ const API_BASE = 'https://apex-web-backend-production.up.railway.app';
         });
       });
 
-      document.getElementById('loadingState').classList.add('hidden');
-      document.getElementById('profileContent').classList.remove('hidden');
+      const loadingEl = document.getElementById('loadingState');
+      const contentEl = document.getElementById('profileContent');
+      if (loadingEl) loadingEl.classList.add('hidden');
+      if (contentEl) contentEl.classList.remove('hidden');
     }
 
-    function showToast(message) {
+    /* ============ TOAST & COPY ============ */
+    function showToast(msg) {
       const toast = document.getElementById('copyToast');
-      document.getElementById('toastText').textContent = message;
+      if (!toast) return;
+      const txt = document.getElementById('toastText');
+      if (txt) txt.textContent = msg;
       toast.classList.add('show');
       clearTimeout(window.__toastTimer);
       window.__toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
@@ -646,6 +709,7 @@ const API_BASE = 'https://apex-web-backend-production.up.railway.app';
 
     function copyProfileKey() {
       const el = document.getElementById('profile-key');
+      if (!el) return;
       const val = el.value;
       const done = () => showToast('API key copied to clipboard');
       if (navigator.clipboard && window.isSecureContext) {
@@ -655,27 +719,36 @@ const API_BASE = 'https://apex-web-backend-production.up.railway.app';
       }
     }
 
+    /* ============ REGENERATE KEY ============ */
     async function regenerateKey() {
       if (!confirm('Revoking this key will immediately disconnect any active scripts. Generate a new key?')) return;
       const btn = document.querySelector('.btn-regenerate');
       const original = btn.textContent;
       btn.disabled = true;
       btn.textContent = 'Regenerating…';
+
+      const authKey = apiKey || token;
+
       try {
-        const res = await fetch(`${API_BASE}/api/user/regenerate-key`, {
+        const res = await fetch(`${API_BASE}/api/user/regenerate-key?api=${encodeURIComponent(authKey)}`, {
           method: 'POST',
-          headers: authHeaders()
+          headers: {
+            'Authorization': `Bearer ${authKey}`,
+            'Content-Type': 'application/json'
+          }
         });
         const data = await res.json().catch(() => ({}));
-        if (res.status === 401) { forceLogout(); return; }
-        if (!res.ok) throw new Error(data.message || data.error || 'Failed to regenerate key.');
-        const newKey = data.apiKey || data.key || data.newKey || (data.user && data.user.apiKey);
-        if (!newKey) throw new Error('Server did not return a new key.');
-        currentKey = newKey;
+
+        if (!res.ok) throw new Error(data.error || data.message || 'Failed to regenerate key.');
+
+        const newKey = data.apiKey || data.key;
+        if (!newKey) throw new Error('Backend did not return a valid key.');
+
         localStorage.setItem('apex_api_key', newKey);
-        document.getElementById('profile-key').value = newKey;
-        document.getElementById('lastRegeneratedLabel').textContent = 'Last regenerated just now';
-        showToast('New API key generated. Update your scripts!');
+        const keyEl = document.getElementById('profile-key');
+        if (keyEl) keyEl.value = newKey;
+        setText('lastRegeneratedLabel', 'Status: Active (Just now)');
+        showToast('New Master Key generated successfully!');
       } catch (err) {
         showToast(err.message || 'Could not regenerate key.');
       } finally {
@@ -684,17 +757,13 @@ const API_BASE = 'https://apex-web-backend-production.up.railway.app';
       }
     }
 
+    /* ============ INITIALIZE ============ */
     document.addEventListener('DOMContentLoaded', async () => {
-      const kEl = document.getElementById('profile-key');
-      if (kEl && currentKey) kEl.value = currentKey;
-      try {
-        const data = await fetchProfileData();
-        if (!data) return;
-        setTimeout(() => renderProfile(data), 300);
-      } catch (err) {
-        document.getElementById('loadingState').innerHTML =
-          `<div class="panel p-6 text-center text-sm text-rose-600 font-semibold">${err.message || 'Could not load profile.'}</div>`;
-      }
+      const keyEl = document.getElementById('profile-key');
+      if (keyEl && apiKey) keyEl.value = apiKey;
+
+      const data = await fetchProfileData();
+      if (data) renderProfile(data);
     });
   </script>
 </body>
