@@ -262,7 +262,7 @@
         <a href="index.html" class="nav-link">Home</a>
       </nav>
 
-      <a href="login.html" id="logout-btn" class="text-xs font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 px-4 py-2 rounded-xl transition">Log out</a>
+      <button id="logout-btn" type="button" class="text-xs font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 px-4 py-2 rounded-xl transition cursor-pointer">Log out</button>
     </div>
   </header>
 
@@ -333,103 +333,143 @@
   </div>
 
   <script>
-const API_BASE = 'https://apex-web-backend-production.up.railway.app';
-
-    (function guard() {
-      if (!localStorage.getItem('apex_token') && !localStorage.getItem('apex_api_key')) {
-        window.location.replace('login.html');
-      }
-    })();
+    const API_BASE = 'https://apex-web-backend-production.up.railway.app';
 
     const USER_API_KEY = localStorage.getItem('apex_api_key') || '';
 
-    document.getElementById('logout-btn').addEventListener('click', () => {
-      localStorage.removeItem('apex_token');
-      localStorage.removeItem('apex_api_key');
-      localStorage.removeItem('apex_user');
-    });
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('apex_token');
+        localStorage.removeItem('apex_api_key');
+        localStorage.removeItem('apex_user');
+        window.location.href = 'login.html';
+      });
+    }
 
+    /* Template literals (``) මඟින් backslash හා newlines ආරක්ෂිතව escape කර ඇත */
     const ENDPOINTS = [
       {
-        id: 'cinesubz-search', category: 'movie', categoryLabel: 'Movie',
-        name: 'CineSubz · Search', method: 'GET',
+        id: 'cinesubz-search',
+        category: 'movie',
+        categoryLabel: 'Movie',
+        name: 'CineSubz · Search',
+        method: 'GET',
         path: '/api/v1/movies/cinesubz/search?q={query}',
         description: 'Searches titles and returns thumbnail artwork, ratings, seasons, and internal content URLs.',
-        testParam: 'q', testPlaceholder: 'avatar',
-        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/search?q=avatar"'
+        testParam: 'q',
+        testPlaceholder: 'avatar',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/search?q=avatar"`
       },
       {
-        id: 'cinesubz-info', category: 'movie', categoryLabel: 'Movie',
-        name: 'CineSubz · Info & Links', method: 'GET',
+        id: 'cinesubz-info',
+        category: 'movie',
+        categoryLabel: 'Movie',
+        name: 'CineSubz · Info & Links',
+        method: 'GET',
         path: '/api/v1/movies/cinesubz/info?url={pageUrl}',
-        description: 'Scrapes available qualities and season episode lists, applying the strictly validated 2GB filter.',
-        testParam: 'url', testPlaceholder: 'https://cinesubz.lk/movies/avatar',
-        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/info?url=https://cinesubz.lk/movies/avatar"'
+        description: 'Scrapes available qualities without file size limits, extracting csplayer direct stream links.',
+        testParam: 'url',
+        testPlaceholder: 'https://cinesubz.co/movies/avatar',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/info?url=https://cinesubz.co/movies/avatar"`
       },
       {
-        id: 'cinesubz-dl', category: 'movie', categoryLabel: 'Movie',
-        name: 'CineSubz · Direct Download', method: 'GET',
+        id: 'cinesubz-dl',
+        category: 'movie',
+        categoryLabel: 'Movie',
+        name: 'CineSubz · Direct Download',
+        method: 'GET',
         path: '/api/v1/movies/cinesubz/dl?directUrl={url}',
         description: 'Resolves internal csplayer and sonic-cloud links into direct Terracloud / Pixeldrain CDN links.',
-        testParam: 'directUrl', testPlaceholder: 'https://cinesubz.lk/player/avatar-1080p',
-        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/dl?directUrl=https://cinesubz.lk/player/avatar-1080p"'
+        testParam: 'directUrl',
+        testPlaceholder: 'https://cinesubz.co/player/avatar-1080p',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/dl?directUrl=https://cinesubz.co/player/avatar-1080p"`
       },
       {
-        id: 'sinhalacartoons-search', category: 'movie', categoryLabel: 'Movie',
-        name: 'sinhalacartoons.lk · Search', method: 'GET',
+        id: 'sinhalacartoons-search',
+        category: 'movie',
+        categoryLabel: 'Movie',
+        name: 'sinhalacartoons.lk · Search',
+        method: 'GET',
         path: '/api/v1/movies/sinhalacartoons/search?q={query}',
         description: 'Searches the SinhalaCartoons catalogue and returns matched series with episode counts and URLs.',
-        testParam: 'q', testPlaceholder: 'tom and jerry',
-        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/sinhalacartoons/search?q=tom+and+jerry"'
+        testParam: 'q',
+        testPlaceholder: 'tom and jerry',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/sinhalacartoons/search?q=tom+and+jerry"`
       },
       {
-        id: 'sinhalacartoons-dl', category: 'movie', categoryLabel: 'Movie',
-        name: 'sinhalacartoons.lk · DL', method: 'GET',
+        id: 'sinhalacartoons-dl',
+        category: 'movie',
+        categoryLabel: 'Movie',
+        name: 'sinhalacartoons.lk · DL',
+        method: 'GET',
         path: '/api/v1/movies/sinhalacartoons/dl?landingUrl={url}',
-        description: 'Extracts direct force-download URLs and base64 sc_data stream strings from cartoon series.',
-        testParam: 'landingUrl', testPlaceholder: 'https://sinhalacartoons.lk/cartoon/tom-and-jerry',
-        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/sinhalacartoons/dl?landingUrl=https://sinhalacartoons.lk/cartoon/tom-and-jerry"'
+        description: 'Extracts direct force-download Cloudflare R2 links from movies and cartoon series.',
+        testParam: 'landingUrl',
+        testPlaceholder: 'https://sinhalacartoons.com/dragon-nest-warriors-dawn-sinhala-dubbed/',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/sinhalacartoons/dl?landingUrl=https://sinhalacartoons.com/dragon-nest-warriors-dawn-sinhala-dubbed/"`
       },
       {
-        id: 'yt-search', category: 'media', categoryLabel: 'Media',
-        name: 'YouTube · Search', method: 'GET',
+        id: 'tamilmv-search',
+        category: 'movie',
+        categoryLabel: 'Movie',
+        name: '1TamilMV · Search',
+        method: 'GET',
+        path: '/api/v1/movies/tamilmv/search?q={query}',
+        description: 'Searches 1TamilMV releases and returns forum topic URLs without any size limits.',
+        testParam: 'q',
+        testPlaceholder: 'leo',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/tamilmv/search?q=leo"`
+      },
+      {
+        id: 'tamilmv-dl',
+        category: 'movie',
+        categoryLabel: 'Movie',
+        name: '1TamilMV · DL & Magnets',
+        method: 'GET',
+        path: '/api/v1/movies/tamilmv/dl?url={topicUrl}',
+        description: 'Extracts all quality links (Direct CDN & Magnets) for movies from 1TamilMV without file size caps.',
+        testParam: 'url',
+        testPlaceholder: 'https://www.1tamilmv.lease/index.php?/forums/topic/12345-movie/',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/tamilmv/dl?url=TOPIC_URL"`
+      },
+      {
+        id: 'yt-search',
+        category: 'media',
+        categoryLabel: 'Media',
+        name: 'YouTube · Search',
+        method: 'GET',
         path: '/api/v1/media/yt/search?q={query}',
-        description: 'Searches YouTube and returns matched videos with IDs, durations, channels, and thumbnails.',
-        testParam: 'q', testPlaceholder: 'shape of you',
-        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/yt/search?q=shape+of+you"'
+        description: 'Searches YouTube and returns matched videos with IDs, direct URLs, durations, and channels.',
+        testParam: 'q',
+        testPlaceholder: 'shape of you',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/yt/search?q=shape+of+you"`
       },
       {
-        id: 'yt-audio-dl', category: 'media', categoryLabel: 'Media',
-        name: 'YouTube · Audio DL', method: 'GET',
+        id: 'yt-audio-dl',
+        category: 'media',
+        categoryLabel: 'Media',
+        name: 'YouTube · Audio DL',
+        method: 'GET',
         path: '/api/v1/media/yt/audio?q={query}',
-        description: 'Decrypts SaveTube VIP AES tokens and returns a high-speed direct 128kbps audio stream URL.',
-        testParam: 'q', testPlaceholder: 'shape of you',
-        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/yt/audio?q=shape+of+you"'
+        description: 'Decrypts SaveTube VIP AES tokens and returns high-speed direct 128kbps audio streams.',
+        testParam: 'q',
+        testPlaceholder: 'shape of you',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/yt/audio?q=shape+of+you"`
       },
       {
-        id: 'yt-video-dl', category: 'media', categoryLabel: 'Media',
-        name: 'YouTube · Video DL', method: 'GET',
+        id: 'yt-video-dl',
+        category: 'media',
+        categoryLabel: 'Media',
+        name: 'YouTube · Video DL',
+        method: 'GET',
         path: '/api/v1/media/yt/video?q={query}',
-        description: 'Returns direct downloadable MP4 URLs across multiple quality tiers for the matched video.',
-        testParam: 'q', testPlaceholder: 'shape of you',
-        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/yt/video?q=shape+of+you"'
+        description: 'Returns direct downloadable MP4 streams across 480p, 720p, and 1080p qualities.',
+        testParam: 'q',
+        testPlaceholder: 'shape of you',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/yt/video?q=shape+of+you"`
       }
-      {
-  id: 'tamilmv-search', category: 'movie', categoryLabel: 'Movie',
-  name: '1TamilMV · Search', method: 'GET',
-  path: '/api/v1/movies/tamilmv/search?q={query}',
-  description: 'Searches 1TamilMV releases and returns forum topic URLs without any size limits.',
-  testParam: 'q', testPlaceholder: 'leo',
-  usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/tamilmv/search?q=leo"'
-},
-{
-  id: 'tamilmv-dl', category: 'movie', categoryLabel: 'Movie',
-  name: '1TamilMV · DL & Magnets', method: 'GET',
-  path: '/api/v1/movies/tamilmv/dl?url={topicUrl}',
-  description: 'Extracts all quality links (Direct CDN & Magnets) for movies from 1TamilMV without file size caps.',
-  testParam: 'url', testPlaceholder: 'https://www.1tamilmv.lease/index.php?/forums/topic/...',
-  usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/tamilmv/dl?url=TOPIC_URL"'
-}
     ];
 
     function escapeHtml(s) {
