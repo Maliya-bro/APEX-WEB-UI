@@ -519,6 +519,30 @@
         testParam: 'url',
         testPlaceholder: 'https://www.slmix.lk/song.php?id=123',
         usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/slmix/dl?url=TRACK_PAGE_URL&api=<YOUR_API_KEY>"`
+      },
+      {
+        id: 'animeheaven-search',
+        category: 'media',
+        categoryLabel: 'Media',
+        name: 'AnimeHeaven · Search',
+        method: 'GET',
+        path: '/api/v1/media/animeheaven/search?q={query}&api=<YOUR_API_KEY>',
+        description: 'Searches anime series on AnimeHeaven and returns matched show pages.',
+        testParam: 'q',
+        testPlaceholder: 'Magical Explorer',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/animeheaven/search?q=Magical+Explorer&api=<YOUR_API_KEY>"`
+      },
+      {
+        id: 'animeheaven-dl',
+        category: 'media',
+        categoryLabel: 'Media',
+        name: 'AnimeHeaven · All Episodes DL',
+        method: 'GET',
+        path: '/api/v1/media/animeheaven/dl?url={pageUrl}&api=<YOUR_API_KEY>',
+        description: 'Extracts direct MP4 download and streaming links for every available episode in an anime series.',
+        testParam: 'url',
+        testPlaceholder: 'https://animeheaven.me/anime.php?gve9a',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/animeheaven/dl?url=https://animeheaven.me/anime.php?gve9a&api=<YOUR_API_KEY>"`
       }
     ];
 
