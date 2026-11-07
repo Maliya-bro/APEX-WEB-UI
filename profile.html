@@ -144,6 +144,8 @@
     }
     .cat-movie { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
     .cat-media { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+    .cat-game  { background: #ecfeff; color: #0891b2; border: 1px solid #a5f3fc; }
+
     .endpoint-row {
       background: #fff; border: 1px solid #e2e8f0;
       border-radius: 1rem; padding: 1.1rem 1.2rem;
@@ -260,7 +262,7 @@
         <a href="profile.html" class="nav-link active">Profile</a>
       </nav>
 
-      <button id="logout-btn" class="text-xs font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 px-4 py-2 rounded-xl transition cursor-pointer">Log out</button>
+      <button id="logout-btn" type="button" class="text-xs font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 px-4 py-2 rounded-xl transition cursor-pointer">Log out</button>
     </div>
   </header>
 
@@ -345,11 +347,12 @@
         <div class="info-banner mt-4">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
           <div>
-            <strong class="font-bold">Required:</strong> every request must end with <code>&amp;api=YOUR_KEY</code> (or <code>?api=YOUR_KEY</code> if the endpoint has no other params). Requests without a valid key return <span class="font-mono font-semibold">401 Unauthorized</span>.
+            <strong class="font-bold">Per-Endpoint Quota:</strong> You receive <span class="font-semibold text-slate-800">100 requests per endpoint daily</span>. Limits reset automatically at 00:00 UTC. Every request requires <code>&amp;api=YOUR_KEY</code>.
           </div>
         </div>
       </section>
 
+      <!-- Stat Cards Summary -->
       <section class="grid grid-cols-2 md:grid-cols-4 gap-4 anim-in" style="animation-delay:.2s">
         <div class="stat-card">
           <div class="stat-icon" style="background:#eef2ff;">
@@ -364,8 +367,8 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
           </div>
           <div class="stat-value" id="statToday">0</div>
-          <div class="stat-label">Today</div>
-          <div class="stat-sub" id="statTodaySub">across used endpoints</div>
+          <div class="stat-label">Used today</div>
+          <div class="stat-sub" id="statTodaySub">across all services</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon" style="background:#ecfdf5;">
@@ -373,7 +376,7 @@
           </div>
           <div class="stat-value" id="statRemaining">0</div>
           <div class="stat-label">Remaining today</div>
-          <div class="stat-sub" id="statRemainingSub">0 of 0 used</div>
+          <div class="stat-sub" id="statRemainingSub">total capacity pool</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon" style="background:#fef2f2;">
@@ -385,13 +388,14 @@
         </div>
       </section>
 
+      <!-- Endpoint Breakdown with 100 limit each -->
       <section class="panel p-6 sm:p-7 anim-in" style="animation-delay:.28s">
         <div class="flex items-start justify-between gap-3 mb-5 flex-wrap">
           <div>
-            <h2 class="text-base font-extrabold text-slate-900 tracking-tight">Endpoint usage</h2>
-            <p class="text-xs text-slate-500 mt-1">Daily limit: <span class="font-semibold text-slate-700">100 requests per endpoint</span> · resets at 00:00 UTC</p>
+            <h2 class="text-base font-extrabold text-slate-900 tracking-tight">Per-Endpoint Usage</h2>
+            <p class="text-xs text-slate-500 mt-1">Each endpoint gets an independent <span class="font-semibold text-slate-700">100 requests/day</span> quota · resets at 00:00 UTC</p>
           </div>
-          <span class="meta-badge" id="usedEndpointCount">0 endpoints used</span>
+          <span class="meta-badge" id="usedEndpointCount">0 endpoints active</span>
         </div>
 
         <div id="endpointUsageList" class="space-y-3"></div>
@@ -400,8 +404,7 @@
           <div class="w-12 h-12 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
           </div>
-          <p class="text-sm font-bold text-slate-700">No endpoints used yet</p>
-          <p class="text-xs text-slate-400 mt-1">Start calling endpoints to see usage here.</p>
+          <p class="text-sm font-bold text-slate-700">Loading endpoint metrics...</p>
         </div>
       </section>
 
@@ -423,7 +426,7 @@
             <div class="account-item"><div class="account-label">Last login</div><div class="account-value" id="accLastLogin">—</div></div>
             <div class="account-item"><div class="account-label">Region</div><div class="account-value" id="accRegion">—</div></div>
             <div class="account-item"><div class="account-label">Storage used</div><div class="account-value">0 GB <span class="text-slate-400 font-semibold text-xs">/ zero persistent</span></div></div>
-            <div class="account-item"><div class="account-label">Auth method</div><div class="account-value">Apex Session</div></div>
+            <div class="account-item"><div class="account-label">Auth method</div><div class="account-value">Apex Key</div></div>
             <div class="account-item"><div class="account-label">Account status</div><div class="account-value text-emerald-600">Active</div></div>
           </div>
         </section>
@@ -447,7 +450,7 @@
   <script>
     /* ============ CONFIG ============ */
     const API_BASE = 'https://apex-web-backend-production.up.railway.app';
-    const DAILY_LIMIT = 100;
+    const ENDPOINT_LIMIT = 100;
 
     function cleanBearer(raw) {
       return raw ? String(raw).replace(/^Bearer\s+/i, '').trim() : '';
@@ -456,7 +459,7 @@
     const token  = cleanBearer(localStorage.getItem('apex_token'));
     const apiKey = cleanBearer(localStorage.getItem('apex_api_key'));
 
-    /* ============ LOGOUT (NO LOOP) ============ */
+    /* ============ LOGOUT ============ */
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', (e) => {
@@ -465,15 +468,13 @@
         localStorage.removeItem('apex_api_key');
         localStorage.removeItem('apex_user');
         sessionStorage.clear();
-        window.location.href = 'index.html';
+        window.location.href = 'login.html';
       });
     }
 
-    /* ============ PROFILE DATA FETCH ============ */
+    /* ============ FETCH DATA ============ */
     async function fetchProfileData() {
       const authKey = apiKey || token;
-
-      // Session එකක් නැත්නම් redirect නොකර clean login prompt එකක් පෙන්වයි
       if (!authKey) {
         showGuestPrompt();
         return null;
@@ -499,8 +500,8 @@
         if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to load profile`);
         return await res.json();
       } catch (err) {
-        console.error('[Apex Profile Error]:', err);
-        showAuthError([err.message || 'Network error occurred']);
+        console.error('[Apex Profile Fetch Error]:', err);
+        showAuthError([err.message || 'Network communication error']);
         return null;
       }
     }
@@ -509,19 +510,20 @@
       const loading = document.getElementById('loadingState');
       if (!loading) return;
       loading.innerHTML = `
-        <div class="panel p-8 text-center">
+        <div class="panel p-8 text-center anim-in">
           <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
           </div>
           <h2 class="text-lg font-extrabold text-slate-900 mb-1">Session Not Found</h2>
-          <p class="text-sm text-slate-500 mb-5">
-            You need to be logged in to view your operator profile and API telemetry.
+          <p class="text-sm text-slate-500 mb-5 max-w-sm mx-auto">
+            You are not signed in. Log in to your account to view your live profile and API keys.
           </p>
           <div class="flex gap-3 justify-center">
-            <a href="login.html" class="btn-primary" style="width:auto;padding:.65rem 1.4rem;">Sign In</a>
-            <a href="index.html" class="btn-ghost" style="padding:.65rem 1.2rem;background:#fff;">Return Home</a>
+            <a href="login.html" class="btn-copy" style="text-decoration:none;">Sign In</a>
+            <a href="index.html" class="btn-regenerate" style="text-decoration:none;border-color:#e2e8f0;color:#475569;">Home</a>
           </div>
         </div>
       `;
@@ -531,43 +533,20 @@
       const loading = document.getElementById('loadingState');
       if (!loading) return;
       loading.innerHTML = `
-        <div class="panel p-8 text-center">
+        <div class="panel p-8 text-center anim-in">
           <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
           </div>
           <h2 class="text-lg font-extrabold text-slate-900 mb-1">Connection Issue</h2>
           <p class="text-sm text-slate-500 mb-5">
-            Could not reach the Apex API backend server. Check your network or Railway service status.
+            Unable to communicate with the Apex backend. Please try reloading or sign in again.
           </p>
           <div class="flex gap-3 justify-center">
             <button onclick="location.reload()" class="btn-copy">Retry</button>
-            <a href="login.html" class="btn-regenerate" style="text-decoration:none;">Sign In Again</a>
+            <a href="login.html" class="btn-regenerate" style="text-decoration:none;">Sign In</a>
           </div>
         </div>
       `;
-    }
-
-    function normalizeProfile(raw) {
-      const user = raw.user || raw.profile || raw.data || raw || {};
-      const key  = raw.key || raw.apiKey || { value: apiKey || '', lastRegenerated: 'Active' };
-      const endpoints = (raw.endpoints || raw.endpointUsage || raw.usage || []).map(ep => ({
-        id:            ep.id || ep._id || ep.path,
-        name:          ep.name || ep.endpointName || ep.path || 'Endpoint',
-        category:      ep.category || (String(ep.path || '').includes('/media/') ? 'media' : 'movie'),
-        categoryLabel: ep.categoryLabel || (String(ep.category || ep.path || '').includes('media') ? 'Media' : 'Movie'),
-        path:          ep.path || ep.endpointPath || '',
-        usedToday:     ep.usedToday ?? ep.today ?? ep.used ?? 0,
-        totalRequests: ep.totalRequests ?? ep.total ?? ep.requests ?? 0,
-        lastUsed:      ep.lastUsed ?? ep.lastUsedAt ?? '—',
-        avgLatency:    ep.avgLatency ?? ep.latency ?? 0
-      }));
-      const recent = (raw.recentRequests || raw.recent || raw.activity || []).map(r => ({
-        endpoint: r.endpoint || r.name || r.path || '—',
-        status:   r.status ?? r.statusCode ?? 200,
-        latency:  r.latency ?? r.duration ?? 0,
-        time:     r.time ?? r.createdAt ?? 'just now'
-      }));
-      return { user, key, endpoints, recent };
     }
 
     function formatNumber(n) { return Number(n || 0).toLocaleString('en-US'); }
@@ -580,20 +559,20 @@
     }
 
     function renderEndpointRow(ep) {
-      const remaining = Math.max(0, DAILY_LIMIT - ep.usedToday);
-      const pct = Math.min(100, (ep.usedToday / DAILY_LIMIT) * 100);
+      const used = ep.usedToday || 0;
+      const remaining = typeof ep.remainingToday !== 'undefined' ? ep.remainingToday : Math.max(0, ENDPOINT_LIMIT - used);
+      const pct = Math.min(100, (used / ENDPOINT_LIMIT) * 100);
       const fillClass = getFillClass(pct);
       const badgeClass = getMiniBadgeClass(pct);
       const badgeText = getMiniBadgeText(remaining);
-      const pathWithApi = ep.path + (ep.path.includes('?') ? '&api=YOUR_KEY' : '?api=YOUR_KEY');
-      const highlightPath = pathWithApi.replace('api=YOUR_KEY', '<span class="api-param">api=YOUR_KEY</span>');
+      const highlightPath = ep.path + '<span class="api-param">?api=YOUR_KEY</span>';
 
       const row = document.createElement('div');
       row.className = 'endpoint-row';
       row.innerHTML = `
         <div class="flex items-center justify-between gap-2 flex-wrap">
           <div class="flex items-center gap-2 min-w-0">
-            <span class="cat-badge cat-${ep.category}">${ep.categoryLabel}</span>
+            <span class="cat-badge cat-${ep.category || 'movie'}">${ep.categoryLabel || 'Service'}</span>
             <span class="text-sm font-extrabold text-slate-900 truncate">${ep.name}</span>
           </div>
           <span class="mini-badge ${badgeClass}">${badgeText}</span>
@@ -602,12 +581,12 @@
         <div class="progress-track"><div class="progress-fill ${fillClass}" data-target="${pct}"></div></div>
         <div class="flex items-center justify-between gap-2 flex-wrap mt-2.5">
           <span class="text-xs font-semibold text-slate-700">
-            <span class="text-slate-900 font-bold">${ep.usedToday}</span> / ${DAILY_LIMIT} used today
+            <span class="text-slate-900 font-bold">${used}</span> / ${ENDPOINT_LIMIT} used today
             <span class="text-slate-400 mx-1">·</span>
             <span class="${remaining <= 20 ? 'text-rose-600' : 'text-emerald-600'} font-bold">${remaining} left</span>
           </span>
           <span class="text-[11px] text-slate-500 font-medium">
-            ${formatNumber(ep.totalRequests)} total · ${ep.lastUsed} · ~${ep.avgLatency}ms
+            Reset at 00:00 UTC · 100 limit
           </span>
         </div>`;
       return row;
@@ -632,71 +611,74 @@
       if (el) el.textContent = txt;
     }
 
+    /* ============ MAIN RENDER ============ */
     function renderProfile(data) {
-      const norm = normalizeProfile(data);
-      const u = norm.user || {};
+      const u = data.user || {};
+      const keyObj = data.key || {};
+      const endpoints = data.endpoints || [];
+      const recent = data.recentRequests || [];
 
       const avatarEl = document.getElementById('heroAvatar');
       if (avatarEl) avatarEl.textContent = (u.name || 'U').charAt(0).toUpperCase();
       setText('userName', u.name || 'Operator');
-      setText('userId', u.userId || u.id || u._id || '—');
+      setText('userId', u.userId || u.id || '—');
 
       const tierEl = document.getElementById('tierBadge');
       if (tierEl) {
         tierEl.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' + (u.tier || 'Developer');
       }
 
-      const joinedStr = u.joined || (u.createdAt
-        ? new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-        : '—');
-      setText('joinedLabel', 'Joined ' + joinedStr);
-      setText('lastLoginLabel', 'Last login ' + (u.lastLogin || '—'));
-      setText('regionLabel', u.region || '—');
+      setText('joinedLabel', 'Joined ' + (u.joined || '—'));
+      setText('lastLoginLabel', 'Last login ' + (u.lastLogin || 'Active'));
+      setText('regionLabel', u.region || 'Asia Pacific · sg-1');
 
       const keyEl = document.getElementById('profile-key');
-      const keyVal = (norm.key && norm.key.value) || apiKey || u.apiKey || '';
+      const keyVal = keyObj.value || apiKey || u.apiKey || '';
       if (keyEl) keyEl.value = keyVal;
-      setText('lastRegeneratedLabel', 'Status: ' + (norm.key.lastRegenerated || 'Active'));
+      setText('lastRegeneratedLabel', 'Status: ' + (keyObj.lastRegenerated || 'Active'));
 
-      const usedEndpoints = (norm.endpoints || []).filter(ep => ep.usedToday > 0 || ep.totalRequests > 0);
-      const totalRequests = usedEndpoints.reduce((s, ep) => s + Number(ep.totalRequests || 0), 0);
-      const todayRequests = usedEndpoints.reduce((s, ep) => s + Number(ep.usedToday || 0), 0);
-      const totalCapacity = usedEndpoints.length * DAILY_LIMIT;
-      const remainingToday = Math.max(0, totalCapacity - todayRequests);
+      // Calculate aggregated pool
+      const totalCapacity = endpoints.length * ENDPOINT_LIMIT;
+      const todayTotalUsed = u.requestsToday || 0;
+      const totalRemaining = Math.max(0, totalCapacity - todayTotalUsed);
 
-      setText('statTotal', formatNumber(totalRequests || u.totalRequests || 0));
-      setText('statTotalSub', 'across ' + usedEndpoints.length + ' endpoint' + (usedEndpoints.length === 1 ? '' : 's'));
-      setText('statToday', formatNumber(todayRequests || u.requestsToday || 0));
-      setText('statTodaySub', 'limit resets at 00:00 UTC');
-      setText('statRemaining', formatNumber(remainingToday));
-      setText('statRemainingSub', todayRequests + ' of ' + totalCapacity + ' used');
-      setText('statSuccess', (u.successRate || 100) + '%');
-      setText('usedEndpointCount', usedEndpoints.length + ' endpoint' + (usedEndpoints.length === 1 ? '' : 's') + ' used');
+      setText('statTotal', formatNumber(u.totalRequests || 0));
+      setText('statTotalSub', 'across all endpoints');
+      setText('statToday', formatNumber(todayTotalUsed));
+      setText('statTodaySub', 'today requests count');
+      setText('statRemaining', formatNumber(totalRemaining));
+      setText('statRemainingSub', `${todayTotalUsed} of ${totalCapacity} pool used`);
+      setText('statSuccess', (u.successRate || 99.4) + '%');
+      setText('usedEndpointCount', `${endpoints.length} endpoints monitored`);
 
+      // Render Endpoints List
       const usageList = document.getElementById('endpointUsageList');
       const noState   = document.getElementById('noEndpointsState');
       if (usageList) {
         usageList.innerHTML = '';
-        if (usedEndpoints.length === 0) {
+        if (endpoints.length === 0) {
           if (noState) noState.classList.remove('hidden');
         } else {
           if (noState) noState.classList.add('hidden');
-          usedEndpoints.forEach(ep => usageList.appendChild(renderEndpointRow(ep)));
+          endpoints.forEach(ep => usageList.appendChild(renderEndpointRow(ep)));
         }
       }
 
+      // Render Recent Requests
       const activityList = document.getElementById('activityList');
       if (activityList) {
         activityList.innerHTML = '';
-        (norm.recent || []).slice(0, 6).forEach(item => activityList.appendChild(renderActivity(item)));
+        recent.slice(0, 6).forEach(item => activityList.appendChild(renderActivity(item)));
       }
 
+      // Account Details
       setText('accEmail', u.email || '—');
       setText('accUserId', u.userId || u.id || '—');
-      setText('accJoined', joinedStr);
-      setText('accLastLogin', u.lastLogin || '—');
-      setText('accRegion', u.region || '—');
+      setText('accJoined', u.joined || '—');
+      setText('accLastLogin', u.lastLogin || 'Active');
+      setText('accRegion', u.region || 'Asia Pacific');
 
+      // Animate progress bars
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           document.querySelectorAll('.progress-fill').forEach(el => {
@@ -770,7 +752,6 @@
       }
     }
 
-    /* ============ INITIALIZE ============ */
     document.addEventListener('DOMContentLoaded', async () => {
       const keyEl = document.getElementById('profile-key');
       if (keyEl && apiKey) keyEl.value = apiKey;
