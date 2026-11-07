@@ -111,6 +111,7 @@
     .cat-movie { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
     .cat-media { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
     .cat-game { background: #ecfeff; color: #0891b2; border: 1px solid #a5f3fc; }
+    .cat-app { background: #fdf4ff; color: #c026d3; border: 1px solid #f5d0fe; }
     .copy-toast {
       position: fixed; bottom: 1.5rem; left: 50%;
       transform: translate(-50%, 20px);
@@ -304,6 +305,7 @@
             <button onclick="filterCategory('movie', this)" class="filter-btn" data-cat="movie">🎬 Movies</button>
             <button onclick="filterCategory('media', this)" class="filter-btn" data-cat="media">🎵 Media</button>
             <button onclick="filterCategory('game', this)" class="filter-btn" data-cat="game">🎮 Games</button>
+            <button onclick="filterCategory('app', this)" class="filter-btn" data-cat="app">👾 Apps</button>
           </div>
         </section>
 
@@ -567,6 +569,30 @@
         testParam: 'url',
         testPlaceholder: 'https://www.slmix.lk/song.php?id=123',
         usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/slmix/dl?url=TRACK_PAGE_URL&api=<YOUR_API_KEY>"`
+      },
+      {
+        id: 'an1-search',
+        category: 'app',
+        categoryLabel: 'App',
+        name: 'AN1 MOD APK· Search',
+        method: 'GET',
+        path: '/api/v1/apps/an1/search?q={query}api=<YOUR_API_KEY>',
+        description: 'Searches MOD applications and games on an1.com.',
+        testParam: 'q',
+        testPlaceholder: 'subway surfers',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/apps/an1/search?q=subway+surfersapi=<YOUR_API_KEY>"`
+      },
+      {
+        id: 'an1-dl',
+        category: 'app',
+        categoryLabel: 'App',
+        name: 'AN1 MOD APK· Direct DL',
+        method: 'GET',
+        path: '/api/v1/apps/an1/dl?url={pageUrl}&api=<YOUR_API_KEY>',
+        description: 'Extracts version, file size, and direct APK download URL from AN1 app page.',
+        testParam: 'url',
+        testPlaceholder: 'https://an1.com/624-subway-surfers-mod-apk.html',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/apps/an1/dl?url=APP_PAGE_URL&api=<YOUR_API_KEY>"`
       }
 
     ];
