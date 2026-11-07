@@ -3,719 +3,830 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In — Apex API</title>
+  <title>Profile — Apex API</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: { sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'] }
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace']
+          }
         }
       }
     }
   </script>
 
   <style>
-    :root { --indigo: #6366f1; --violet: #8b5cf6; }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; overflow: hidden; }
+    html { scroll-behavior: smooth; }
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       -webkit-font-smoothing: antialiased;
       color: #0f172a;
-      background: #f8fafc;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .bg-decor { position: fixed; inset: 0; z-index: -10; pointer-events: none; overflow: hidden; }
-    .bg-base {
-      position: fixed; inset: 0; z-index: -11;
       background:
         radial-gradient(1200px 800px at 15% 5%, #e0e7ff 0%, transparent 60%),
         radial-gradient(1000px 700px at 85% 20%, #ede9fe 0%, transparent 55%),
         radial-gradient(900px 600px at 50% 100%, #e0f2fe 0%, transparent 60%),
         linear-gradient(180deg, #f8fafc 0%, #eef2ff 45%, #f8fafc 100%);
+      background-attachment: fixed;
     }
-    @keyframes cardIn { from { opacity: 0; transform: scale(.94) translateY(24px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-    @keyframes riseIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
-    .stagger { opacity: 0; animation: riseIn .7s cubic-bezier(.16,1,.3,1) both; }
-    .live-dot { animation: pulseDot 1.6s ease-in-out infinite; }
-    .card-stage {
-      position: fixed; inset: 0; z-index: 30;
-      display: flex; overflow-y: auto;
-      padding: 5.5rem 1.25rem 2rem;
-      pointer-events: none; scrollbar-width: none;
-    }
-    .card-stage::-webkit-scrollbar { display: none; }
-    .card-motion {
-      margin: auto; width: 100%; max-width: 28rem;
-      pointer-events: auto;
-      transition: transform 1s cubic-bezier(.34, 1.4, .64, 1);
-      will-change: transform;
-    }
-    @media (min-width: 1024px) {
-      .card-motion.is-right { transform: translateX(25vw); }
-      .card-motion.is-left  { transform: translateX(-25vw); }
-    }
-    .auth-card {
-      position: relative;
-      background: rgba(255, 255, 255, .93);
-      -webkit-backdrop-filter: blur(24px);
-      backdrop-filter: blur(24px);
+    @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .anim-in { opacity: 0; animation: fadeSlideUp .7s cubic-bezier(.16,1,.3,1) both; }
+    .panel {
+      background: rgba(255, 255, 255, .96);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
       border: 1px solid rgba(226, 232, 240, .9);
-      border-radius: 1.75rem;
-      padding: 2rem 1.65rem;
-      box-shadow: 0 40px 80px -40px rgba(15, 23, 42, .35), 0 0 0 1px rgba(255, 255, 255, .6) inset;
-      animation: cardIn .8s cubic-bezier(.16,1,.3,1) both;
+      border-radius: 1.25rem;
+      box-shadow: 0 20px 50px -30px rgba(15, 23, 42, .25);
     }
-    @media (min-width: 640px) { .auth-card { padding: 2.4rem 2.1rem; } }
-    .card-logo-wrap {
-      width: 3.1rem; height: 3.1rem; border-radius: 1rem;
+    .hero-avatar {
+      width: 5.5rem; height: 5.5rem; border-radius: 1.6rem;
       background: linear-gradient(135deg, #6366f1, #8b5cf6);
       display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 1.1rem;
-      box-shadow: 0 14px 26px -10px rgba(99, 102, 241, .55);
-      color: #fff; font-weight: 800; font-size: 1.3rem;
+      color: #fff; font-size: 1.85rem; font-weight: 800;
+      letter-spacing: -0.02em;
+      box-shadow: 0 20px 36px -16px rgba(99, 102, 241, .6);
+      flex-shrink: 0;
     }
-    .auth-tabs {
-      position: relative; display: grid; grid-template-columns: 1fr 1fr;
-      background: #f1f5f9; border-radius: .8rem; padding: .25rem; margin-bottom: 1.6rem;
+    .tier-badge {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .72rem; font-weight: 700;
+      padding: .3rem .7rem; border-radius: 999px;
+      background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;
     }
-    .auth-tab-pill {
-      position: absolute; top: .25rem; left: .25rem;
-      width: calc(50% - .25rem); height: calc(100% - .5rem);
-      background: #fff; border-radius: .6rem;
-      box-shadow: 0 2px 8px -2px rgba(15, 23, 42, .18);
-      transition: transform .38s cubic-bezier(.16,1,.3,1);
-      pointer-events: none;
+    .meta-badge {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .72rem; font-weight: 700;
+      padding: .3rem .7rem; border-radius: 999px;
+      background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;
     }
-    .auth-tabs[data-active="register"] .auth-tab-pill { transform: translateX(100%); }
-    .auth-tab {
-      position: relative; z-index: 1; padding: .55rem;
-      font-size: .85rem; font-weight: 700; color: #64748b;
-      border-radius: .6rem; transition: color .3s ease;
-      cursor: pointer; background: none; border: none;
+    .key-field {
+      width: 100%; font-family: 'JetBrains Mono', monospace;
+      font-size: .82rem; background: #f8fafc; border: 1.5px solid #e2e8f0;
+      border-radius: .7rem; padding: .8rem 1rem; color: #0f172a;
+      letter-spacing: .02em; transition: all .2s ease;
     }
-    .auth-tab.active { color: #0f172a; }
-    .form-stack { position: relative; transition: height .55s cubic-bezier(.16,1,.3,1); }
-    .form-pane {
-      position: absolute; top: 0; left: 0; width: 100%;
-      opacity: 0; transform: translateY(12px); visibility: hidden;
-      pointer-events: none;
-      transition: opacity .45s ease, transform .45s cubic-bezier(.16,1,.3,1), visibility 0s linear .45s;
-    }
-    .form-pane.active {
-      position: relative; opacity: 1; transform: translateY(0);
-      visibility: visible; pointer-events: auto;
-      transition: opacity .45s ease, transform .45s cubic-bezier(.16,1,.3,1), visibility 0s;
-    }
-    .pane-title { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em; text-align: center; color: #0f172a; }
-    .pane-sub { margin-top: .35rem; margin-bottom: 1.4rem; text-align: center; font-size: .86rem; color: #64748b; }
-    .field label { display: block; font-size: .78rem; font-weight: 700; color: #475569; margin-bottom: .38rem; }
-    .input {
-      width: 100%; background: #f8fafc; border: 1.5px solid #e2e8f0;
-      border-radius: .8rem; padding: .72rem .95rem;
-      font-size: .9rem; color: #0f172a; transition: all .2s ease;
-    }
-    .input::placeholder { color: #94a3b8; }
-    .input:hover { border-color: #cbd5e1; }
-    .input:focus {
-      outline: none; border-color: var(--indigo); background: #fff;
+    .key-field:hover { border-color: #cbd5e1; }
+    .key-field:focus {
+      outline: none; border-color: #6366f1; background: #fff;
       box-shadow: 0 0 0 4px rgba(99, 102, 241, .12);
     }
-    .btn-primary {
-      width: 100%; padding: .88rem 1rem; border-radius: .8rem;
-      font-weight: 700; font-size: .93rem; color: #fff;
-      background-image: linear-gradient(135deg, #6366f1, #8b5cf6);
+    .btn-copy, .btn-regenerate {
+      font-weight: 700; font-size: .78rem;
+      padding: .7rem 1.2rem; border-radius: .7rem;
+      cursor: pointer; white-space: nowrap;
+      transition: all .25s ease; border: none;
+    }
+    .btn-copy {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
       background-size: 160% 160%; background-position: 0% 50%;
-      box-shadow: 0 14px 26px -12px rgba(99, 102, 241, .7);
-      transition: background-position .5s ease, box-shadow .3s ease, transform .2s ease;
-      cursor: pointer; border: none;
+      color: #fff; box-shadow: 0 12px 24px -12px rgba(99, 102, 241, .7);
     }
-    .btn-primary:hover:not(:disabled) {
-      background-position: 100% 50%;
-      box-shadow: 0 20px 34px -14px rgba(99, 102, 241, .8);
-      transform: translateY(-1.5px);
+    .btn-copy:hover {
+      background-position: 100% 50%; transform: translateY(-1.5px);
+      box-shadow: 0 18px 30px -14px rgba(99, 102, 241, .85);
     }
-    .btn-primary:active:not(:disabled) { transform: translateY(0) scale(.99); }
-    .btn-primary:disabled { opacity: .65; cursor: wait; transform: none; }
-    .google-btn {
-      display: flex; align-items: center; justify-content: center; gap: .65rem;
-      width: 100%; padding: .8rem 1rem; background: #fff;
-      border: 1.5px solid #e2e8f0; border-radius: .8rem;
-      font-weight: 700; font-size: .88rem; color: #1e293b;
-      transition: all .25s ease;
+    .btn-regenerate {
+      background: #fff; color: #e11d48; border: 1.5px solid #fecdd3;
       box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
     }
-    .google-btn:hover {
-      border-color: #cbd5e1; background: #f8fafc;
-      transform: translateY(-1.5px);
-      box-shadow: 0 10px 22px -14px rgba(15, 23, 42, .3);
+    .btn-regenerate:hover:not(:disabled) {
+      background: #fff1f2; border-color: #fda4af; transform: translateY(-1.5px);
     }
-    .divider {
-      display: flex; align-items: center; gap: .9rem;
-      margin: 1.15rem 0; font-size: .72rem; color: #94a3b8;
-      font-weight: 600; white-space: nowrap;
+    .btn-regenerate:disabled { opacity: .65; cursor: wait; transform: none; }
+    .info-banner {
+      display: flex; gap: .7rem; align-items: flex-start;
+      background: #fffbeb; border: 1px solid #fde68a;
+      border-radius: .8rem; padding: .85rem 1rem;
+      font-size: .8rem; color: #78350f; line-height: 1.55;
     }
-    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
-    .checkbox {
-      display: flex; align-items: center; gap: .5rem;
-      font-size: .8rem; color: #475569; cursor: pointer; user-select: none;
+    .info-banner svg { flex-shrink: 0; margin-top: .1rem; }
+    .info-banner code {
+      font-family: 'JetBrains Mono', monospace; font-weight: 600;
+      background: #fef3c7; padding: .05rem .35rem;
+      border-radius: .3rem; color: #92400e;
     }
-    .checkbox input[type="checkbox"] {
-      appearance: none; -webkit-appearance: none;
-      width: 1.05rem; height: 1.05rem;
-      border: 1.5px solid #cbd5e1; border-radius: .35rem;
-      background: #fff; cursor: pointer; transition: all .2s;
-      position: relative; flex-shrink: 0;
+    .stat-card {
+      background: rgba(255, 255, 255, .96);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(226, 232, 240, .9);
+      border-radius: 1.05rem; padding: 1.15rem 1.25rem;
+      transition: transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s ease, border-color .3s ease;
     }
-    .checkbox input[type="checkbox"]:checked { background: var(--indigo); border-color: var(--indigo); }
-    .checkbox input[type="checkbox"]:checked::after {
-      content: ''; position: absolute;
-      left: 4px; top: 1px; width: 4px; height: 8px;
-      border: solid #fff; border-width: 0 2px 2px 0;
-      transform: rotate(45deg);
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 22px 40px -26px rgba(15, 23, 42, .3);
+      border-color: #c7d2fe;
     }
-    .link { color: var(--indigo); font-weight: 600; transition: color .2s; }
-    .link:hover { color: #4f46e5; text-decoration: underline; }
-    .side-panel {
-      position: fixed; top: 0; bottom: 0; width: 50%;
-      display: none; align-items: center;
-      padding: 6rem 2.5rem 3rem; overflow-y: auto;
-      scrollbar-width: none; opacity: 0;
-      transition: opacity .8s ease; pointer-events: none; z-index: 10;
-    }
-    .side-panel::-webkit-scrollbar { display: none; }
-    @media (min-width: 1024px) { .side-panel { display: flex; } }
-    .side-panel.side-left  { left: 0;  justify-content: flex-end; }
-    .side-panel.side-right { right: 0; justify-content: flex-start; }
-    .side-panel.active { opacity: 1; pointer-events: auto; }
-    .side-inner { width: 100%; max-width: 26rem; display: flex; flex-direction: column; gap: 1.6rem; }
-    .side-panel .stagger-child {
-      opacity: 0; transform: translateY(24px);
-      transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1);
-    }
-    .side-panel.active .stagger-child { opacity: 1; transform: translateY(0); transition-delay: var(--delay, 0s); }
-    .badge {
-      display: inline-flex; align-items: center; gap: .45rem;
-      background: #fff; border: 1px solid #e0e7ff; color: #4f46e5;
-      font-size: .74rem; font-weight: 700; padding: .4rem .85rem;
-      border-radius: 999px; box-shadow: 0 4px 10px -8px rgba(79, 70, 229, .5);
-    }
-    .side-greeting h1 {
-      font-size: 2.5rem; line-height: 1.08; font-weight: 800;
-      letter-spacing: -0.025em; color: #0f172a; margin-top: .9rem;
-    }
-    .side-greeting h1 span {
-      background: linear-gradient(120deg, #6366f1, #8b5cf6);
-      -webkit-background-clip: text; background-clip: text; color: transparent;
-    }
-    .side-greeting p { margin-top: .7rem; font-size: .98rem; line-height: 1.6; color: #64748b; max-width: 24rem; }
-    .emoji-row { display: flex; gap: .6rem; flex-wrap: wrap; }
-    .emoji-chip {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 2.9rem; height: 2.9rem; font-size: 1.3rem;
-      background: #fff; border: 1px solid #e2e8f0; border-radius: .95rem;
-      box-shadow: 0 10px 18px -14px rgba(15, 23, 42, .25);
-      transition: transform .3s ease, box-shadow .3s ease; cursor: default;
-    }
-    .emoji-chip:hover { transform: translateY(-4px) rotate(-5deg); box-shadow: 0 18px 26px -16px rgba(15, 23, 42, .35); }
-    .integration-row { display: flex; gap: .6rem; flex-wrap: wrap; }
-    .integration-chip {
-      display: inline-flex; align-items: center; gap: .5rem;
-      background: #fff; border: 1px solid #e2e8f0; border-radius: .85rem;
-      padding: .55rem .9rem; font-size: .8rem; font-weight: 700; color: #334155;
-      box-shadow: 0 6px 14px -12px rgba(15, 23, 42, .25);
-    }
-    .bot-log {
-      background: #fff; border: 1px solid #e2e8f0; border-radius: 1rem;
-      overflow: hidden; box-shadow: 0 16px 34px -26px rgba(15, 23, 42, .35);
-    }
-    .bot-log-header {
-      display: flex; align-items: center; gap: .35rem;
-      padding: .55rem .9rem; background: #f8fafc;
-      border-bottom: 1px solid #e2e8f0; font-size: .63rem;
-      font-weight: 800; letter-spacing: .1em; color: #64748b; text-transform: uppercase;
-    }
-    .bot-dot { width: .5rem; height: .5rem; border-radius: 999px; }
-    .bot-log-body { padding: .55rem .9rem; max-height: 8.2rem; overflow: hidden; }
-    .log-line {
-      display: flex; align-items: baseline; gap: .5rem; padding: .28rem 0;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
-      font-size: .7rem; opacity: 0; transform: translateY(6px);
-      transition: opacity .45s ease, transform .45s ease;
-    }
-    .log-line.show { opacity: 1; transform: translateY(0); }
-    .log-time { color: #94a3b8; flex-shrink: 0; }
-    .log-tag {
-      font-size: .58rem; font-weight: 800; padding: 1px 6px;
-      border-radius: 4px; text-transform: uppercase; letter-spacing: .05em; flex-shrink: 0;
-    }
-    .log-tag.info { background: #eef2ff; color: #4f46e5; }
-    .log-tag.ok   { background: #ecfdf5; color: #059669; }
-    .log-tag.warn { background: #fffbeb; color: #d97706; }
-    .log-msg { color: #475569; }
-    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: .65rem; }
-    .stat-item {
-      background: #fff; border: 1px solid #e2e8f0; border-radius: .9rem;
-      padding: .7rem .4rem; text-align: center;
-      box-shadow: 0 8px 18px -16px rgba(15, 23, 42, .3);
-    }
-    .stat-item strong { display: block; font-size: 1rem; font-weight: 800; color: #0f172a; }
-    .stat-item span {
-      font-size: .62rem; color: #94a3b8; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .05em;
-    }
-    .benefit-list { display: flex; flex-direction: column; gap: .6rem; }
-    .benefit-list li {
-      display: flex; align-items: center; gap: .65rem;
-      font-size: .89rem; font-weight: 600; color: #334155;
-    }
-    .check {
-      width: 1.3rem; height: 1.3rem; border-radius: 999px;
-      background: #ecfdf5; color: #059669;
+    .stat-icon {
+      width: 2.2rem; height: 2.2rem; border-radius: .65rem;
       display: flex; align-items: center; justify-content: center;
-      font-size: .7rem; font-weight: 800; flex-shrink: 0;
+      margin-bottom: .65rem;
     }
-    .quote-card {
+    .stat-value {
+      font-size: 1.55rem; font-weight: 800;
+      letter-spacing: -0.02em; line-height: 1; color: #0f172a;
+    }
+    .stat-label { font-size: .72rem; font-weight: 600; color: #64748b; margin-top: .35rem; }
+    .stat-sub { font-size: .68rem; color: #94a3b8; margin-top: .25rem; }
+    .cat-badge {
+      font-size: .58rem; font-weight: 800; letter-spacing: .08em;
+      padding: .22rem .55rem; border-radius: .35rem; text-transform: uppercase;
+    }
+    .cat-movie { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .cat-media { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+    .endpoint-row {
       background: #fff; border: 1px solid #e2e8f0;
-      border-left: 3px solid var(--indigo); border-radius: .9rem;
-      padding: .9rem 1rem; font-size: .84rem; line-height: 1.55;
-      color: #475569; font-style: italic;
-      box-shadow: 0 10px 24px -20px rgba(15, 23, 42, .3);
+      border-radius: 1rem; padding: 1.1rem 1.2rem;
+      transition: border-color .25s ease, box-shadow .25s ease;
     }
-    .quote-card span {
-      display: block; margin-top: .5rem; font-style: normal;
-      font-size: .72rem; font-weight: 700; color: #94a3b8;
+    .endpoint-row:hover {
+      border-color: #c7d2fe;
+      box-shadow: 0 14px 32px -22px rgba(15, 23, 42, .3);
     }
-    .form-error {
-      display: none; font-size: .78rem; font-weight: 600;
-      color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca;
-      border-radius: .5rem; padding: .55rem .75rem;
-      margin-top: .7rem; text-align: center; line-height: 1.4;
+    .endpoint-path {
+      font-family: 'JetBrains Mono', monospace; font-size: .7rem;
+      background: #f8fafc; border: 1px solid #e2e8f0;
+      border-radius: .5rem; padding: .45rem .65rem; color: #475569;
+      overflow-x: auto; white-space: nowrap;
+      scrollbar-width: none; margin-top: .55rem;
     }
-    .form-error.show { display: block; }
+    .endpoint-path::-webkit-scrollbar { display: none; }
+    .endpoint-path .api-param { color: #4f46e5; font-weight: 600; }
+    .progress-track {
+      height: .55rem; background: #f1f5f9;
+      border-radius: 999px; overflow: hidden; margin-top: .9rem;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 999px; width: 0;
+      transition: width 1.1s cubic-bezier(.16,1,.3,1);
+    }
+    .fill-ok   { background: linear-gradient(90deg, #10b981, #34d399); }
+    .fill-warn { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .fill-high { background: linear-gradient(90deg, #ef4444, #f87171); }
+    .mini-badge {
+      display: inline-flex; align-items: center; gap: .3rem;
+      font-size: .66rem; font-weight: 700;
+      padding: .18rem .5rem; border-radius: .35rem;
+    }
+    .mb-ok   { background: #ecfdf5; color: #047857; }
+    .mb-warn { background: #fffbeb; color: #b45309; }
+    .mb-high { background: #fef2f2; color: #b91c1c; }
+    .mb-neutral { background: #f1f5f9; color: #475569; }
+    .activity-item {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .6rem .2rem; border-bottom: 1px solid #f1f5f9;
+      font-size: .8rem;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot { width: .45rem; height: .45rem; border-radius: 999px; flex-shrink: 0; }
+    .dot-ok { background: #10b981; }
+    .dot-warn { background: #f59e0b; }
+    .dot-err { background: #ef4444; }
+    .account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
+    @media (max-width: 480px) { .account-grid { grid-template-columns: 1fr; } }
+    .account-item {
+      background: #f8fafc; border: 1px solid #e2e8f0;
+      border-radius: .7rem; padding: .65rem .8rem;
+    }
+    .account-label {
+      font-size: .62rem; font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; color: #94a3b8;
+    }
+    .account-value {
+      font-size: .82rem; font-weight: 700; color: #0f172a;
+      margin-top: .2rem; word-break: break-word;
+    }
+    .nav-link {
+      font-size: .82rem; font-weight: 600; color: #64748b;
+      transition: color .2s; padding: .4rem .7rem; border-radius: .5rem;
+    }
+    .nav-link:hover { color: #0f172a; background: #f1f5f9; }
+    .nav-link.active { color: #4f46e5; background: #eef2ff; }
+    .copy-toast {
+      position: fixed; bottom: 1.5rem; left: 50%;
+      transform: translate(-50%, 20px);
+      background: #0f172a; color: #f8fafc;
+      font-size: .8rem; font-weight: 600; padding: .7rem 1.2rem;
+      border-radius: .7rem; box-shadow: 0 20px 40px -18px rgba(15, 23, 42, .5);
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s ease, transform .3s ease;
+      z-index: 100; display: flex; align-items: center; gap: .5rem;
+      max-width: calc(100% - 2rem);
+    }
+    .copy-toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .skeleton {
+      background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.3s infinite linear;
+      border-radius: .5rem;
+    }
+    @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
   </style>
 </head>
 
 <body>
 
-  <div class="bg-base"></div>
-  <div class="bg-decor">
+  <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
     <div class="absolute -top-40 -left-32 w-[34rem] h-[34rem] rounded-full bg-indigo-300/40 blur-3xl"></div>
     <div class="absolute top-1/3 -right-40 w-[30rem] h-[30rem] rounded-full bg-violet-300/40 blur-3xl"></div>
     <div class="absolute bottom-0 left-1/3 w-[26rem] h-[26rem] rounded-full bg-sky-200/60 blur-3xl"></div>
-    <div class="absolute top-1/2 left-1/2 w-[24rem] h-[24rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-fuchsia-200/30 blur-3xl"></div>
   </div>
 
-  <header class="fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 py-3.5 flex items-center justify-between pointer-events-none">
-    <a href="index.html" class="pointer-events-auto flex items-center gap-2.5 bg-white/85 backdrop-blur-md border border-slate-200/80 rounded-xl pl-2 pr-3.5 py-1.5 shadow-sm hover:shadow-md transition">
-      <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white text-xs font-extrabold shadow-sm">A</span>
-      <span class="text-sm font-extrabold tracking-tight text-slate-900">Apex<span class="text-indigo-600">API</span></span>
-    </a>
-    <a href="index.html" class="pointer-events-auto text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-900 bg-white/85 backdrop-blur-md border border-slate-200/80 rounded-xl px-3.5 py-2 shadow-sm hover:shadow-md transition">
-      ← Back to home
-    </a>
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/80">
+    <div class="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-2.5 group">
+          <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-500/30 transition-transform duration-300 group-hover:scale-105">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13l0-8z"/></svg>
+          </span>
+          <span class="text-lg font-extrabold tracking-tight text-slate-900">Apex<span class="text-indigo-600">API</span></span>
+        </a>
+        <span class="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">Profile</span>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-1">
+        <a href="dashboard.html" class="nav-link">Docs</a>
+        <a href="playground.html" class="nav-link">Playground</a>
+        <a href="profile.html" class="nav-link active">Profile</a>
+      </nav>
+
+      <a href="index.html" id="logout-btn" class="text-xs font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 px-4 py-2 rounded-xl transition">Log out</a>
+    </div>
   </header>
 
-  <div id="sideLogin" class="side-panel side-left">
-    <div class="side-inner">
-      <div class="stagger-child side-greeting" style="--delay: 0s">
-        <span class="badge">
-          <span class="live-dot w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-          Hello there 👋
-        </span>
-        <h1>Welcome to<br><span>Apex API</span></h1>
-        <p>Please log in to access your unified media resolver dashboard, live telemetry, and developer tools.</p>
-      </div>
+  <main class="max-w-7xl mx-auto px-6 py-10 space-y-6">
 
-      <div class="stagger-child emoji-row" style="--delay: .12s">
-        <span class="emoji-chip">🎬</span>
-        <span class="emoji-chip">📺</span>
-        <span class="emoji-chip">💬</span>
-        <span class="emoji-chip">🔐</span>
-        <span class="emoji-chip">✨</span>
-        <span class="emoji-chip">🚀</span>
-      </div>
-
-      <div class="stagger-child integration-row" style="--delay: .24s">
-        <div class="integration-chip">
-          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#FF0000" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8z"/><path fill="#fff" d="M9.6 15.6V8.4l6.2 3.6-6.2 3.6z"/></svg>
-          YouTube
-        </div>
-        <div class="integration-chip">
-          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#25D366" d="M12 0a12 12 0 0 0-10.4 18l-1.6 5.8 6-1.6A12 12 0 1 0 12 0z"/><path fill="#fff" d="M17.5 13.9c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.2-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.2-.5.1-.2 0-.4 0-.5 0-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4 0 1.4 1 2.8 1.2 3 .1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.5-.3z"/></svg>
-          WhatsApp
-        </div>
-        <div class="integration-chip">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6366f1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-          REST API
-        </div>
-      </div>
-
-      <div class="stagger-child bot-log" style="--delay: .36s">
-        <div class="bot-log-header">
-          <span class="bot-dot bg-red-400"></span>
-          <span class="bot-dot bg-amber-400"></span>
-          <span class="bot-dot bg-emerald-400"></span>
-          <span class="ml-1.5">Apex Bot · Live Activity</span>
-        </div>
-        <div id="botLog" class="bot-log-body"></div>
-      </div>
-
-      <div class="stagger-child stats-row" style="--delay: .48s">
-        <div class="stat-item"><strong>1.2M+</strong><span>Req / day</span></div>
-        <div class="stat-item"><strong>99.98%</strong><span>Uptime</span></div>
-        <div class="stat-item"><strong>148ms</strong><span>Median</span></div>
-      </div>
-    </div>
-  </div>
-
-  <div id="sideRegister" class="side-panel side-right">
-    <div class="side-inner">
-      <div class="stagger-child side-greeting" style="--delay: 0s">
-        <span class="badge">
-          <span class="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
-          ✨ Join the network
-        </span>
-        <h1>Create your<br><span>Apex API</span> account</h1>
-        <p>Get instant access to unified media resolvers, streaming endpoints, and developer tooling.</p>
-      </div>
-
-      <div class="stagger-child emoji-row" style="--delay: .12s">
-        <span class="emoji-chip">🛠️</span>
-        <span class="emoji-chip">⚡</span>
-        <span class="emoji-chip">🌐</span>
-        <span class="emoji-chip">📊</span>
-        <span class="emoji-chip">🔑</span>
-      </div>
-
-      <ul class="stagger-child benefit-list" style="--delay: .24s">
-        <li><span class="check">✓</span> One API key for every endpoint</li>
-        <li><span class="check">✓</span> Zero persistent file storage</li>
-        <li><span class="check">✓</span> Real-time telemetry dashboard</li>
-        <li><span class="check">✓</span> Isolated microservice engines</li>
-        <li><span class="check">✓</span> Automatic rate-limit metering</li>
-      </ul>
-
-      <div class="stagger-child quote-card" style="--delay: .36s">
-        "Setup took less than two minutes. The resolver mesh is genuinely fast, and the dashboard is clean."
-        <span>— Early access operator</span>
-      </div>
-
-      <div class="stagger-child stats-row" style="--delay: .48s">
-        <div class="stat-item"><strong>3</strong><span>Engines</span></div>
-        <div class="stat-item"><strong>1</strong><span>API key</span></div>
-        <div class="stat-item"><strong>0</strong><span>Storage</span></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card-stage">
-    <div id="cardMotion" class="card-motion">
-      <div id="authCard" class="auth-card">
-
-        <div class="card-brand stagger" style="animation-delay: .2s">
-          <div class="card-logo-wrap">A</div>
-        </div>
-
-        <div class="auth-tabs stagger" data-active="login" style="animation-delay: .45s">
-          <span class="auth-tab-pill"></span>
-          <button type="button" class="auth-tab active" data-mode="login">Log in</button>
-          <button type="button" class="auth-tab" data-mode="register">Register</button>
-        </div>
-
-        <div id="formStack" class="form-stack">
-
-          <!-- LOGIN PANE -->
-          <div class="form-pane active" data-pane="login">
-            <h2 class="pane-title stagger" style="animation-delay: .7s">Welcome back</h2>
-            <p class="pane-sub stagger" style="animation-delay: .95s">Sign in to your Apex API dashboard</p>
-
-            <a href="#" onclick="return false;" class="google-btn stagger" style="animation-delay: 1.25s">
-              <svg width="18" height="18" viewBox="0 0 24 24">
-                <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.2 9 5 12 5z"/>
-                <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/>
-                <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3 0-.8.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12.3 0 15.2c0 2.8.7 5.5 1.9 7.8l3.7-2.9z"/>
-                <path fill="#34A853" d="M12 23.5c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.2-6.4-5.2L1.9 16.5C3.7 20.2 7.5 23.5 12 23.5z"/>
-              </svg>
-              Continue with Google
-            </a>
-
-            <div class="divider stagger" style="animation-delay: 1.55s"><span>or continue with email</span></div>
-
-            <form id="login-form" class="space-y-3.5">
-              <div class="field stagger" style="animation-delay: 1.85s">
-                <label>Email address</label>
-                <input type="email" id="login-email" class="input" placeholder="you@example.com" autocomplete="email" required>
-              </div>
-              <div class="field stagger" style="animation-delay: 2.2s">
-                <label>Password</label>
-                <input type="password" id="login-password" class="input" placeholder="••••••••" autocomplete="current-password" required>
-              </div>
-              <div class="flex items-center justify-between stagger" style="animation-delay: 2.55s">
-                <label class="checkbox"><input type="checkbox"> Remember me</label>
-                <a href="#" class="link text-xs">Forgot password?</a>
-              </div>
-              <button type="submit" id="login-submit" class="btn-primary stagger" style="animation-delay: 2.85s">Sign in</button>
-              <p id="login-error" class="form-error"></p>
-            </form>
+    <div id="loadingState" class="space-y-6">
+      <div class="panel p-7">
+        <div class="flex items-center gap-5">
+          <div class="skeleton" style="width:5.5rem;height:5.5rem;border-radius:1.6rem;"></div>
+          <div class="flex-1 space-y-2">
+            <div class="skeleton" style="width:12rem;height:1.4rem;"></div>
+            <div class="skeleton" style="width:9rem;height:.9rem;"></div>
+            <div class="skeleton" style="width:14rem;height:1.2rem;margin-top:.6rem;"></div>
           </div>
-
-          <!-- REGISTER PANE -->
-          <div class="form-pane" data-pane="register">
-            <h2 class="pane-title">Create your account</h2>
-            <p class="pane-sub">Join Apex API in seconds — no credit card needed</p>
-
-            <a href="#" onclick="return false;" class="google-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24">
-                <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.2 9 5 12 5z"/>
-                <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/>
-                <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3 0-.8.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12.3 0 15.2c0 2.8.7 5.5 1.9 7.8l3.7-2.9z"/>
-                <path fill="#34A853" d="M12 23.5c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.2-6.4-5.2L1.9 16.5C3.7 20.2 7.5 23.5 12 23.5z"/>
-              </svg>
-              Sign up with Google
-            </a>
-
-            <div class="divider"><span>or sign up with email</span></div>
-
-            <form id="register-form" class="space-y-3.5">
-              <div class="field">
-                <label>Full name</label>
-                <input type="text" id="reg-name" class="input" placeholder="Jane Doe" autocomplete="name" required>
-              </div>
-              <div class="field">
-                <label>Email address</label>
-                <input type="email" id="reg-email" class="input" placeholder="you@example.com" autocomplete="email" required>
-              </div>
-              <div class="field">
-                <label>Password</label>
-                <input type="password" id="reg-password" class="input" placeholder="Create a strong password" autocomplete="new-password" minlength="6" required>
-              </div>
-              <label class="checkbox">
-                <input type="checkbox">
-                <span>I agree to the <a href="#" class="link">Terms</a> &amp; <a href="#" class="link">Privacy Policy</a></span>
-              </label>
-              <button type="submit" id="reg-submit" class="btn-primary">Create account</button>
-              <p id="reg-error" class="form-error"></p>
-            </form>
-          </div>
-
         </div>
       </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="stat-card"><div class="skeleton" style="height:4rem;"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:4rem;"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:4rem;"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:4rem;"></div></div>
+      </div>
     </div>
+
+    <div id="profileContent" class="hidden space-y-6">
+
+      <section class="panel p-6 sm:p-7 anim-in" style="animation-delay:.05s">
+        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+          <div class="hero-avatar" id="heroAvatar">M</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 flex-wrap">
+              <h1 class="text-2xl font-extrabold tracking-tight text-slate-900" id="userName">Loading…</h1>
+              <span class="tier-badge mx-auto sm:mx-0" id="tierBadge">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                Developer
+              </span>
+            </div>
+            <p class="mt-1 font-mono text-xs text-slate-500" id="userId">—</p>
+            <div class="mt-3 flex flex-wrap items-center justify-center sm:justify-start gap-2">
+              <span class="meta-badge">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                <span id="joinedLabel">Joined —</span>
+              </span>
+              <span class="meta-badge">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                <span id="lastLoginLabel">Last login —</span>
+              </span>
+              <span class="meta-badge">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span id="regionLabel">—</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel p-6 sm:p-7 anim-in" style="animation-delay:.12s">
+        <div class="flex items-start justify-between gap-3 mb-4 flex-wrap">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2M17 6l2 2M14 9l2 2"/></svg>
+              </span>
+              <h2 class="text-sm font-extrabold text-slate-900">Master API Key</h2>
+            </div>
+            <p class="mt-1 text-xs text-slate-500" id="lastRegeneratedLabel">Last regenerated —</p>
+          </div>
+          <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Active
+          </span>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-3">
+          <input type="text" id="profile-key" readonly class="key-field">
+          <div class="flex gap-2 flex-col sm:flex-row">
+            <button onclick="copyProfileKey()" class="btn-copy">Copy key</button>
+            <button onclick="regenerateKey()" class="btn-regenerate">Revoke &amp; regenerate</button>
+          </div>
+        </div>
+
+        <div class="info-banner mt-4">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+          <div>
+            <strong class="font-bold">Required:</strong> every request must end with <code>&amp;api=YOUR_KEY</code> (or <code>?api=YOUR_KEY</code> if the endpoint has no other params). Requests without a valid key return <span class="font-mono font-semibold">401 Unauthorized</span>.
+          </div>
+        </div>
+      </section>
+
+      <section class="grid grid-cols-2 md:grid-cols-4 gap-4 anim-in" style="animation-delay:.2s">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#eef2ff;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 9 11l4 4 8-8"/><path d="M14 7h7v7"/></svg>
+          </div>
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-label">Total requests</div>
+          <div class="stat-sub" id="statTotalSub">all time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#f5f3ff;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          </div>
+          <div class="stat-value" id="statToday">0</div>
+          <div class="stat-label">Today</div>
+          <div class="stat-sub" id="statTodaySub">across used endpoints</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#ecfdf5;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <div class="stat-value" id="statRemaining">0</div>
+          <div class="stat-label">Remaining today</div>
+          <div class="stat-sub" id="statRemainingSub">0 of 0 used</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fef2f2;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div class="stat-value" id="statSuccess">0%</div>
+          <div class="stat-label">Success rate</div>
+          <div class="stat-sub">last 30 days</div>
+        </div>
+      </section>
+
+      <section class="panel p-6 sm:p-7 anim-in" style="animation-delay:.28s">
+        <div class="flex items-start justify-between gap-3 mb-5 flex-wrap">
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900 tracking-tight">Endpoint usage</h2>
+            <p class="text-xs text-slate-500 mt-1">Daily limit: <span class="font-semibold text-slate-700">100 requests per endpoint</span> · resets at 00:00 UTC</p>
+          </div>
+          <span class="meta-badge" id="usedEndpointCount">0 endpoints used</span>
+        </div>
+
+        <div id="endpointUsageList" class="space-y-3"></div>
+
+        <div id="noEndpointsState" class="hidden text-center py-10">
+          <div class="w-12 h-12 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <p class="text-sm font-bold text-slate-700">No endpoints used yet</p>
+          <p class="text-xs text-slate-400 mt-1">Start calling endpoints to see usage here.</p>
+        </div>
+      </section>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section class="panel p-6 sm:p-7 anim-in" style="animation-delay:.36s">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-extrabold text-slate-900 tracking-tight">Recent requests</h2>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Live</span>
+          </div>
+          <div id="activityList" class="space-y-0"></div>
+        </section>
+
+        <section class="panel p-6 sm:p-7 anim-in" style="animation-delay:.44s">
+          <h2 class="text-base font-extrabold text-slate-900 tracking-tight mb-4">Account details</h2>
+          <div class="account-grid">
+            <div class="account-item"><div class="account-label">Email</div><div class="account-value" id="accEmail">—</div></div>
+            <div class="account-item"><div class="account-label">User ID</div><div class="account-value font-mono" id="accUserId">—</div></div>
+            <div class="account-item"><div class="account-label">Member since</div><div class="account-value" id="accJoined">—</div></div>
+            <div class="account-item"><div class="account-label">Last login</div><div class="account-value" id="accLastLogin">—</div></div>
+            <div class="account-item"><div class="account-label">Region</div><div class="account-value" id="accRegion">—</div></div>
+            <div class="account-item"><div class="account-label">Storage used</div><div class="account-value">0 GB <span class="text-slate-400 font-semibold text-xs">/ zero persistent</span></div></div>
+            <div class="account-item"><div class="account-label">Auth method</div><div class="account-value">Google OAuth</div></div>
+            <div class="account-item"><div class="account-label">Account status</div><div class="account-value text-emerald-600">Active</div></div>
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white/60 mt-8">
+    <div class="max-w-7xl mx-auto px-6 py-7 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 font-medium">
+      <span>© 2026 Apex API System. All rights reserved.</span>
+      <span>Built for autonomous deployments.</span>
+    </div>
+  </footer>
+
+  <div id="copyToast" class="copy-toast">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+    <span id="toastText">API key copied to clipboard</span>
   </div>
 
   <script>
-    (function () {
-      const cardMotion   = document.getElementById('cardMotion');
-      const sideLogin    = document.getElementById('sideLogin');
-      const sideRegister = document.getElementById('sideRegister');
-      const formStack    = document.getElementById('formStack');
-      const tabsWrap     = document.querySelector('.auth-tabs');
-      const tabButtons   = document.querySelectorAll('.auth-tab');
+    /* ============ CONFIG ============ */
+    const API_BASE = 'https://apex-web-backend-production.up.railway.app';
+    const DAILY_LIMIT = 100;
 
-      let currentMode = 'login';
-      let introDone   = false;
-      let introTimer  = null;
+    /* ============ AUTH STATE ============ */
+    const rawToken = localStorage.getItem('apex_token');
+    const rawApiKey = localStorage.getItem('apex_api_key');
 
-      function finishIntro() {
-        if (introDone) return;
-        introDone = true;
-        if (currentMode === 'login') {
-          cardMotion.classList.add('is-right');
-          setTimeout(() => {
-            if (currentMode === 'login') sideLogin.classList.add('active');
-          }, 250);
-        }
-      }
+    // Strip any accidental "Bearer " prefix if backend included one
+    function cleanBearer(raw) {
+      return raw ? String(raw).replace(/^Bearer\s+/i, '').trim() : '';
+    }
 
-      window.addEventListener('DOMContentLoaded', () => {
-        introTimer = setTimeout(finishIntro, 4000);
+    const token  = cleanBearer(rawToken);
+    const apiKey = cleanBearer(rawApiKey);
+
+    console.log('[Apex Profile] Auth state:', {
+      hasToken: !!token,
+      hasApiKey: !!apiKey,
+      tokenPrefix: token ? token.substring(0, 25) + '…' : null,
+      apiKeyPrefix: apiKey ? apiKey.substring(0, 25) + '…' : null
+    });
+
+    // Only redirect if BOTH are missing
+    if (!token && !apiKey) {
+      console.warn('[Apex Profile] No credentials found → redirecting to login');
+      window.location.replace('login.html');
+    }
+
+    /* ============ LOGOUT ============ */
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('apex_token');
+        localStorage.removeItem('apex_api_key');
+        localStorage.removeItem('apex_user');
       });
+    }
 
-      function switchPane(mode) {
-        const current = formStack.querySelector('.form-pane.active');
-        const next    = formStack.querySelector('.form-pane[data-pane="' + mode + '"]');
-        if (!next || current === next) return;
-        formStack.style.height = current.offsetHeight + 'px';
-        void formStack.offsetHeight;
-        current.classList.remove('active');
-        next.classList.add('active');
-        formStack.style.height = next.offsetHeight + 'px';
-      }
+    /* ============ MULTI-ATTEMPT PROFILE FETCH ============ */
+    async function fetchProfileData() {
+      const attempts = [];
 
-      formStack.addEventListener('transitionend', (e) => {
-        if (e.target === formStack && e.propertyName === 'height') formStack.style.height = '';
-      });
-
-      function updateTabs(mode) {
-        tabsWrap.dataset.active = mode;
-        tabButtons.forEach((btn) => {
-          btn.classList.toggle('active', btn.dataset.mode === mode);
+      // Primary: Bearer <apiKey> — matches how the API endpoints authenticate
+      if (apiKey) {
+        attempts.push({
+          name: 'Bearer apiKey',
+          url: `${API_BASE}/api/user/profile`,
+          headers: { 'Authorization': `Bearer ${apiKey}` }
         });
       }
 
-      function setMode(mode) {
-        if (mode === currentMode) return;
-        currentMode = mode;
-        if (!introDone) { clearTimeout(introTimer); introDone = true; }
-        if (mode === 'register') {
-          cardMotion.classList.remove('is-right');
-          cardMotion.classList.add('is-left');
-          sideLogin.classList.remove('active');
-          sideRegister.classList.add('active');
+      // Fallback: Bearer <token> (JWT from login)
+      if (token) {
+        attempts.push({
+          name: 'Bearer token',
+          url: `${API_BASE}/api/user/profile`,
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      }
+
+      // Last resort: query-only (no auth header)
+      if (apiKey) {
+        attempts.push({
+          name: 'Query apiKey',
+          url: `${API_BASE}/api/user/profile?api=${apiKey}`,
+          headers: {}
+        });
+      }
+
+      const errors = [];
+
+      for (const a of attempts) {
+        try {
+          console.log(`[Apex Profile] Trying ${a.name} → ${a.url}`);
+          const res = await fetch(a.url, {
+            headers: { ...a.headers, 'Content-Type': 'application/json' }
+          });
+          const text = await res.text();
+          let data;
+          try { data = JSON.parse(text); } catch { data = { raw: text }; }
+
+          console.log(`[Apex Profile] ${a.name} → ${res.status} ${res.statusText}`, data);
+
+          if (res.ok) {
+            console.log(`[Apex Profile] ✅ SUCCESS via ${a.name}`);
+            return data;
+          }
+
+          const msg = (data && (data.message || data.error)) || (typeof data.raw === 'string' ? data.raw.substring(0, 120) : '');
+          errors.push(`${a.name}: HTTP ${res.status}${msg ? ' — ' + msg : ''}`);
+
+          // If it's a non-auth error (not 401/403), try next method anyway
+        } catch (err) {
+          console.error(`[Apex Profile] ${a.name} threw:`, err);
+          errors.push(`${a.name}: ${err.message || 'network error'}`);
+        }
+      }
+
+      // All attempts failed
+      console.error('[Apex Profile] ❌ All auth attempts failed:\n' + errors.join('\n'));
+      showAuthError(errors);
+      return null;
+    }
+
+    function showAuthError(errors) {
+      const loading = document.getElementById('loadingState');
+      if (!loading) return;
+
+      const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+      loading.innerHTML = `
+        <div class="panel p-8 text-center">
+          <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          </div>
+          <h2 class="text-lg font-extrabold text-slate-900 mb-1">Could not load profile</h2>
+          <p class="text-sm text-slate-500 mb-4">
+            The backend did not accept any of the available credentials. Your session has NOT been cleared.
+            Open the browser console (F12) to see full details.
+          </p>
+          <details class="text-left max-w-xl mx-auto mb-5">
+            <summary class="text-xs font-bold text-slate-600 cursor-pointer mb-2 select-none">Show error details</summary>
+            <pre style="text-align:left;font-size:11px;font-family:'JetBrains Mono',monospace;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;white-space:pre-wrap;color:#475569;line-height:1.6;">${esc(errors.join('\n'))}</pre>
+          </details>
+          <div class="flex gap-2 justify-center flex-wrap">
+            <button onclick="location.reload()" class="btn-copy" style="width:auto;padding:.65rem 1.2rem;">Retry</button>
+            <button onclick="localStorage.removeItem('apex_token');localStorage.removeItem('apex_api_key');localStorage.removeItem('apex_user');location.replace('login.html')" class="btn-primary" style="width:auto;padding:.65rem 1.2rem;background-image:linear-gradient(135deg,#f43f5e,#e11d48);">
+              Log in again
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-4">
+            If this keeps happening, the backend <code class="font-mono">/api/user/profile</code> endpoint may require a different auth format.
+          </p>
+        </div>
+      `;
+    }
+
+    /* ============ NORMALIZER ============ */
+    function normalizeProfile(raw) {
+      const user = raw.user || raw.profile || raw.data || raw || {};
+      const key  = raw.key || raw.apiKey || { value: apiKey || '', lastRegenerated: 'Active' };
+      const endpoints = (raw.endpoints || raw.endpointUsage || raw.usage || []).map(ep => ({
+        id:            ep.id || ep._id || ep.path,
+        name:          ep.name || ep.endpointName || ep.path || 'Endpoint',
+        category:      ep.category || (String(ep.path || '').includes('/media/') ? 'media' : 'movie'),
+        categoryLabel: ep.categoryLabel || (String(ep.category || ep.path || '').includes('media') ? 'Media' : 'Movie'),
+        path:          ep.path || ep.endpointPath || '',
+        usedToday:     ep.usedToday ?? ep.today ?? ep.used ?? 0,
+        totalRequests: ep.totalRequests ?? ep.total ?? ep.requests ?? 0,
+        lastUsed:      ep.lastUsed ?? ep.lastUsedAt ?? '—',
+        avgLatency:    ep.avgLatency ?? ep.latency ?? 0
+      }));
+      const recent = (raw.recentRequests || raw.recent || raw.activity || []).map(r => ({
+        endpoint: r.endpoint || r.name || r.path || '—',
+        status:   r.status ?? r.statusCode ?? 200,
+        latency:  r.latency ?? r.duration ?? 0,
+        time:     r.time ?? r.createdAt ?? 'just now'
+      }));
+      return { user, key, endpoints, recent };
+    }
+
+    /* ============ RENDER HELPERS ============ */
+    function formatNumber(n) { return Number(n || 0).toLocaleString('en-US'); }
+    function getFillClass(pct) { if (pct >= 80) return 'fill-high'; if (pct >= 50) return 'fill-warn'; return 'fill-ok'; }
+    function getMiniBadgeClass(pct) { if (pct >= 80) return 'mb-high'; if (pct >= 50) return 'mb-warn'; return 'mb-ok'; }
+    function getMiniBadgeText(remaining) {
+      if (remaining <= 0) return 'Limit reached';
+      if (remaining <= 20) return 'Low';
+      return 'Healthy';
+    }
+
+    function renderEndpointRow(ep) {
+      const remaining = Math.max(0, DAILY_LIMIT - ep.usedToday);
+      const pct = Math.min(100, (ep.usedToday / DAILY_LIMIT) * 100);
+      const fillClass = getFillClass(pct);
+      const badgeClass = getMiniBadgeClass(pct);
+      const badgeText = getMiniBadgeText(remaining);
+      const pathWithApi = ep.path + (ep.path.includes('?') ? '&api=YOUR_KEY' : '?api=YOUR_KEY');
+      const highlightPath = pathWithApi.replace('api=YOUR_KEY', '<span class="api-param">api=YOUR_KEY</span>');
+
+      const row = document.createElement('div');
+      row.className = 'endpoint-row';
+      row.innerHTML = `
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="cat-badge cat-${ep.category}">${ep.categoryLabel}</span>
+            <span class="text-sm font-extrabold text-slate-900 truncate">${ep.name}</span>
+          </div>
+          <span class="mini-badge ${badgeClass}">${badgeText}</span>
+        </div>
+        <div class="endpoint-path">${highlightPath}</div>
+        <div class="progress-track"><div class="progress-fill ${fillClass}" data-target="${pct}"></div></div>
+        <div class="flex items-center justify-between gap-2 flex-wrap mt-2.5">
+          <span class="text-xs font-semibold text-slate-700">
+            <span class="text-slate-900 font-bold">${ep.usedToday}</span> / ${DAILY_LIMIT} used today
+            <span class="text-slate-400 mx-1">·</span>
+            <span class="${remaining <= 20 ? 'text-rose-600' : 'text-emerald-600'} font-bold">${remaining} left</span>
+          </span>
+          <span class="text-[11px] text-slate-500 font-medium">
+            ${formatNumber(ep.totalRequests)} total · ${ep.lastUsed} · ~${ep.avgLatency}ms
+          </span>
+        </div>`;
+      return row;
+    }
+
+    function renderActivity(item) {
+      const dotClass = item.status >= 500 ? 'dot-err' : item.status >= 400 ? 'dot-warn' : 'dot-ok';
+      const statusClass = item.status >= 500 ? 'mb-high' : item.status >= 400 ? 'mb-warn' : 'mb-ok';
+      const el = document.createElement('div');
+      el.className = 'activity-item';
+      el.innerHTML = `
+        <span class="activity-dot ${dotClass}"></span>
+        <span class="flex-1 truncate text-slate-700 font-semibold">${item.endpoint}</span>
+        <span class="mini-badge ${statusClass}">${item.status}</span>
+        <span class="font-mono text-[11px] text-slate-400">${item.latency}ms</span>
+        <span class="text-[11px] text-slate-400 whitespace-nowrap">${item.time}</span>`;
+      return el;
+    }
+
+    function setText(id, txt) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = txt;
+    }
+
+    /* ============ MAIN RENDER ============ */
+    function renderProfile(data) {
+      const norm = normalizeProfile(data);
+      const u = norm.user || {};
+
+      const avatarEl = document.getElementById('heroAvatar');
+      if (avatarEl) avatarEl.textContent = (u.name || 'U').charAt(0).toUpperCase();
+      setText('userName', u.name || 'Operator');
+      setText('userId', u.userId || u.id || u._id || '—');
+
+      const tierEl = document.getElementById('tierBadge');
+      if (tierEl) {
+        tierEl.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' + (u.tier || 'Developer');
+      }
+
+      const joinedStr = u.joined || (u.createdAt
+        ? new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+        : '—');
+      setText('joinedLabel', 'Joined ' + joinedStr);
+      setText('lastLoginLabel', 'Last login ' + (u.lastLogin || '—'));
+      setText('regionLabel', u.region || '—');
+
+      const keyEl = document.getElementById('profile-key');
+      const keyVal = (norm.key && norm.key.value) || apiKey || u.apiKey || '';
+      if (keyEl) keyEl.value = keyVal;
+      setText('lastRegeneratedLabel', 'Last regenerated ' + (norm.key.lastRegenerated || '—'));
+
+      const usedEndpoints = (norm.endpoints || []).filter(ep => ep.usedToday > 0 || ep.totalRequests > 0);
+      const totalRequests = usedEndpoints.reduce((s, ep) => s + Number(ep.totalRequests || 0), 0);
+      const todayRequests = usedEndpoints.reduce((s, ep) => s + Number(ep.usedToday || 0), 0);
+      const totalCapacity = usedEndpoints.length * DAILY_LIMIT;
+      const remainingToday = Math.max(0, totalCapacity - todayRequests);
+
+      setText('statTotal', formatNumber(totalRequests || u.totalRequests || 0));
+      setText('statTotalSub', 'across ' + usedEndpoints.length + ' endpoint' + (usedEndpoints.length === 1 ? '' : 's'));
+      setText('statToday', formatNumber(todayRequests || u.requestsToday || 0));
+      setText('statTodaySub', 'limit resets at 00:00 UTC');
+      setText('statRemaining', formatNumber(remainingToday));
+      setText('statRemainingSub', todayRequests + ' of ' + totalCapacity + ' used');
+      setText('statSuccess', (u.successRate || 100) + '%');
+      setText('usedEndpointCount', usedEndpoints.length + ' endpoint' + (usedEndpoints.length === 1 ? '' : 's') + ' used');
+
+      const usageList = document.getElementById('endpointUsageList');
+      const noState   = document.getElementById('noEndpointsState');
+      if (usageList) {
+        usageList.innerHTML = '';
+        if (usedEndpoints.length === 0) {
+          if (noState) noState.classList.remove('hidden');
         } else {
-          cardMotion.classList.remove('is-left');
-          cardMotion.classList.add('is-right');
-          sideRegister.classList.remove('active');
-          sideLogin.classList.add('active');
+          if (noState) noState.classList.add('hidden');
+          usedEndpoints.forEach(ep => usageList.appendChild(renderEndpointRow(ep)));
         }
-        updateTabs(mode);
-        switchPane(mode);
       }
 
-      tabButtons.forEach((btn) => {
-        btn.addEventListener('click', () => setMode(btn.dataset.mode));
+      const activityList = document.getElementById('activityList');
+      if (activityList) {
+        activityList.innerHTML = '';
+        (norm.recent || []).slice(0, 6).forEach(item => activityList.appendChild(renderActivity(item)));
+      }
+
+      setText('accEmail', u.email || '—');
+      setText('accUserId', u.userId || u.id || '—');
+      setText('accJoined', joinedStr);
+      setText('accLastLogin', u.lastLogin || '—');
+      setText('accRegion', u.region || '—');
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          document.querySelectorAll('.progress-fill').forEach(el => {
+            el.style.width = el.dataset.target + '%';
+          });
+        });
       });
 
-      const botLogEl = document.getElementById('botLog');
-      if (botLogEl) {
-        const messages = [
-          { type: 'info', text: 'CineSubz engine online' },
-          { type: 'ok',   text: 'API key issued · op_8f2a' },
-          { type: 'info', text: 'GET /v1/resolve · id=7842' },
-          { type: 'ok',   text: 'Direct link ready · 142ms' },
-          { type: 'warn', text: 'Rate limit at 82% of quota' },
-          { type: 'ok',   text: 'SaveTube adapter synced' },
-          { type: 'info', text: 'Cache hit ratio · 96.4%' },
-          { type: 'ok',   text: 'SinhalaCartoons tunnel up' }
-        ];
-        let logIndex = 0;
-        function pushLogLine() {
-          const msg  = messages[logIndex % messages.length];
-          const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
-          const line = document.createElement('div');
-          line.className = 'log-line';
-          line.innerHTML =
-            '<span class="log-time">' + time + '</span>' +
-            '<span class="log-tag ' + msg.type + '">' + msg.type + '</span>' +
-            '<span class="log-msg">' + msg.text + '</span>';
-          botLogEl.appendChild(line);
-          requestAnimationFrame(() => line.classList.add('show'));
-          while (botLogEl.children.length > 4) botLogEl.removeChild(botLogEl.firstChild);
-          logIndex++;
-        }
-        pushLogLine(); pushLogLine(); pushLogLine();
-        setInterval(pushLogLine, 2000);
+      const loadingEl = document.getElementById('loadingState');
+      const contentEl = document.getElementById('profileContent');
+      if (loadingEl) loadingEl.classList.add('hidden');
+      if (contentEl) contentEl.classList.remove('hidden');
+    }
+
+    /* ============ TOAST + COPY ============ */
+    function showToast(msg) {
+      const toast = document.getElementById('copyToast');
+      if (!toast) return;
+      const txt = document.getElementById('toastText');
+      if (txt) txt.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+    }
+
+    function copyProfileKey() {
+      const el = document.getElementById('profile-key');
+      if (!el) return;
+      const val = el.value;
+      const done = () => showToast('API key copied to clipboard');
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(val).then(done).catch(() => { el.select(); document.execCommand('copy'); done(); });
+      } else {
+        el.select(); document.execCommand('copy'); done();
       }
-    })();
+    }
 
-    /* ============ LIVE AUTH INTEGRATION ============ */
-    (function () {
-const API_BASE = 'https://apex-web-backend-production.up.railway.app';
+    /* ============ REGENERATE KEY ============ */
+    async function regenerateKey() {
+      if (!confirm('Revoking this key will immediately disconnect any active scripts. Generate a new key?')) return;
+      const btn = document.querySelector('.btn-regenerate');
+      const original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Regenerating…';
 
-      function setErr(id, msg) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        if (msg) { el.textContent = msg; el.classList.add('show'); }
-        else { el.classList.remove('show'); }
-      }
+      const authValue = apiKey || token;
 
-      function saveSession(data) {
-        const token  = data.token || data.jwt;
-        const apiKey = data.apiKey || (data.user && data.user.apiKey) || data.key;
-        const user   = data.user || data.userData || data;
-        if (!token) throw new Error('Server did not return an auth token.');
-        localStorage.setItem('apex_token', token);
-        if (apiKey) localStorage.setItem('apex_api_key', apiKey);
-        localStorage.setItem('apex_user', JSON.stringify(user));
-      }
-
-      async function postJSON(path, body) {
-        const res = await fetch(API_BASE + path, {
+      try {
+        // Try both header style + query fallback
+        let res = await fetch(`${API_BASE}/api/user/regenerate-key`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
+          headers: { 'Authorization': `Bearer ${authValue}`, 'Content-Type': 'application/json' }
         });
-        const data = await res.json().catch(() => ({}));
-        return { res, data };
+        let data = await res.json().catch(() => ({}));
+
+        if (res.status === 401 || res.status === 403) {
+          // Retry with query param
+          res = await fetch(`${API_BASE}/api/user/regenerate-key?api=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          data = await res.json().catch(() => ({}));
+        }
+
+        if (!res.ok) throw new Error(data.message || data.error || 'Failed to regenerate key.');
+
+        const newKey = data.apiKey || data.key || data.newKey || (data.user && data.user.apiKey);
+        if (!newKey) throw new Error('Server did not return a new key.');
+
+        localStorage.setItem('apex_api_key', newKey);
+        const keyEl = document.getElementById('profile-key');
+        if (keyEl) keyEl.value = newKey;
+        setText('lastRegeneratedLabel', 'Last regenerated just now');
+        showToast('New API key generated. Update your scripts!');
+      } catch (err) {
+        showToast(err.message || 'Could not regenerate key.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
       }
+    }
 
-      const loginForm = document.getElementById('login-form');
-      if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          setErr('login-error', '');
-          const email = document.getElementById('login-email').value.trim();
-          const password = document.getElementById('login-password').value;
-          const btn = document.getElementById('login-submit');
-          if (!email || !password) { setErr('login-error', 'Please enter your email and password.'); return; }
+    /* ============ BOOT ============ */
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Show existing key immediately for perceived speed
+      const keyEl = document.getElementById('profile-key');
+      if (keyEl && apiKey) keyEl.value = apiKey;
 
-          const original = btn.textContent;
-          btn.disabled = true;
-          btn.textContent = 'Signing in…';
-          try {
-            const { res, data } = await postJSON('/api/auth/login', { email, password });
-            if (!res.ok) throw new Error(data.message || data.error || 'Invalid credentials.');
-            saveSession(data);
-            window.location.href = 'dashboard.html';
-          } catch (err) {
-            setErr('login-error', err.message || 'Unable to sign in.');
-          } finally {
-            btn.disabled = false;
-            btn.textContent = original;
-          }
-        });
-      }
-
-      const regForm = document.getElementById('register-form');
-      if (regForm) {
-        regForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          setErr('reg-error', '');
-          const name     = document.getElementById('reg-name').value.trim();
-          const email    = document.getElementById('reg-email').value.trim();
-          const password = document.getElementById('reg-password').value;
-          const btn      = document.getElementById('reg-submit');
-
-          if (!name || !email || !password) { setErr('reg-error', 'Please fill in all fields.'); return; }
-          if (password.length < 6) { setErr('reg-error', 'Password must be at least 6 characters.'); return; }
-
-          const original = btn.textContent;
-          btn.disabled = true;
-          btn.textContent = 'Creating account…';
-          try {
-            const { res, data } = await postJSON('/api/auth/register', { name, email, password });
-            if (!res.ok) throw new Error(data.message || data.error || 'Registration failed.');
-            if (data.token || data.jwt) {
-              saveSession(data);
-              window.location.href = 'dashboard.html';
-            } else {
-              const { res: lr, data: ld } = await postJSON('/api/auth/login', { email, password });
-              if (!lr.ok) throw new Error(ld.message || 'Account created but sign-in failed.');
-              saveSession(ld);
-              window.location.href = 'dashboard.html';
-            }
-          } catch (err) {
-            setErr('reg-error', err.message || 'Unable to register.');
-          } finally {
-            btn.disabled = false;
-            btn.textContent = original;
-          }
-        });
-      }
-
-      if (localStorage.getItem('apex_token')) {
-        window.location.replace('dashboard.html');
-      }
-    })();
+      const data = await fetchProfileData();
+      if (data) renderProfile(data);
+    });
   </script>
 </body>
 </html>
