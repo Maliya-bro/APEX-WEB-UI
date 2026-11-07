@@ -528,11 +528,23 @@
         categoryLabel: 'Media',
         name: 'Apex AI · Text to Speech',
         method: 'GET',
-        path: '/api/v1/media/ai/tts?text={query}&voice=woman2&language=English',
+        path: '/api/v1/media/ai/tts?text={query}&voice=woman2&language=English&api=<YOUR_API_KEY>',
         description: 'Converts textual prompts into natural AI synthesized voice audio MP3 streams.',
         testParam: 'text',
         testPlaceholder: 'Hello, this is Apex AI Voice System',
-        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/ai/tts?text=Hello+World&voice=woman2&language=English"`
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/ai/tts?text=Hello+World&voice=woman2&language=English%api=<YOUR_API_KEY>"`
+      },
+      {
+        id: 'facebook-dl',
+        category: 'media',
+        categoryLabel: 'Media',
+        name: 'Facebook · Video DL',
+        method: 'GET',
+        path: '/api/v1/media/facebook/dl?url={url}&api=<YOUR_API_KEY>',
+        description: 'Resolves public Facebook videos and reels into direct high-speed HD & SD MP4 download streams.',
+        testParam: 'url',
+        testPlaceholder: 'https://www.facebook.com/watch/?v=123456789',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/facebook/dl?url=https://www.facebook.com/watch/?v=123456789&api=<YOUR_API_KEY>"`
       },
       {
         id: 'fitgirl-search',
