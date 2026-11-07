@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Playground — Apex API</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      color: #0f172a;
+      background:
+        radial-gradient(1200px 800px at 15% 5%, #e0e7ff 0%, transparent 60%),
+        radial-gradient(1000px 700px at 85% 20%, #ede9fe 0%, transparent 55%),
+        radial-gradient(900px 600px at 50% 100%, #e0f2fe 0%, transparent 60%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2ff 45%, #f8fafc 100%);
+      background-attachment: fixed;
+    }
+    @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .anim-in { opacity: 0; animation: fadeSlideUp .7s cubic-bezier(.16,1,.3,1) both; }
+    .panel {
+      background: rgba(255, 255, 255, .96);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, .9);
+      border-radius: 1.25rem;
+      box-shadow: 0 20px 50px -30px rgba(15, 23, 42, .25);
+    }
+    .nav-link {
+      font-size: .82rem; font-weight: 600; color: #64748b;
+      transition: color .2s; padding: .4rem .7rem; border-radius: .5rem;
+    }
+    .nav-link:hover { color: #0f172a; background: #f1f5f9; }
+    .nav-link.active { color: #4f46e5; background: #eef2ff; }
+    .field-label {
+      display: block; font-size: .68rem; font-weight: 800;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: #94a3b8; margin-bottom: .45rem;
+    }
+    .field-select, .field-input {
+      width: 100%; font-size: .84rem; background: #f8fafc;
+      border: 1.5px solid #e2e8f0; border-radius: .7rem;
+      padding: .72rem .9rem; color: #0f172a;
+      transition: all .2s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .field-select {
+      cursor: pointer; appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat; background-position: right .7rem center;
+      background-size: 1rem; padding-right: 2.2rem;
+    }
+    .field-input { font-family: 'JetBrains Mono', monospace; font-size: .82rem; }
+    .field-select:hover, .field-input:hover { border-color: #cbd5e1; }
+    .field-select:focus, .field-input:focus {
+      outline: none; border-color: #6366f1; background: #fff;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, .12);
+    }
+    .btn-send {
+      width: 100%; display: inline-flex; align-items: center; justify-content: center;
+      gap: .55rem; font-weight: 700; font-size: .85rem;
+      padding: .85rem 1.3rem; border-radius: .7rem; border: none;
+      cursor: pointer; color: #fff;
+      background-image: linear-gradient(135deg, #6366f1, #8b5cf6);
+      background-size: 160% 160%; background-position: 0% 50%;
+      transition: background-position .5s ease, box-shadow .3s ease, transform .2s ease;
+      box-shadow: 0 14px 26px -12px rgba(99, 102, 241, .7);
+    }
+    .btn-send:hover:not(:disabled) {
+      background-position: 100% 50%; transform: translateY(-1.5px);
+      box-shadow: 0 20px 34px -14px rgba(99, 102, 241, .85);
+    }
+    .btn-send:active:not(:disabled) { transform: translateY(0) scale(.99); }
+    .btn-send:disabled { opacity: .7; cursor: wait; transform: none; }
+    .spinner {
+      width: 1rem; height: 1rem;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: #fff; border-radius: 999px;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .url-bar {
+      display: flex; align-items: stretch; background: #f8fafc;
+      border: 1.5px solid #e2e8f0; border-radius: .7rem;
+      overflow: hidden; transition: border-color .2s ease;
+    }
+    .url-bar:focus-within { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99, 102, 241, .12); }
+    .url-method {
+      display: flex; align-items: center; padding: 0 .8rem;
+      background: #ecfdf5; color: #059669;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem; font-weight: 700; letter-spacing: .05em;
+      border-right: 1.5px solid #e2e8f0;
+    }
+    .url-text {
+      flex: 1; min-width: 0;
+      font-family: 'JetBrains Mono', monospace; font-size: .74rem;
+      padding: .72rem .8rem; color: #334155;
+      overflow-x: auto; white-space: nowrap;
+      scrollbar-width: none; line-height: 1.5;
+    }
+    .url-text::-webkit-scrollbar { display: none; }
+    .url-text .api-param {
+      background: #eef2ff; color: #4f46e5;
+      padding: .02rem .35rem; border-radius: .3rem; font-weight: 600;
+    }
+    .url-text .param-value { color: #7c3aed; font-weight: 600; }
+    .pane-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: .6rem; gap: .5rem;
+    }
+    .pane-title {
+      display: flex; align-items: center; gap: .4rem;
+      font-size: .68rem; font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; color: #94a3b8;
+    }
+    .pane-title::before {
+      content: ''; width: 3px; height: 10px; border-radius: 2px;
+      background: linear-gradient(180deg, #6366f1, #8b5cf6);
+    }
+    .code-panel {
+      background: #0f172a; color: #e2e8f0;
+      font-family: 'JetBrains Mono', monospace; font-size: .73rem;
+      line-height: 1.7; padding: 1rem 1.1rem; border-radius: .85rem;
+      overflow: auto; height: 22rem; margin: 0;
+      border: 1px solid rgba(255, 255, 255, .04); position: relative;
+    }
+    .code-panel::-webkit-scrollbar { width: 8px; height: 8px; }
+    .code-panel::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    .code-panel::-webkit-scrollbar-track { background: transparent; }
+    .json-key { color: #a5b4fc; }
+    .json-string { color: #86efac; }
+    .json-number { color: #fbbf24; }
+    .json-boolean { color: #f472b6; }
+    .json-null { color: #f472b6; }
+    .json-punct { color: #64748b; }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .68rem; font-weight: 700; padding: .22rem .6rem;
+      border-radius: .35rem; font-family: 'JetBrains Mono', monospace;
+      letter-spacing: .03em;
+    }
+    .status-idle { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+    .status-loading { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .status-success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .status-error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .status-dot { width: .4rem; height: .4rem; border-radius: 999px; background: currentColor; }
+    .status-loading .status-dot { animation: blink 1s ease-in-out infinite; }
+    @keyframes blink { 50% { opacity: .3; } }
+    .icon-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: .3rem; font-size: .68rem; font-weight: 700;
+      padding: .35rem .6rem; border-radius: .4rem;
+      border: 1px solid #e2e8f0; background: #fff;
+      color: #475569; cursor: pointer; transition: all .18s ease;
+    }
+    .icon-btn:hover { border-color: #c7d2fe; color: #4f46e5; background: #f8fafc; }
+    .cat-badge {
+      font-size: .58rem; font-weight: 800; letter-spacing: .08em;
+      padding: .22rem .55rem; border-radius: .35rem;
+      text-transform: uppercase; display: inline-flex; align-items: center; gap: .3rem;
+    }
+    .cat-movie { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .cat-media { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+    .meta-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-top: .55rem; }
+    .meta-pill {
+      font-size: .68rem; font-weight: 600; color: #64748b;
+      background: #f8fafc; border: 1px solid #e2e8f0;
+      padding: .18rem .55rem; border-radius: .35rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .empty-response { color: #64748b; font-style: italic; }
+    .copy-toast {
+      position: fixed; bottom: 1.5rem; left: 50%;
+      transform: translate(-50%, 20px);
+      background: #0f172a; color: #f8fafc;
+      font-size: .8rem; font-weight: 600; padding: .7rem 1.2rem;
+      border-radius: .7rem; box-shadow: 0 20px 40px -18px rgba(15, 23, 42, .5);
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s ease, transform .3s ease;
+      z-index: 100; display: flex; align-items: center; gap: .5rem;
+      max-width: calc(100% - 2rem);
+    }
+    .copy-toast.show { opacity: 1; transform: translate(-50%, 0); }
+    @media (max-width: 640px) { .code-panel { height: 16rem; font-size: .68rem; } }
+  </style>
+</head>
+
+<body>
+
+  <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+    <div class="absolute -top-40 -left-32 w-[34rem] h-[34rem] rounded-full bg-indigo-300/40 blur-3xl"></div>
+    <div class="absolute top-1/3 -right-40 w-[30rem] h-[30rem] rounded-full bg-violet-300/40 blur-3xl"></div>
+    <div class="absolute bottom-0 left-1/3 w-[26rem] h-[26rem] rounded-full bg-sky-200/60 blur-3xl"></div>
+  </div>
+
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/80">
+    <div class="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-2.5 group">
+          <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-500/30 transition-transform duration-300 group-hover:scale-105">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13l0-8z"/></svg>
+          </span>
+          <span class="text-lg font-extrabold tracking-tight text-slate-900">Apex<span class="text-indigo-600">API</span></span>
+        </a>
+        <span class="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">Playground</span>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-1">
+        <a href="dashboard.html" class="nav-link">Docs</a>
+        <a href="playground.html" class="nav-link active">Playground</a>
+        <a href="profile.html" class="nav-link">Profile</a>
+      </nav>
+
+      <a href="login.html" id="logout-btn" class="text-xs font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 px-4 py-2 rounded-xl transition">Log out</a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-10 space-y-6">
+    <section class="anim-in" style="animation-delay:.05s">
+      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">API Playground</h1>
+      <p class="mt-1.5 text-sm text-slate-500">Pick an endpoint, enter a value, and send a live request to see the response.</p>
+    </section>
+
+    <section class="panel p-6 sm:p-7 anim-in" style="animation-delay:.12s">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div>
+          <label class="field-label">Endpoint</label>
+          <select id="pg-endpoint" class="field-select"></select>
+        </div>
+        <div>
+          <label class="field-label" id="pg-param-label">Query</label>
+          <input type="text" id="pg-param" class="field-input" placeholder="Enter a value">
+        </div>
+        <div class="flex items-end">
+          <button id="pg-send" class="btn-send">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            Send request
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <label class="field-label">Request URL</label>
+        <div class="url-bar">
+          <span class="url-method">GET</span>
+          <div id="pg-url" class="url-text"></div>
+          <button class="icon-btn" onclick="copyUrl()" title="Copy full URL" style="border-radius:0;border:none;border-left:1.5px solid #e2e8f0;padding:0 .9rem;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <div class="meta-row">
+          <span class="meta-pill" id="pg-category-pill">Movie</span>
+          <span class="meta-pill" id="pg-desc-pill">Searches titles on CineSubz</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 anim-in" style="animation-delay:.2s">
+      <div>
+        <div class="pane-header">
+          <h2 class="pane-title">Request preview</h2>
+          <button class="icon-btn" onclick="copyRequest()" title="Copy as cURL">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy as cURL
+          </button>
+        </div>
+        <pre id="pg-req-preview" class="code-panel"></pre>
+      </div>
+
+      <div>
+        <div class="pane-header">
+          <h2 class="pane-title">Response</h2>
+          <div class="flex items-center gap-2">
+            <span id="pg-status" class="status-badge status-idle"><span class="status-dot"></span>Ready</span>
+            <button class="icon-btn" onclick="copyResponse()" title="Copy response">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+        </div>
+        <pre id="pg-res-preview" class="code-panel"><span class="empty-response">Select an endpoint, enter a value, and hit Send request to see the response.</span></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white/60 mt-8">
+    <div class="max-w-7xl mx-auto px-6 py-7 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 font-medium">
+      <span>© 2026 Apex API System. All rights reserved.</span>
+      <span>Built for autonomous deployments.</span>
+    </div>
+  </footer>
+
+  <div id="copyToast" class="copy-toast">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+    <span id="toastText">Copied to clipboard</span>
+  </div>
+
+  <script>
+    const API_BASE = (function () {
+      if (window.location.protocol === 'file:') return 'http://localhost:5000';
+      const o = window.location.origin;
+      if (!o || o === 'null') return 'http://localhost:5000';
+      return o;
+    })();
+
+    (function guard() {
+      if (!localStorage.getItem('apex_token') && !localStorage.getItem('apex_api_key')) {
+        window.location.replace('login.html');
+      }
+    })();
+
+    const API_KEY = localStorage.getItem('apex_api_key') || '';
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('apex_token');
+      localStorage.removeItem('apex_api_key');
+      localStorage.removeItem('apex_user');
+    });
+
+    const ENDPOINTS = [
+      { id: 'cinesubz-search', category: 'movie', categoryLabel: 'Movie', name: 'CineSubz · Search',
+        path: '/api/v1/movies/cinesubz/search', paramKey: 'q', paramLabel: 'Query',
+        placeholder: 'avatar', desc: 'Searches titles on CineSubz' },
+      { id: 'cinesubz-info', category: 'movie', categoryLabel: 'Movie', name: 'CineSubz · Info & Links',
+        path: '/api/v1/movies/cinesubz/info', paramKey: 'url', paramLabel: 'Page URL',
+        placeholder: 'https://cinesubz.lk/movies/avatar', desc: 'Scrapes qualities and episodes on CineSubz' },
+      { id: 'cinesubz-dl', category: 'movie', categoryLabel: 'Movie', name: 'CineSubz · Direct Download',
+        path: '/api/v1/movies/cinesubz/dl', paramKey: 'directUrl', paramLabel: 'Player URL',
+        placeholder: 'https://cinesubz.lk/player/avatar-1080p', desc: 'Resolves CineSubz player links to CDN' },
+      { id: 'sinhalacartoons-search', category: 'movie', categoryLabel: 'Movie', name: 'sinhalacartoons.lk · Search',
+        path: '/api/v1/movies/sinhalacartoons/search', paramKey: 'q', paramLabel: 'Query',
+        placeholder: 'tom and jerry', desc: 'Searches the SinhalaCartoons catalogue' },
+      { id: 'sinhalacartoons-dl', category: 'movie', categoryLabel: 'Movie', name: 'sinhalacartoons.lk · DL',
+        path: '/api/v1/movies/sinhalacartoons/dl', paramKey: 'landingUrl', paramLabel: 'Landing URL',
+        placeholder: 'https://sinhalacartoons.lk/cartoon/tom-and-jerry', desc: 'Extracts direct download URLs from series' },
+      { id: 'yt-search', category: 'media', categoryLabel: 'Media', name: 'YouTube · Search',
+        path: '/api/v1/media/yt/search', paramKey: 'q', paramLabel: 'Query',
+        placeholder: 'shape of you', desc: 'Searches YouTube videos' },
+      { id: 'yt-audio-dl', category: 'media', categoryLabel: 'Media', name: 'YouTube · Audio DL',
+        path: '/api/v1/media/yt/audio', paramKey: 'q', paramLabel: 'Query',
+        placeholder: 'shape of you', desc: 'Returns direct 128kbps audio stream' },
+      { id: 'yt-video-dl', category: 'media', categoryLabel: 'Media', name: 'YouTube · Video DL',
+        path: '/api/v1/media/yt/video', paramKey: 'q', paramLabel: 'Query',
+        placeholder: 'shape of you', desc: 'Returns direct MP4 URLs across qualities' }
+    ];
+
+    const endpointSelect = document.getElementById('pg-endpoint');
+    const paramInput = document.getElementById('pg-param');
+    const paramLabel = document.getElementById('pg-param-label');
+    const urlBox = document.getElementById('pg-url');
+    const reqPreview = document.getElementById('pg-req-preview');
+    const resPreview = document.getElementById('pg-res-preview');
+    const statusEl = document.getElementById('pg-status');
+    const sendBtn = document.getElementById('pg-send');
+    const categoryPill = document.getElementById('pg-category-pill');
+    const descPill = document.getElementById('pg-desc-pill');
+
+    let currentResponse = null;
+    let currentEndpoint = null;
+
+    function buildUrl(ep, value) {
+      const encoded = encodeURIComponent(value || '{' + ep.paramKey + '}');
+      let url = API_BASE + ep.path + '?' + ep.paramKey + '=' + encoded;
+      if (API_KEY) url += '&api=' + API_KEY;
+      return url;
+    }
+
+    function buildCurl(ep, value) {
+      const url = buildUrl(ep, value);
+      return 'curl -X GET "' + url + '" \\\n  -H "Authorization: Bearer ' + API_KEY + '" \\\n  -H "User-Agent: Apex-Playground/1.0"';
+    }
+
+    function highlightUrl(url, ep, value) {
+      const keyShort = API_KEY ? API_KEY.substring(0, 12) + '…' : '{api_key}';
+      let html;
+      if (!value) {
+        const placeholder = '{' + ep.paramKey + '}';
+        html = url.replace(placeholder, '<span class="param-value">' + placeholder + '</span>');
+      } else {
+        const encoded = encodeURIComponent(value);
+        const safe = encoded.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        html = url.replace(new RegExp(safe, 'g'), '<span class="param-value">' + encoded + '</span>');
+      }
+      if (API_KEY) {
+        html = html.replace('api=' + API_KEY, '<span class="api-param">api=' + keyShort + '</span>');
+      }
+      return html;
+    }
+
+    function updateUrlPreview() {
+      if (!currentEndpoint) return;
+      const value = paramInput.value.trim();
+      const url = buildUrl(currentEndpoint, value);
+      urlBox.innerHTML = highlightUrl(url, currentEndpoint, value);
+      reqPreview.textContent = buildCurl(currentEndpoint, value);
+    }
+
+    function selectEndpoint(id) {
+      const ep = ENDPOINTS.find(e => e.id === id);
+      if (!ep) return;
+      currentEndpoint = ep;
+      paramLabel.textContent = ep.paramLabel;
+      paramInput.placeholder = ep.placeholder;
+      paramInput.value = ep.placeholder;
+      categoryPill.textContent = ep.categoryLabel;
+      descPill.textContent = ep.desc;
+      updateUrlPreview();
+    }
+
+    function populateEndpoints() {
+      ENDPOINTS.forEach(ep => {
+        const opt = document.createElement('option');
+        opt.value = ep.id;
+        opt.textContent = ep.name;
+        endpointSelect.appendChild(opt);
+      });
+    }
+
+    function setStatus(type, text) {
+      statusEl.className = 'status-badge status-' + type;
+      statusEl.innerHTML = '<span class="status-dot"></span>' + text;
+    }
+
+    function syntaxHighlight(json) {
+      const str = JSON.stringify(json, null, 2);
+      return str
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
+          let cls = 'json-number';
+          if (/^"/.test(match)) {
+            if (/:$/.test(match)) cls = 'json-key';
+            else cls = 'json-string';
+          } else if (/true|false/.test(match)) cls = 'json-boolean';
+          else if (/null/.test(match)) cls = 'json-null';
+          return '<span class="' + cls + '">' + match + '</span>';
+        });
+    }
+
+    async function sendRequest() {
+      if (!currentEndpoint) return;
+      const value = paramInput.value.trim();
+
+      if (!value) {
+        paramInput.focus();
+        paramInput.style.borderColor = '#f87171';
+        paramInput.style.boxShadow = '0 0 0 4px rgba(248, 113, 113, .12)';
+        setTimeout(() => { paramInput.style.borderColor = ''; paramInput.style.boxShadow = ''; }, 1000);
+        return;
+      }
+      if (!API_KEY) {
+        setStatus('error', 'No API key');
+        resPreview.innerHTML = syntaxHighlight({ error: 'Missing API key. Please log in again.' });
+        return;
+      }
+
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = '<span class="spinner"></span>Sending...';
+      setStatus('loading', 'Loading...');
+      resPreview.innerHTML = '<span class="empty-response">Contacting gateway...</span>';
+
+      const url = buildUrl(currentEndpoint, value);
+      const start = performance.now();
+      try {
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
+        const elapsed = Math.round(performance.now() - start);
+        let data;
+        const txt = await res.text();
+        try { data = JSON.parse(txt); } catch { data = { raw: txt }; }
+        currentResponse = data;
+        setStatus(res.ok ? 'success' : 'error', `${res.status} ${res.statusText || ''}`.trim() + ' · ' + elapsed + 'ms');
+        resPreview.innerHTML = syntaxHighlight(data);
+      } catch (err) {
+        const elapsed = Math.round(performance.now() - start);
+        currentResponse = { error: err.message || 'Request failed' };
+        setStatus('error', 'Network error · ' + elapsed + 'ms');
+        resPreview.innerHTML = syntaxHighlight(currentResponse);
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Send request';
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('copyToast');
+      document.getElementById('toastText').textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function copyText(text, msg) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => showToast(msg)).catch(() => showToast('Copy failed'));
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); showToast(msg); } catch (e) { showToast('Copy failed'); }
+        document.body.removeChild(ta);
+      }
+    }
+
+    function copyUrl() {
+      if (!currentEndpoint) return;
+      copyText(buildUrl(currentEndpoint, paramInput.value.trim()), 'URL copied to clipboard');
+    }
+    function copyRequest() {
+      if (!currentEndpoint) return;
+      copyText(buildCurl(currentEndpoint, paramInput.value.trim()), 'cURL command copied');
+    }
+    function copyResponse() {
+      if (!currentResponse) { showToast('Nothing to copy yet'); return; }
+      copyText(JSON.stringify(currentResponse, null, 2), 'Response copied to clipboard');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      populateEndpoints();
+      selectEndpoint(ENDPOINTS[0].id);
+      endpointSelect.addEventListener('change', (e) => selectEndpoint(e.target.value));
+      paramInput.addEventListener('input', updateUrlPreview);
+      sendBtn.addEventListener('click', sendRequest);
+      paramInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); sendRequest(); }
+      });
+    });
+  </script>
+</body>
+</html>

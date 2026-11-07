@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation — Apex API</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      color: #0f172a;
+      background:
+        radial-gradient(1200px 800px at 15% 5%, #e0e7ff 0%, transparent 60%),
+        radial-gradient(1000px 700px at 85% 20%, #ede9fe 0%, transparent 55%),
+        radial-gradient(900px 600px at 50% 100%, #e0f2fe 0%, transparent 60%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2ff 45%, #f8fafc 100%);
+      background-attachment: fixed;
+    }
+    .reveal {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity .75s cubic-bezier(.16,1,.3,1), transform .75s cubic-bezier(.16,1,.3,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .views-wrap { position: relative; transition: height .55s cubic-bezier(.16,1,.3,1); }
+    .page-view {
+      position: absolute; top: 0; left: 0; right: 0;
+      opacity: 0; transform: translateX(24px);
+      pointer-events: none;
+      transition: opacity .4s ease, transform .55s cubic-bezier(.16,1,.3,1);
+    }
+    .page-view.active {
+      position: relative; opacity: 1; transform: translateX(0); pointer-events: auto;
+    }
+    #listView:not(.active) { transform: translateX(-24px); }
+    @keyframes detailItemIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+    .detail-item { opacity: 0; will-change: opacity, transform; }
+    .page-view.active .detail-item { animation: detailItemIn .65s cubic-bezier(.16,1,.3,1) var(--d, 0s) both; }
+    .doc-card {
+      background: rgba(255, 255, 255, .96);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(226, 232, 240, .9);
+      border-radius: 1.1rem;
+      transition: box-shadow .35s ease, border-color .35s ease, transform .35s cubic-bezier(.16,1,.3,1);
+    }
+    .doc-card:hover { border-color: #c7d2fe; box-shadow: 0 26px 48px -26px rgba(15, 23, 42, .3); }
+    .api-card { cursor: pointer; }
+    .filter-btn {
+      font-size: .78rem; font-weight: 700; padding: .5rem .95rem;
+      border-radius: .7rem; border: 1.5px solid #e2e8f0;
+      color: #64748b; background: rgba(255, 255, 255, .85);
+      transition: all .22s ease; cursor: pointer; white-space: nowrap;
+    }
+    .filter-btn:hover { border-color: #c7d2fe; color: #4f46e5; transform: translateY(-1px); }
+    .filter-btn.active {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-color: transparent; color: #fff;
+      box-shadow: 0 10px 22px -12px rgba(99, 102, 241, .75);
+    }
+    .btn-copy, .btn-test {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      background-size: 160% 160%; background-position: 0% 50%;
+      color: #fff; font-weight: 700; border: none; cursor: pointer; white-space: nowrap;
+      transition: background-position .5s ease, box-shadow .3s ease, transform .2s ease, opacity .2s ease;
+      box-shadow: 0 12px 24px -12px rgba(99, 102, 241, .7);
+    }
+    .btn-copy { font-size: .78rem; padding: .7rem 1.3rem; border-radius: .7rem; }
+    .btn-test { font-size: .76rem; padding: .65rem 1.1rem; border-radius: .6rem; }
+    .btn-copy:hover, .btn-test:hover:not(:disabled) {
+      background-position: 100% 50%; transform: translateY(-1.5px);
+      box-shadow: 0 18px 30px -14px rgba(99, 102, 241, .85);
+    }
+    .btn-test:disabled { opacity: .65; cursor: wait; transform: none; }
+    .endpoint-path {
+      font-family: 'JetBrains Mono', monospace; font-size: .72rem;
+      background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: .55rem;
+      padding: .55rem .75rem; color: #4f46e5;
+      overflow-x: auto; white-space: nowrap; scrollbar-width: none;
+    }
+    .endpoint-path::-webkit-scrollbar { display: none; }
+    .method-badge {
+      font-family: 'JetBrains Mono', monospace; font-size: .62rem;
+      font-weight: 700; padding: .2rem .5rem; border-radius: .35rem; letter-spacing: .05em;
+    }
+    .method-get { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+    .cat-badge {
+      font-size: .58rem; font-weight: 800; letter-spacing: .08em;
+      padding: .22rem .55rem; border-radius: .35rem; text-transform: uppercase;
+    }
+    .cat-movie { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .cat-media { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+    .copy-toast {
+      position: fixed; bottom: 1.5rem; left: 50%;
+      transform: translate(-50%, 20px);
+      background: #0f172a; color: #f8fafc;
+      font-size: .8rem; font-weight: 600; padding: .7rem 1.2rem;
+      border-radius: .7rem; box-shadow: 0 20px 40px -18px rgba(15, 23, 42, .5);
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s ease, transform .3s ease;
+      z-index: 100; display: flex; align-items: center; gap: .5rem;
+    }
+    .copy-toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .key-field {
+      width: 100%; font-family: 'JetBrains Mono', monospace;
+      font-size: .82rem; background: #f8fafc; border: 1.5px solid #e2e8f0;
+      border-radius: .7rem; padding: .8rem 1rem; color: #0f172a;
+      letter-spacing: .02em; transition: all .2s ease;
+    }
+    .key-field:hover { border-color: #cbd5e1; }
+    .key-field:focus {
+      outline: none; border-color: #6366f1; background: #fff;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, .12);
+    }
+    .nav-link {
+      font-size: .82rem; font-weight: 600; color: #64748b;
+      transition: color .2s; padding: .4rem .7rem; border-radius: .5rem;
+    }
+    .nav-link:hover { color: #0f172a; background: #f1f5f9; }
+    .card-trigger {
+      width: 100%; text-align: left; background: none; border: none;
+      padding: 1.25rem; cursor: pointer; display: block;
+      transition: background .2s ease; border-radius: 1.1rem;
+    }
+    .card-trigger:hover { background: rgba(248, 250, 252, .6); }
+    .card-trigger:focus-visible { outline: 2px solid #6366f1; outline-offset: -2px; }
+    .card-top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+    .card-title-row { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: .65rem; }
+    .card-title { font-size: .9rem; font-weight: 800; color: #0f172a; line-height: 1.35; }
+    .chevron { flex-shrink: 0; color: #94a3b8; transition: transform .35s ease, color .2s; }
+    .api-card:hover .chevron { color: #6366f1; transform: translateX(3px); }
+    .card-desc { font-size: .76rem; line-height: 1.55; color: #64748b; margin-top: .65rem; }
+    .section-label {
+      font-size: .66rem; font-weight: 800; letter-spacing: .1em;
+      text-transform: uppercase; color: #94a3b8; margin-bottom: .55rem;
+      display: flex; align-items: center; gap: .4rem;
+    }
+    .section-label::before {
+      content: ''; width: 3px; height: 10px; border-radius: 2px;
+      background: linear-gradient(180deg, #6366f1, #8b5cf6);
+    }
+    .code-block {
+      background: #0f172a; color: #e2e8f0;
+      font-family: 'JetBrains Mono', monospace; font-size: .72rem;
+      line-height: 1.7; padding: .85rem 1rem; border-radius: .65rem;
+      overflow-x: auto; white-space: pre; margin: 0;
+      border: 1px solid rgba(255, 255, 255, .04);
+    }
+    .code-block::-webkit-scrollbar { height: 6px; }
+    .code-block::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    .test-row { display: flex; gap: .5rem; }
+    .test-input {
+      flex: 1; min-width: 0;
+      font-family: 'JetBrains Mono', monospace; font-size: .78rem;
+      background: #f8fafc; border: 1.5px solid #e2e8f0;
+      border-radius: .6rem; padding: .65rem .85rem;
+      color: #0f172a; transition: all .2s ease;
+    }
+    .test-input:focus {
+      outline: none; border-color: #6366f1; background: #fff;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
+    }
+    .test-input::placeholder { color: #94a3b8; }
+    .response-area {
+      margin-top: .9rem;
+      animation: fadeSlideIn .4s cubic-bezier(.16,1,.3,1);
+    }
+    .response-area.hidden { display: none; }
+    @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .response-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .45rem; }
+    .response-status {
+      font-size: .68rem; font-weight: 800; padding: .22rem .55rem;
+      border-radius: .3rem; font-family: 'JetBrains Mono', monospace; letter-spacing: .03em;
+    }
+    .response-status.loading { background: #fef3c7; color: #b45309; }
+    .response-status.success { background: #ecfdf5; color: #047857; }
+    .response-status.error   { background: #fef2f2; color: #b91c1c; }
+    .response-time {
+      font-size: .68rem; color: #94a3b8;
+      font-family: 'JetBrains Mono', monospace; font-weight: 600;
+    }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: .45rem;
+      font-size: .8rem; font-weight: 700; color: #475569;
+      background: rgba(255, 255, 255, .9);
+      border: 1.5px solid #e2e8f0; border-radius: .7rem;
+      padding: .55rem 1rem; cursor: pointer; transition: all .22s ease;
+    }
+    .back-btn:hover {
+      color: #0f172a; border-color: #c7d2fe; background: #fff;
+      transform: translateX(-2px);
+      box-shadow: 0 8px 20px -14px rgba(15, 23, 42, .3);
+    }
+    .detail-header-card {
+      background: rgba(255, 255, 255, .97);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, .9);
+      border-radius: 1.3rem; padding: 1.75rem;
+      box-shadow: 0 24px 60px -32px rgba(15, 23, 42, .28);
+    }
+    @media (min-width: 640px) { .detail-header-card { padding: 2.1rem; } }
+    .detail-title { font-size: 1.55rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; color: #0f172a; margin-top: .8rem; }
+    @media (min-width: 640px) { .detail-title { font-size: 1.85rem; } }
+    .detail-desc { font-size: .9rem; line-height: 1.65; color: #64748b; margin-top: .65rem; }
+    .detail-section {
+      background: rgba(255, 255, 255, .97);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, .9);
+      border-radius: 1.1rem; padding: 1.4rem;
+      box-shadow: 0 16px 40px -28px rgba(15, 23, 42, .22);
+    }
+    @media (min-width: 640px) { .detail-section { padding: 1.6rem; } }
+    @media (max-width: 520px) { .test-row { flex-direction: column; } .btn-test { width: 100%; } }
+  </style>
+</head>
+
+<body>
+
+  <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+    <div class="absolute -top-40 -left-32 w-[34rem] h-[34rem] rounded-full bg-indigo-300/40 blur-3xl"></div>
+    <div class="absolute top-1/3 -right-40 w-[30rem] h-[30rem] rounded-full bg-violet-300/40 blur-3xl"></div>
+    <div class="absolute bottom-0 left-1/3 w-[26rem] h-[26rem] rounded-full bg-sky-200/60 blur-3xl"></div>
+  </div>
+
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/80">
+    <div class="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-2.5 group">
+          <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-500/30 transition-transform duration-300 group-hover:scale-105">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13l0-8z"/></svg>
+          </span>
+          <span class="text-lg font-extrabold tracking-tight text-slate-900">Apex<span class="text-indigo-600">API</span></span>
+        </a>
+        <span class="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">Docs</span>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-1">
+        <a href="playground.html" class="nav-link">Playground</a>
+        <a href="profile.html" class="nav-link">Profile</a>
+        <a href="index.html" class="nav-link">Home</a>
+      </nav>
+
+      <a href="login.html" id="logout-btn" class="text-xs font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 px-4 py-2 rounded-xl transition">Log out</a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-10">
+    <div id="viewsWrap" class="views-wrap">
+      <div id="listView" class="page-view active space-y-8">
+        <section class="reveal">
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">API Documentation</h1>
+          <p class="mt-1.5 text-sm text-slate-500">Browse endpoints, grab your master key, and test live.</p>
+        </section>
+
+        <section class="reveal doc-card p-6 sm:p-7">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2M17 6l2 2M14 9l2 2"/></svg>
+                </span>
+                <h2 class="text-sm font-extrabold text-slate-900">Your master API key</h2>
+              </div>
+              <p class="mt-1 text-xs text-slate-500">Authenticated key holder · keep this private</p>
+            </div>
+            <span class="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Active
+            </span>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-3">
+            <input type="text" id="user-api-key" readonly value="" class="key-field">
+            <button onclick="copyApiKey()" class="btn-copy">Copy key</button>
+          </div>
+        </section>
+
+        <section class="reveal">
+          <div class="flex flex-wrap gap-2.5">
+            <button onclick="filterCategory('all', this)" class="filter-btn active" data-cat="all">All services</button>
+            <button onclick="filterCategory('movie', this)" class="filter-btn" data-cat="movie">🎬 Movies</button>
+            <button onclick="filterCategory('media', this)" class="filter-btn" data-cat="media">🎵 Media</button>
+          </div>
+        </section>
+
+        <section id="apiGrid" class="grid grid-cols-1 md:grid-cols-2 gap-5"></section>
+
+        <div id="emptyState" class="hidden text-center py-16">
+          <div class="w-14 h-14 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          </div>
+          <p class="text-sm font-bold text-slate-700">No endpoints found</p>
+          <p class="text-xs text-slate-400 mt-1">Try a different category filter.</p>
+        </div>
+      </div>
+
+      <div id="detailView" class="page-view"></div>
+    </div>
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white/60 mt-8">
+    <div class="max-w-7xl mx-auto px-6 py-7 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 font-medium">
+      <span>© 2026 Apex API System. All rights reserved.</span>
+      <span>Built for autonomous deployments.</span>
+    </div>
+  </footer>
+
+  <div id="copyToast" class="copy-toast">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+    <span id="toastText">API key copied to clipboard</span>
+  </div>
+
+  <script>
+    const API_BASE = (function () {
+      if (window.location.protocol === 'file:') return 'http://localhost:5000';
+      const o = window.location.origin;
+      if (!o || o === 'null') return 'http://localhost:5000';
+      return o;
+    })();
+
+    (function guard() {
+      if (!localStorage.getItem('apex_token') && !localStorage.getItem('apex_api_key')) {
+        window.location.replace('login.html');
+      }
+    })();
+
+    const USER_API_KEY = localStorage.getItem('apex_api_key') || '';
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('apex_token');
+      localStorage.removeItem('apex_api_key');
+      localStorage.removeItem('apex_user');
+    });
+
+    const ENDPOINTS = [
+      {
+        id: 'cinesubz-search', category: 'movie', categoryLabel: 'Movie',
+        name: 'CineSubz · Search', method: 'GET',
+        path: '/api/v1/movies/cinesubz/search?q={query}',
+        description: 'Searches titles and returns thumbnail artwork, ratings, seasons, and internal content URLs.',
+        testParam: 'q', testPlaceholder: 'avatar',
+        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://api.apex-api.dev/api/v1/movies/cinesubz/search?q=avatar"'
+      },
+      {
+        id: 'cinesubz-info', category: 'movie', categoryLabel: 'Movie',
+        name: 'CineSubz · Info & Links', method: 'GET',
+        path: '/api/v1/movies/cinesubz/info?url={pageUrl}',
+        description: 'Scrapes available qualities and season episode lists, applying the strictly validated 2GB filter.',
+        testParam: 'url', testPlaceholder: 'https://cinesubz.lk/movies/avatar',
+        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://api.apex-api.dev/api/v1/movies/cinesubz/info?url=https://cinesubz.lk/movies/avatar"'
+      },
+      {
+        id: 'cinesubz-dl', category: 'movie', categoryLabel: 'Movie',
+        name: 'CineSubz · Direct Download', method: 'GET',
+        path: '/api/v1/movies/cinesubz/dl?directUrl={url}',
+        description: 'Resolves internal csplayer and sonic-cloud links into direct Terracloud / Pixeldrain CDN links.',
+        testParam: 'directUrl', testPlaceholder: 'https://cinesubz.lk/player/avatar-1080p',
+        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://api.apex-api.dev/api/v1/movies/cinesubz/dl?directUrl=https://cinesubz.lk/player/avatar-1080p"'
+      },
+      {
+        id: 'sinhalacartoons-search', category: 'movie', categoryLabel: 'Movie',
+        name: 'sinhalacartoons.lk · Search', method: 'GET',
+        path: '/api/v1/movies/sinhalacartoons/search?q={query}',
+        description: 'Searches the SinhalaCartoons catalogue and returns matched series with episode counts and URLs.',
+        testParam: 'q', testPlaceholder: 'tom and jerry',
+        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://api.apex-api.dev/api/v1/movies/sinhalacartoons/search?q=tom+and+jerry"'
+      },
+      {
+        id: 'sinhalacartoons-dl', category: 'movie', categoryLabel: 'Movie',
+        name: 'sinhalacartoons.lk · DL', method: 'GET',
+        path: '/api/v1/movies/sinhalacartoons/dl?landingUrl={url}',
+        description: 'Extracts direct force-download URLs and base64 sc_data stream strings from cartoon series.',
+        testParam: 'landingUrl', testPlaceholder: 'https://sinhalacartoons.lk/cartoon/tom-and-jerry',
+        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://api.apex-api.dev/api/v1/movies/sinhalacartoons/dl?landingUrl=https://sinhalacartoons.lk/cartoon/tom-and-jerry"'
+      },
+      {
+        id: 'yt-search', category: 'media', categoryLabel: 'Media',
+        name: 'YouTube · Search', method: 'GET',
+        path: '/api/v1/media/yt/search?q={query}',
+        description: 'Searches YouTube and returns matched videos with IDs, durations, channels, and thumbnails.',
+        testParam: 'q', testPlaceholder: 'shape of you',
+        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://api.apex-api.dev/api/v1/media/yt/search?q=shape+of+you"'
+      },
+      {
+        id: 'yt-audio-dl', category: 'media', categoryLabel: 'Media',
+        name: 'YouTube · Audio DL', method: 'GET',
+        path: '/api/v1/media/yt/audio?q={query}',
+        description: 'Decrypts SaveTube VIP AES tokens and returns a high-speed direct 128kbps audio stream URL.',
+        testParam: 'q', testPlaceholder: 'shape of you',
+        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://api.apex-api.dev/api/v1/media/yt/audio?q=shape+of+you"'
+      },
+      {
+        id: 'yt-video-dl', category: 'media', categoryLabel: 'Media',
+        name: 'YouTube · Video DL', method: 'GET',
+        path: '/api/v1/media/yt/video?q={query}',
+        description: 'Returns direct downloadable MP4 URLs across multiple quality tiers for the matched video.',
+        testParam: 'q', testPlaceholder: 'shape of you',
+        usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://api.apex-api.dev/api/v1/media/yt/video?q=shape+of+you"'
+      }
+    ];
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function getEndpointById(id) { return ENDPOINTS.find(e => e.id === id); }
+
+    function buildTestUrl(ep, value) {
+      const qIndex = ep.path.indexOf('?');
+      const basePath = qIndex >= 0 ? ep.path.slice(0, qIndex) : ep.path;
+      const query = qIndex >= 0 ? ep.path.slice(qIndex + 1) : '';
+      const params = new URLSearchParams();
+      if (query) {
+        query.split('&').forEach(pair => {
+          const eq = pair.indexOf('=');
+          const k = eq >= 0 ? pair.slice(0, eq) : pair;
+          const v = eq >= 0 ? pair.slice(eq + 1) : '';
+          if (/^\{.+\}$/.test(v)) params.append(k, value);
+          else params.append(k, v);
+        });
+      }
+      if (USER_API_KEY) params.append('api', USER_API_KEY);
+      return `${API_BASE}${basePath}?${params.toString()}`;
+    }
+
+    function renderCard(ep) {
+      const card = document.createElement('div');
+      card.className = 'doc-card api-card';
+      card.dataset.endpointId = ep.id;
+      card.dataset.cat = ep.category;
+      card.innerHTML = `
+        <button class="card-trigger" type="button">
+          <div class="card-top">
+            <span class="cat-badge cat-${ep.category}">${ep.categoryLabel}</span>
+            <span class="method-badge method-get">${ep.method}</span>
+          </div>
+          <div class="card-title-row">
+            <h3 class="card-title">${ep.name}</h3>
+            <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+          </div>
+          <p class="endpoint-path">${ep.path}</p>
+          <p class="card-desc">${ep.description}</p>
+        </button>`;
+      card.querySelector('.card-trigger').addEventListener('click', () => openDetail(ep.id));
+      return card;
+    }
+
+    function buildDetailHTML(ep) {
+      return `
+        <div class="detail-item" style="--d:0s">
+          <button class="back-btn" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to endpoints
+          </button>
+        </div>
+        <div class="detail-item detail-header-card mt-5" style="--d:.08s">
+          <div class="flex items-center gap-2">
+            <span class="cat-badge cat-${ep.category}">${ep.categoryLabel}</span>
+            <span class="method-badge method-get">${ep.method}</span>
+          </div>
+          <h1 class="detail-title">${ep.name}</h1>
+          <p class="detail-desc">${ep.description}</p>
+          <div class="endpoint-path mt-4">${ep.path}</div>
+        </div>
+        <div class="detail-item detail-section mt-5" style="--d:.16s">
+          <h4 class="section-label">Usage example</h4>
+          <pre class="code-block"><code>${escapeHtml(ep.usage)}</code></pre>
+        </div>
+        <div class="detail-item detail-section mt-4" style="--d:.24s">
+          <h4 class="section-label">Live test</h4>
+          <div class="test-row">
+            <input class="test-input" type="text" placeholder="${escapeHtml(ep.testPlaceholder)}" aria-label="Test value">
+            <button class="btn-test" type="button">Send request</button>
+          </div>
+          <div class="response-area hidden">
+            <div class="response-header">
+              <span class="response-status"></span>
+              <span class="response-time"></span>
+            </div>
+            <pre class="code-block response-code"></pre>
+          </div>
+        </div>`;
+    }
+
+    function openDetail(id) {
+      const ep = getEndpointById(id);
+      if (!ep) return;
+      const detail = document.getElementById('detailView');
+      detail.innerHTML = buildDetailHTML(ep);
+      detail.querySelector('.back-btn').addEventListener('click', backToList);
+      const testBtn = detail.querySelector('.btn-test');
+      const testInput = detail.querySelector('.test-input');
+      testBtn.addEventListener('click', () => runTest(detail, ep, testInput.value.trim()));
+      testInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); runTest(detail, ep, testInput.value.trim()); }
+      });
+      switchView('detailView');
+    }
+
+    function backToList() { switchView('listView'); }
+
+    function switchView(targetId) {
+      const wrap = document.getElementById('viewsWrap');
+      const current = wrap.querySelector('.page-view.active');
+      const target = document.getElementById(targetId);
+      if (!target || current === target) return;
+      const startH = wrap.offsetHeight;
+      wrap.style.height = startH + 'px';
+      wrap.style.overflow = 'hidden';
+      if (current) current.classList.remove('active');
+      target.classList.add('active');
+      const endH = target.offsetHeight;
+      requestAnimationFrame(() => { wrap.style.height = endH + 'px'; });
+      setTimeout(() => { wrap.style.height = ''; wrap.style.overflow = ''; }, 620);
+    }
+
+    async function runTest(root, ep, value) {
+      const input = root.querySelector('.test-input');
+      const btn = root.querySelector('.btn-test');
+      const respArea = root.querySelector('.response-area');
+      const respCode = root.querySelector('.response-code');
+      const respStatus = root.querySelector('.response-status');
+      const respTime = root.querySelector('.response-time');
+
+      const finalValue = value || input.value.trim();
+      if (!finalValue) {
+        input.focus();
+        input.style.borderColor = '#f87171';
+        setTimeout(() => { input.style.borderColor = ''; }, 900);
+        return;
+      }
+      if (!USER_API_KEY) {
+        respArea.classList.remove('hidden');
+        respStatus.textContent = 'No API key';
+        respStatus.className = 'response-status error';
+        respTime.textContent = '';
+        respCode.textContent = JSON.stringify({ error: 'Missing API key. Please log in again.' }, null, 2);
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      respArea.classList.remove('hidden');
+      respStatus.textContent = 'Loading';
+      respStatus.className = 'response-status loading';
+      respTime.textContent = '';
+      respCode.textContent = '{}';
+
+      const url = buildTestUrl(ep, finalValue);
+      const start = performance.now();
+      try {
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${USER_API_KEY}` } });
+        const elapsed = Math.round(performance.now() - start);
+        let data;
+        const txt = await res.text();
+        try { data = JSON.parse(txt); } catch { data = { raw: txt }; }
+
+        respStatus.textContent = `${res.status} ${res.statusText || ''}`.trim();
+        respStatus.className = 'response-status ' + (res.ok ? 'success' : 'error');
+        respTime.textContent = elapsed + 'ms';
+        respCode.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        const elapsed = Math.round(performance.now() - start);
+        respStatus.textContent = 'Network error';
+        respStatus.className = 'response-status error';
+        respTime.textContent = elapsed + 'ms';
+        respCode.textContent = JSON.stringify({ error: err.message || 'Request failed' }, null, 2);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send request';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const grid = document.getElementById('apiGrid');
+      ENDPOINTS.forEach(ep => grid.appendChild(renderCard(ep)));
+
+      const keyInput = document.getElementById('user-api-key');
+      if (keyInput) keyInput.value = USER_API_KEY || '(not signed in)';
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+      const wrap = document.getElementById('viewsWrap');
+      const list = document.getElementById('listView');
+      wrap.style.height = list.offsetHeight + 'px';
+      requestAnimationFrame(() => { wrap.style.height = ''; });
+    });
+
+    function copyApiKey() {
+      const keyInput = document.getElementById('user-api-key');
+      const toast = document.getElementById('copyToast');
+      const showToast = () => {
+        toast.classList.add('show');
+        clearTimeout(window.__copyTimer);
+        window.__copyTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+      };
+      const text = keyInput.value;
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(showToast).catch(() => { keyInput.select(); document.execCommand('copy'); showToast(); });
+      } else {
+        keyInput.select(); document.execCommand('copy'); showToast();
+      }
+    }
+
+    function filterCategory(cat, btnElement) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+      let visibleCount = 0;
+      document.querySelectorAll('.api-card').forEach(card => {
+        const match = (cat === 'all' || card.dataset.cat === cat);
+        card.style.display = match ? '' : 'none';
+        if (match) visibleCount++;
+      });
+      document.getElementById('emptyState').classList.toggle('hidden', visibleCount > 0);
+    }
+  </script>
+</body>
+</html>
