@@ -319,12 +319,7 @@
   </div>
 
   <script>
-    const API_BASE = (function () {
-      if (window.location.protocol === 'file:') return 'http://localhost:5000';
-      const o = window.location.origin;
-      if (!o || o === 'null') return 'http://localhost:5000';
-      return o;
-    })();
+   const API_BASE = 'https://apex-web-backend-production.up.railway.app';
 
     (function guard() {
       if (!localStorage.getItem('apex_token') && !localStorage.getItem('apex_api_key')) {
