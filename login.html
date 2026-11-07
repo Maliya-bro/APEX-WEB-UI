@@ -28,10 +28,13 @@
     @keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
     .stagger { opacity: 0; animation: riseIn .7s cubic-bezier(.16,1,.3,1) both; }
     .live-dot { animation: pulseDot 1.6s ease-in-out infinite; }
+    
     .card-stage { position: fixed; inset: 0; z-index: 30; display: flex; overflow-y: auto; padding: 5.5rem 1.25rem 2rem; pointer-events: none; scrollbar-width: none; }
     .card-stage::-webkit-scrollbar { display: none; }
-    .card-motion { margin: auto; width: 100%; max-width: 28rem; pointer-events: auto; transition: transform 1s cubic-bezier(.34, 1.4, .64, 1); will-change: transform; }
+    
+    .card-motion { margin: auto; width: 100%; max-width: 28rem; pointer-events: auto; transition: transform 1.2s cubic-bezier(.34, 1.4, .64, 1); will-change: transform; }
     @media (min-width: 1024px) { .card-motion.is-right { transform: translateX(25vw); } .card-motion.is-left  { transform: translateX(-25vw); } }
+
     .auth-card { position: relative; background: rgba(255, 255, 255, .93); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); border: 1px solid rgba(226, 232, 240, .9); border-radius: 1.75rem; padding: 2rem 1.65rem; box-shadow: 0 40px 80px -40px rgba(15, 23, 42, .35), 0 0 0 1px rgba(255, 255, 255, .6) inset; animation: cardIn .8s cubic-bezier(.16,1,.3,1) both; }
     @media (min-width: 640px) { .auth-card { padding: 2.4rem 2.1rem; } }
     .card-logo-wrap { width: 3.1rem; height: 3.1rem; border-radius: 1rem; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.1rem; box-shadow: 0 14px 26px -10px rgba(99, 102, 241, .55); color: #fff; font-weight: 800; font-size: 1.3rem; }
@@ -321,6 +324,18 @@
   <script>
     const API_BASE = 'https://apex-web-backend-production.up.railway.app';
 
+    // ─── Initial Load Animations (Login Card Slide Right after 3.8s) ───
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const cardMotion = document.getElementById('cardMotion');
+        const sideLogin = document.getElementById('sideLogin');
+        if (cardMotion && sideLogin) {
+          cardMotion.classList.add('is-right');
+          sideLogin.classList.add('active');
+        }
+      }, 3800); // තත්පර 3.8කට පස්සේ (Stagger Animation ඉවර වෙලා) දකුණට ලිස්සනවා
+    });
+
     // ─── UI Functions (Global) ───
     window.setMode = function(mode) {
       const cardMotion   = document.getElementById('cardMotion');
@@ -351,6 +366,7 @@
         tabsWrap.style.pointerEvents = 'auto';
       }
 
+      // Animation Fix: Slide Logic
       if (mode === 'register') {
         cardMotion.classList.remove('is-right'); cardMotion.classList.add('is-left');
         sideLogin.classList.remove('active'); sideRegister.classList.add('active');
@@ -360,12 +376,10 @@
       }
     };
 
-    // Form stack transition
     document.getElementById('formStack').addEventListener('transitionend', (e) => {
       if (e.target.id === 'formStack' && e.propertyName === 'height') e.target.style.height = '';
     });
 
-    // Tabs click
     document.querySelectorAll('.auth-tab').forEach((btn) => {
       btn.addEventListener('click', () => window.setMode(btn.dataset.mode));
     });
@@ -491,7 +505,7 @@
               });
               if (verifyRes.status === 404) {
                 dTitle.textContent = 'Verification Failed';
-                dDesc.textContent = 'Security check failed. Please disable VPN / AdBlocker and try again.';
+                dDesc.textContent = 'Security check failed. Please try again.';
                 setTimeout(() => { overlay.classList.remove('show'); resolve(null); }, 3000);
                 return;
               }
@@ -542,12 +556,22 @@
             }
 
             const { res, data } = await postJSON('/api/auth/login', { email, password, darknessToken });
-            if (res.status === 404) { setErr('login-error', 'Security signature rejected by server.'); return; }
-            if (!res.ok) throw new Error(data.message || data.error || 'Invalid credentials.');
             
+            if (res.status === 404) { 
+              setErr('login-error', 'Security signature rejected by server. Please clear your browser cache and try again.'); 
+              btn.disabled = false; btn.textContent = original;
+              return; 
+            }
+            
+            if (!res.ok) {
+              throw new Error(data.message || data.error || 'Invalid credentials.');
+            }
+            
+            // SUCCESS! 
             saveSession(data);
             overlay.classList.remove('show');
             window.location.href = 'dashboard.html';
+
           } catch (err) {
             setErr('login-error', err.message || 'Unable to sign in.');
             btn.disabled = false;
