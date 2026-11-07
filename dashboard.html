@@ -594,29 +594,29 @@
         testPlaceholder: 'https://www.slmix.lk/song.php?id=123',
         usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/slmix/dl?url=TRACK_PAGE_URL&api=<YOUR_API_KEY>"`
       },
-      {
+{
         id: 'an1-search',
         category: 'app',
         categoryLabel: 'App',
-        name: 'AN1 MOD APK· Search',
+        name: 'AN1 · Search',
         method: 'GET',
-        path: '/api/v1/apps/an1/search?q={query}api=<YOUR_API_KEY>',
+        path: '/api/v1/apps/an1/search?q={query}',
         description: 'Searches MOD applications and games on an1.com.',
         testParam: 'q',
         testPlaceholder: 'subway surfers',
-        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/apps/an1/search?q=subway+surfersapi=<YOUR_API_KEY>"`
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/apps/an1/search?q=subway+surfers"`
       },
       {
         id: 'an1-dl',
         category: 'app',
         categoryLabel: 'App',
-        name: 'AN1 MOD APK· Direct DL',
+        name: 'AN1 · Direct DL',
         method: 'GET',
-        path: '/api/v1/apps/an1/dl?url={pageUrl}&api=<YOUR_API_KEY>',
+        path: '/api/v1/apps/an1/dl?url={url}',
         description: 'Extracts version, file size, and direct APK download URL from AN1 app page.',
         testParam: 'url',
         testPlaceholder: 'https://an1.com/624-subway-surfers-mod-apk.html',
-        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/apps/an1/dl?url=APP_PAGE_URL&api=<YOUR_API_KEY>"`
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/apps/an1/dl?url=https://an1.com/624-subway-surfers-mod-apk.html"`
       }
 
     ];
