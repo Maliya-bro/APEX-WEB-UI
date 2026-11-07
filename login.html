@@ -260,7 +260,8 @@
         <a href="profile.html" class="nav-link active">Profile</a>
       </nav>
 
-      <a href="index.html" id="logout-btn" class="text-xs font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 px-4 py-2 rounded-xl transition">Log out</a>
+      <!-- Logout button (Href empty to prevent loop) -->
+      <button id="logout-btn" class="text-xs font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 px-4 py-2 rounded-xl transition cursor-pointer">Log out</button>
     </div>
   </header>
 
@@ -423,7 +424,7 @@
             <div class="account-item"><div class="account-label">Last login</div><div class="account-value" id="accLastLogin">—</div></div>
             <div class="account-item"><div class="account-label">Region</div><div class="account-value" id="accRegion">—</div></div>
             <div class="account-item"><div class="account-label">Storage used</div><div class="account-value">0 GB <span class="text-slate-400 font-semibold text-xs">/ zero persistent</span></div></div>
-            <div class="account-item"><div class="account-label">Auth method</div><div class="account-value">Google OAuth</div></div>
+            <div class="account-item"><div class="account-label">Auth method</div><div class="account-value">Apex Session</div></div>
             <div class="account-item"><div class="account-label">Account status</div><div class="account-value text-emerald-600">Active</div></div>
           </div>
         </section>
@@ -449,136 +450,82 @@
     const API_BASE = 'https://apex-web-backend-production.up.railway.app';
     const DAILY_LIMIT = 100;
 
-    /* ============ AUTH STATE ============ */
-    const rawToken = localStorage.getItem('apex_token');
-    const rawApiKey = localStorage.getItem('apex_api_key');
-
-    // Strip any accidental "Bearer " prefix if backend included one
+    /* ============ AUTH CREDENTIALS RETRIEVAL ============ */
     function cleanBearer(raw) {
       return raw ? String(raw).replace(/^Bearer\s+/i, '').trim() : '';
     }
 
-    const token  = cleanBearer(rawToken);
-    const apiKey = cleanBearer(rawApiKey);
+    const token  = cleanBearer(localStorage.getItem('apex_token'));
+    const apiKey = cleanBearer(localStorage.getItem('apex_api_key'));
 
-    console.log('[Apex Profile] Auth state:', {
-      hasToken: !!token,
-      hasApiKey: !!apiKey,
-      tokenPrefix: token ? token.substring(0, 25) + '…' : null,
-      apiKeyPrefix: apiKey ? apiKey.substring(0, 25) + '…' : null
-    });
-
-    // Only redirect if BOTH are missing
+    // SAFE REDIRECT: Redirects ONLY if explicitly missing, without history loop
     if (!token && !apiKey) {
-      console.warn('[Apex Profile] No credentials found → redirecting to login');
-      window.location.replace('login.html');
+      window.location.href = 'login.html';
     }
 
-    /* ============ LOGOUT ============ */
+    /* ============ LOGOUT HANDLER (LOOP-FREE) ============ */
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', () => {
+      logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Clear all session storage keys
         localStorage.removeItem('apex_token');
         localStorage.removeItem('apex_api_key');
         localStorage.removeItem('apex_user');
+        sessionStorage.clear();
+        // Redirect cleanly to login page
+        window.location.href = 'login.html';
       });
     }
 
-    /* ============ MULTI-ATTEMPT PROFILE FETCH ============ */
+    /* ============ ROBUST DATA FETCHING ============ */
     async function fetchProfileData() {
-      const attempts = [];
+      const authKey = apiKey || token;
+      if (!authKey) return null;
 
-      // Primary: Bearer <apiKey> — matches how the API endpoints authenticate
-      if (apiKey) {
-        attempts.push({
-          name: 'Bearer apiKey',
-          url: `${API_BASE}/api/user/profile`,
-          headers: { 'Authorization': `Bearer ${apiKey}` }
-        });
-      }
-
-      // Fallback: Bearer <token> (JWT from login)
-      if (token) {
-        attempts.push({
-          name: 'Bearer token',
-          url: `${API_BASE}/api/user/profile`,
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-      }
-
-      // Last resort: query-only (no auth header)
-      if (apiKey) {
-        attempts.push({
-          name: 'Query apiKey',
-          url: `${API_BASE}/api/user/profile?api=${apiKey}`,
-          headers: {}
-        });
-      }
-
-      const errors = [];
-
-      for (const a of attempts) {
-        try {
-          console.log(`[Apex Profile] Trying ${a.name} → ${a.url}`);
-          const res = await fetch(a.url, {
-            headers: { ...a.headers, 'Content-Type': 'application/json' }
-          });
-          const text = await res.text();
-          let data;
-          try { data = JSON.parse(text); } catch { data = { raw: text }; }
-
-          console.log(`[Apex Profile] ${a.name} → ${res.status} ${res.statusText}`, data);
-
-          if (res.ok) {
-            console.log(`[Apex Profile] ✅ SUCCESS via ${a.name}`);
-            return data;
+      try {
+        const res = await fetch(`${API_BASE}/api/user/profile?api=${encodeURIComponent(authKey)}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${authKey}`,
+            'Content-Type': 'application/json'
           }
+        });
 
-          const msg = (data && (data.message || data.error)) || (typeof data.raw === 'string' ? data.raw.substring(0, 120) : '');
-          errors.push(`${a.name}: HTTP ${res.status}${msg ? ' — ' + msg : ''}`);
-
-          // If it's a non-auth error (not 401/403), try next method anyway
-        } catch (err) {
-          console.error(`[Apex Profile] ${a.name} threw:`, err);
-          errors.push(`${a.name}: ${err.message || 'network error'}`);
+        // Backend explicitly rejects authorization
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('apex_token');
+          localStorage.removeItem('apex_api_key');
+          localStorage.removeItem('apex_user');
+          window.location.href = 'login.html';
+          return null;
         }
-      }
 
-      // All attempts failed
-      console.error('[Apex Profile] ❌ All auth attempts failed:\n' + errors.join('\n'));
-      showAuthError(errors);
-      return null;
+        if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to load profile`);
+        return await res.json();
+      } catch (err) {
+        console.error('[Apex Profile Error]:', err);
+        showAuthError([err.message || 'Network error occurred']);
+        return null;
+      }
     }
 
     function showAuthError(errors) {
       const loading = document.getElementById('loadingState');
       if (!loading) return;
-
-      const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
       loading.innerHTML = `
         <div class="panel p-8 text-center">
           <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
           </div>
-          <h2 class="text-lg font-extrabold text-slate-900 mb-1">Could not load profile</h2>
-          <p class="text-sm text-slate-500 mb-4">
-            The backend did not accept any of the available credentials. Your session has NOT been cleared.
-            Open the browser console (F12) to see full details.
+          <h2 class="text-lg font-extrabold text-slate-900 mb-1">Session Expired or Connection Failed</h2>
+          <p class="text-sm text-slate-500 mb-5">
+            Unable to communicate with the Apex backend. Please log in again to renew your credentials.
           </p>
-          <details class="text-left max-w-xl mx-auto mb-5">
-            <summary class="text-xs font-bold text-slate-600 cursor-pointer mb-2 select-none">Show error details</summary>
-            <pre style="text-align:left;font-size:11px;font-family:'JetBrains Mono',monospace;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;white-space:pre-wrap;color:#475569;line-height:1.6;">${esc(errors.join('\n'))}</pre>
-          </details>
-          <div class="flex gap-2 justify-center flex-wrap">
-            <button onclick="location.reload()" class="btn-copy" style="width:auto;padding:.65rem 1.2rem;">Retry</button>
-            <button onclick="localStorage.removeItem('apex_token');localStorage.removeItem('apex_api_key');localStorage.removeItem('apex_user');location.replace('login.html')" class="btn-primary" style="width:auto;padding:.65rem 1.2rem;background-image:linear-gradient(135deg,#f43f5e,#e11d48);">
-              Log in again
-            </button>
+          <div class="flex gap-3 justify-center">
+            <button onclick="location.reload()" class="btn-copy">Retry</button>
+            <button onclick="localStorage.clear(); location.href='login.html';" class="btn-regenerate">Sign In Again</button>
           </div>
-          <p class="text-[11px] text-slate-400 mt-4">
-            If this keeps happening, the backend <code class="font-mono">/api/user/profile</code> endpoint may require a different auth format.
-          </p>
         </div>
       `;
     }
@@ -607,7 +554,7 @@
       return { user, key, endpoints, recent };
     }
 
-    /* ============ RENDER HELPERS ============ */
+    /* ============ RENDER UI ============ */
     function formatNumber(n) { return Number(n || 0).toLocaleString('en-US'); }
     function getFillClass(pct) { if (pct >= 80) return 'fill-high'; if (pct >= 50) return 'fill-warn'; return 'fill-ok'; }
     function getMiniBadgeClass(pct) { if (pct >= 80) return 'mb-high'; if (pct >= 50) return 'mb-warn'; return 'mb-ok'; }
@@ -670,7 +617,6 @@
       if (el) el.textContent = txt;
     }
 
-    /* ============ MAIN RENDER ============ */
     function renderProfile(data) {
       const norm = normalizeProfile(data);
       const u = norm.user || {};
@@ -695,7 +641,7 @@
       const keyEl = document.getElementById('profile-key');
       const keyVal = (norm.key && norm.key.value) || apiKey || u.apiKey || '';
       if (keyEl) keyEl.value = keyVal;
-      setText('lastRegeneratedLabel', 'Last regenerated ' + (norm.key.lastRegenerated || '—'));
+      setText('lastRegeneratedLabel', 'Status: ' + (norm.key.lastRegenerated || 'Active'));
 
       const usedEndpoints = (norm.endpoints || []).filter(ep => ep.usedToday > 0 || ep.totalRequests > 0);
       const totalRequests = usedEndpoints.reduce((s, ep) => s + Number(ep.totalRequests || 0), 0);
@@ -750,7 +696,7 @@
       if (contentEl) contentEl.classList.remove('hidden');
     }
 
-    /* ============ TOAST + COPY ============ */
+    /* ============ TOAST & COPY ============ */
     function showToast(msg) {
       const toast = document.getElementById('copyToast');
       if (!toast) return;
@@ -781,35 +727,28 @@
       btn.disabled = true;
       btn.textContent = 'Regenerating…';
 
-      const authValue = apiKey || token;
+      const authKey = apiKey || token;
 
       try {
-        // Try both header style + query fallback
-        let res = await fetch(`${API_BASE}/api/user/regenerate-key`, {
+        const res = await fetch(`${API_BASE}/api/user/regenerate-key?api=${encodeURIComponent(authKey)}`, {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${authValue}`, 'Content-Type': 'application/json' }
+          headers: {
+            'Authorization': `Bearer ${authKey}`,
+            'Content-Type': 'application/json'
+          }
         });
-        let data = await res.json().catch(() => ({}));
+        const data = await res.json().catch(() => ({}));
 
-        if (res.status === 401 || res.status === 403) {
-          // Retry with query param
-          res = await fetch(`${API_BASE}/api/user/regenerate-key?api=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-          });
-          data = await res.json().catch(() => ({}));
-        }
+        if (!res.ok) throw new Error(data.error || data.message || 'Failed to regenerate key.');
 
-        if (!res.ok) throw new Error(data.message || data.error || 'Failed to regenerate key.');
-
-        const newKey = data.apiKey || data.key || data.newKey || (data.user && data.user.apiKey);
-        if (!newKey) throw new Error('Server did not return a new key.');
+        const newKey = data.apiKey || data.key;
+        if (!newKey) throw new Error('Backend did not return a valid key.');
 
         localStorage.setItem('apex_api_key', newKey);
         const keyEl = document.getElementById('profile-key');
         if (keyEl) keyEl.value = newKey;
-        setText('lastRegeneratedLabel', 'Last regenerated just now');
-        showToast('New API key generated. Update your scripts!');
+        setText('lastRegeneratedLabel', 'Status: Active (Just now)');
+        showToast('New Master Key generated successfully!');
       } catch (err) {
         showToast(err.message || 'Could not regenerate key.');
       } finally {
@@ -818,9 +757,8 @@
       }
     }
 
-    /* ============ BOOT ============ */
+    /* ============ INITIALIZE ============ */
     document.addEventListener('DOMContentLoaded', async () => {
-      // Show existing key immediately for perceived speed
       const keyEl = document.getElementById('profile-key');
       if (keyEl && apiKey) keyEl.value = apiKey;
 
