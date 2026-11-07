@@ -414,6 +414,22 @@ const API_BASE = 'https://apex-web-backend-production.up.railway.app';
         testParam: 'q', testPlaceholder: 'shape of you',
         usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/yt/video?q=shape+of+you"'
       }
+      {
+  id: 'tamilmv-search', category: 'movie', categoryLabel: 'Movie',
+  name: '1TamilMV · Search', method: 'GET',
+  path: '/api/v1/movies/tamilmv/search?q={query}',
+  description: 'Searches 1TamilMV releases and returns forum topic URLs without any size limits.',
+  testParam: 'q', testPlaceholder: 'leo',
+  usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/tamilmv/search?q=leo"'
+},
+{
+  id: 'tamilmv-dl', category: 'movie', categoryLabel: 'Movie',
+  name: '1TamilMV · DL & Magnets', method: 'GET',
+  path: '/api/v1/movies/tamilmv/dl?url={topicUrl}',
+  description: 'Extracts all quality links (Direct CDN & Magnets) for movies from 1TamilMV without file size caps.',
+  testParam: 'url', testPlaceholder: 'https://www.1tamilmv.lease/index.php?/forums/topic/...',
+  usage: 'curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/tamilmv/dl?url=TOPIC_URL"'
+}
     ];
 
     function escapeHtml(s) {
