@@ -260,7 +260,6 @@
         <a href="profile.html" class="nav-link active">Profile</a>
       </nav>
 
-      <!-- Logout button (Href empty to prevent loop) -->
       <button id="logout-btn" class="text-xs font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 px-4 py-2 rounded-xl transition cursor-pointer">Log out</button>
     </div>
   </header>
@@ -450,7 +449,6 @@
     const API_BASE = 'https://apex-web-backend-production.up.railway.app';
     const DAILY_LIMIT = 100;
 
-    /* ============ AUTH CREDENTIALS RETRIEVAL ============ */
     function cleanBearer(raw) {
       return raw ? String(raw).replace(/^Bearer\s+/i, '').trim() : '';
     }
@@ -458,30 +456,28 @@
     const token  = cleanBearer(localStorage.getItem('apex_token'));
     const apiKey = cleanBearer(localStorage.getItem('apex_api_key'));
 
-    // SAFE REDIRECT: Redirects ONLY if explicitly missing, without history loop
-    if (!token && !apiKey) {
-      window.location.href = 'login.html';
-    }
-
-    /* ============ LOGOUT HANDLER (LOOP-FREE) ============ */
+    /* ============ LOGOUT (NO LOOP) ============ */
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        // Clear all session storage keys
         localStorage.removeItem('apex_token');
         localStorage.removeItem('apex_api_key');
         localStorage.removeItem('apex_user');
         sessionStorage.clear();
-        // Redirect cleanly to login page
-        window.location.href = 'login.html';
+        window.location.href = 'index.html';
       });
     }
 
-    /* ============ ROBUST DATA FETCHING ============ */
+    /* ============ PROFILE DATA FETCH ============ */
     async function fetchProfileData() {
       const authKey = apiKey || token;
-      if (!authKey) return null;
+
+      // Session එකක් නැත්නම් redirect නොකර clean login prompt එකක් පෙන්වයි
+      if (!authKey) {
+        showGuestPrompt();
+        return null;
+      }
 
       try {
         const res = await fetch(`${API_BASE}/api/user/profile?api=${encodeURIComponent(authKey)}`, {
@@ -492,12 +488,11 @@
           }
         });
 
-        // Backend explicitly rejects authorization
         if (res.status === 401 || res.status === 403) {
           localStorage.removeItem('apex_token');
           localStorage.removeItem('apex_api_key');
           localStorage.removeItem('apex_user');
-          window.location.href = 'login.html';
+          showGuestPrompt();
           return null;
         }
 
@@ -510,6 +505,28 @@
       }
     }
 
+    function showGuestPrompt() {
+      const loading = document.getElementById('loadingState');
+      if (!loading) return;
+      loading.innerHTML = `
+        <div class="panel p-8 text-center">
+          <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <h2 class="text-lg font-extrabold text-slate-900 mb-1">Session Not Found</h2>
+          <p class="text-sm text-slate-500 mb-5">
+            You need to be logged in to view your operator profile and API telemetry.
+          </p>
+          <div class="flex gap-3 justify-center">
+            <a href="login.html" class="btn-primary" style="width:auto;padding:.65rem 1.4rem;">Sign In</a>
+            <a href="index.html" class="btn-ghost" style="padding:.65rem 1.2rem;background:#fff;">Return Home</a>
+          </div>
+        </div>
+      `;
+    }
+
     function showAuthError(errors) {
       const loading = document.getElementById('loadingState');
       if (!loading) return;
@@ -518,19 +535,18 @@
           <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
           </div>
-          <h2 class="text-lg font-extrabold text-slate-900 mb-1">Session Expired or Connection Failed</h2>
+          <h2 class="text-lg font-extrabold text-slate-900 mb-1">Connection Issue</h2>
           <p class="text-sm text-slate-500 mb-5">
-            Unable to communicate with the Apex backend. Please log in again to renew your credentials.
+            Could not reach the Apex API backend server. Check your network or Railway service status.
           </p>
           <div class="flex gap-3 justify-center">
             <button onclick="location.reload()" class="btn-copy">Retry</button>
-            <button onclick="localStorage.clear(); location.href='login.html';" class="btn-regenerate">Sign In Again</button>
+            <a href="login.html" class="btn-regenerate" style="text-decoration:none;">Sign In Again</a>
           </div>
         </div>
       `;
     }
 
-    /* ============ NORMALIZER ============ */
     function normalizeProfile(raw) {
       const user = raw.user || raw.profile || raw.data || raw || {};
       const key  = raw.key || raw.apiKey || { value: apiKey || '', lastRegenerated: 'Active' };
@@ -554,7 +570,6 @@
       return { user, key, endpoints, recent };
     }
 
-    /* ============ RENDER UI ============ */
     function formatNumber(n) { return Number(n || 0).toLocaleString('en-US'); }
     function getFillClass(pct) { if (pct >= 80) return 'fill-high'; if (pct >= 50) return 'fill-warn'; return 'fill-ok'; }
     function getMiniBadgeClass(pct) { if (pct >= 80) return 'mb-high'; if (pct >= 50) return 'mb-warn'; return 'mb-ok'; }
@@ -696,7 +711,6 @@
       if (contentEl) contentEl.classList.remove('hidden');
     }
 
-    /* ============ TOAST & COPY ============ */
     function showToast(msg) {
       const toast = document.getElementById('copyToast');
       if (!toast) return;
@@ -719,7 +733,6 @@
       }
     }
 
-    /* ============ REGENERATE KEY ============ */
     async function regenerateKey() {
       if (!confirm('Revoking this key will immediately disconnect any active scripts. Generate a new key?')) return;
       const btn = document.querySelector('.btn-regenerate');
@@ -739,7 +752,7 @@
         });
         const data = await res.json().catch(() => ({}));
 
-        if (!res.ok) throw new Error(data.error || data.message || 'Failed to regenerate key.');
+        if (!res.ok) throw new Error(data.message || data.error || 'Failed to regenerate key.');
 
         const newKey = data.apiKey || data.key;
         if (!newKey) throw new Error('Backend did not return a valid key.');
