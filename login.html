@@ -324,7 +324,7 @@
   <script>
     const API_BASE = 'https://apex-web-backend-production.up.railway.app';
 
-    // ─── Initial Load Animations (Login Card Slide Right after 3.8s) ───
+    // ─── Initial Load Animations (Login Card Slide Right after 3.5s) ───
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         const cardMotion = document.getElementById('cardMotion');
@@ -333,7 +333,7 @@
           cardMotion.classList.add('is-right');
           sideLogin.classList.add('active');
         }
-      }, 3800); // තත්පර 3.8කට පස්සේ (Stagger Animation ඉවර වෙලා) දකුණට ලිස්සනවා
+      }, 3500); // 3.5 seconds
     });
 
     // ─── UI Functions (Global) ───
@@ -504,9 +504,9 @@
                 body: JSON.stringify({ ...pow, fingerprint })
               });
               if (verifyRes.status === 404) {
-                dTitle.textContent = 'Verification Failed';
-                dDesc.textContent = 'Security check failed. Please try again.';
-                setTimeout(() => { overlay.classList.remove('show'); resolve(null); }, 3000);
+                overlay.classList.remove('show');
+                setErr('login-error', 'Security check failed. Please try again.');
+                resolve(null);
                 return;
               }
               if (!verifyRes.ok) throw new Error("Verification failed");
@@ -514,13 +514,14 @@
               const data = await verifyRes.json();
               dIcon.innerHTML = '<div class="darkness-check">✓</div>';
               dTitle.textContent = 'Verified';
-              dDesc.textContent = 'Welcome to Apex API.';
+              dDesc.textContent = 'Proceeding to login...';
+              
               localStorage.setItem('apex_darkness', JSON.stringify({ token: data.darknessToken, expires: Date.now() + DARKNESS_EXPIRY }));
               setTimeout(() => resolve(data.darknessToken), 1000);
             } catch (err) {
-              dTitle.textContent = 'Verification Failed';
-              dDesc.textContent = err.message || 'Please refresh and try again.';
-              setTimeout(() => { overlay.classList.remove('show'); resolve(null); }, 2000);
+              overlay.classList.remove('show');
+              setErr('login-error', err.message || 'Please refresh and try again.');
+              resolve(null);
             }
           })();
         });
@@ -552,18 +553,26 @@
             }
             if (!darknessToken) {
               darknessToken = await runDarknessCheck();
-              if (!darknessToken) { btn.disabled = false; btn.textContent = original; setErr('login-error', 'Security check failed. Please check your connection.'); return; }
+              if (!darknessToken) { btn.disabled = false; btn.textContent = original; return; }
             }
+
+            // 🔥 Bot Check පාස් වුනාට පස්සේ ලොගින් වෙන කොටස
+            overlay.classList.add('show');
+            dIcon.innerHTML = '<div class="darkness-spinner"></div>';
+            dTitle.textContent = 'Authenticating';
+            dDesc.textContent = 'Signing in...';
 
             const { res, data } = await postJSON('/api/auth/login', { email, password, darknessToken });
             
             if (res.status === 404) { 
-              setErr('login-error', 'Security signature rejected by server. Please clear your browser cache and try again.'); 
+              overlay.classList.remove('show');
+              setErr('login-error', 'Security signature rejected by server.'); 
               btn.disabled = false; btn.textContent = original;
               return; 
             }
             
             if (!res.ok) {
+              overlay.classList.remove('show');
               throw new Error(data.message || data.error || 'Invalid credentials.');
             }
             
@@ -573,6 +582,7 @@
             window.location.href = 'dashboard.html';
 
           } catch (err) {
+            overlay.classList.remove('show');
             setErr('login-error', err.message || 'Unable to sign in.');
             btn.disabled = false;
             btn.textContent = original;
