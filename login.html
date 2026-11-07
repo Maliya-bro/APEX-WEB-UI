@@ -619,12 +619,7 @@
 
     /* ============ LIVE AUTH INTEGRATION ============ */
     (function () {
-      const API_BASE = (function () {
-        if (window.location.protocol === 'file:') return 'http://localhost:5000';
-        const o = window.location.origin;
-        if (!o || o === 'null') return 'http://localhost:5000';
-        return o;
-      })();
+const API_BASE = 'https://your-railway-app.up.railway.app';
 
       function setErr(id, msg) {
         const el = document.getElementById(id);
