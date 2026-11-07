@@ -227,7 +227,6 @@
 
         <div id="formStack" class="form-stack">
 
-          <!-- LOGIN PANE -->
           <div class="form-pane active" data-pane="login">
             <h2 class="pane-title stagger" style="animation-delay: .7s">Welcome back</h2>
             <p class="pane-sub stagger" style="animation-delay: .95s">Sign in to your Apex API dashboard</p>
@@ -257,7 +256,6 @@
             </form>
           </div>
 
-          <!-- REGISTER PANE -->
           <div class="form-pane" data-pane="register">
             <h2 class="pane-title">Create your account</h2>
             <p class="pane-sub">Join Apex API in seconds — no credit card needed</p>
@@ -288,11 +286,9 @@
               </label>
               <button type="submit" id="reg-submit" class="btn-primary">Create account</button>
               <p id="reg-error" class="form-error"></p>
-              <p id="reg-success" class="form-success"></p>
             </form>
           </div>
 
-          <!-- VERIFY PANE (OTP) -->
           <div class="form-pane" data-pane="verify">
             <h2 class="pane-title">Verify your email</h2>
             <p class="pane-sub">We sent a 6-digit code to <strong id="verify-email-display" class="text-indigo-600"></strong></p>
@@ -323,10 +319,10 @@
   </div>
 
   <script>
-    // මෙතන ඔයාගේ Railway URL එක හරිද කියලා අනිවාර්යයෙන්ම බලන්න
     const API_BASE = 'https://apex-web-backend-production.up.railway.app';
 
-    (function () {
+    // ─── UI Functions (Global) ───
+    window.setMode = function(mode) {
       const cardMotion   = document.getElementById('cardMotion');
       const sideLogin    = document.getElementById('sideLogin');
       const sideRegister = document.getElementById('sideRegister');
@@ -334,24 +330,10 @@
       const tabsWrap     = document.querySelector('.auth-tabs');
       const tabButtons   = document.querySelectorAll('.auth-tab');
 
-      let currentMode = 'login';
-      let introDone   = false;
-      let introTimer  = null;
-
-      function finishIntro() {
-        if (introDone) return;
-        introDone = true;
-        if (currentMode === 'login') {
-          cardMotion.classList.add('is-right');
-          setTimeout(() => { if (currentMode === 'login') sideLogin.classList.add('active'); }, 250);
-        }
-      }
-      window.addEventListener('DOMContentLoaded', () => { introTimer = setTimeout(finishIntro, 4000); });
-
-      function switchPane(mode) {
-        const current = formStack.querySelector('.form-pane.active');
-        const next    = formStack.querySelector('.form-pane[data-pane="' + mode + '"]');
-        if (!next || current === next) return;
+      const current = formStack.querySelector('.form-pane.active');
+      const next    = formStack.querySelector('.form-pane[data-pane="' + mode + '"]');
+      
+      if (next && current !== next) {
         formStack.style.height = current.offsetHeight + 'px';
         void formStack.offsetHeight;
         current.classList.remove('active');
@@ -359,58 +341,47 @@
         formStack.style.height = next.offsetHeight + 'px';
       }
 
-      formStack.addEventListener('transitionend', (e) => {
-        if (e.target === formStack && e.propertyName === 'height') formStack.style.height = '';
-      });
-
-      function updateTabs(mode) {
-        tabsWrap.dataset.active = mode;
-        tabButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.mode === mode));
-        if (mode === 'verify') {
-          tabsWrap.style.opacity = '0';
-          tabsWrap.style.pointerEvents = 'none';
-        } else {
-          tabsWrap.style.opacity = '1';
-          tabsWrap.style.pointerEvents = 'auto';
-        }
+      tabsWrap.dataset.active = mode;
+      tabButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.mode === mode));
+      if (mode === 'verify') {
+        tabsWrap.style.opacity = '0';
+        tabsWrap.style.pointerEvents = 'none';
+      } else {
+        tabsWrap.style.opacity = '1';
+        tabsWrap.style.pointerEvents = 'auto';
       }
 
-      window.setMode = function(mode) {
-        if (mode === currentMode && mode !== 'verify') return;
-        currentMode = mode;
-        if (!introDone) { clearTimeout(introTimer); introDone = true; }
-        
-        if (mode === 'register') {
-          cardMotion.classList.remove('is-right');
-          cardMotion.classList.add('is-left');
-          sideLogin.classList.remove('active');
-          sideRegister.classList.add('active');
-        } else if (mode === 'login') {
-          cardMotion.classList.remove('is-left');
-          cardMotion.classList.add('is-right');
-          sideRegister.classList.remove('active');
-          sideLogin.classList.add('active');
-        }
-        updateTabs(mode);
-        switchPane(mode);
+      if (mode === 'register') {
+        cardMotion.classList.remove('is-right'); cardMotion.classList.add('is-left');
+        sideLogin.classList.remove('active'); sideRegister.classList.add('active');
+      } else if (mode === 'login') {
+        cardMotion.classList.remove('is-left'); cardMotion.classList.add('is-right');
+        sideRegister.classList.remove('active'); sideLogin.classList.add('active');
       }
+    };
 
-      tabButtons.forEach((btn) => btn.addEventListener('click', () => window.setMode(btn.dataset.mode)));
+    // Form stack transition
+    document.getElementById('formStack').addEventListener('transitionend', (e) => {
+      if (e.target.id === 'formStack' && e.propertyName === 'height') e.target.style.height = '';
+    });
 
+    // Tabs click
+    document.querySelectorAll('.auth-tab').forEach((btn) => {
+      btn.addEventListener('click', () => window.setMode(btn.dataset.mode));
+    });
+
+    // Bot Log Animation
+    (function() {
       const botLogEl = document.getElementById('botLog');
       if (botLogEl) {
         const messages = [
-          { type: 'info', text: 'CineSubz engine online' },
-          { type: 'ok',   text: 'API key issued · op_8f2a' },
-          { type: 'info', text: 'GET /v1/resolve · id=7842' },
-          { type: 'ok',   text: 'Direct link ready · 142ms' },
-          { type: 'warn', text: 'Rate limit at 82% of quota' },
-          { type: 'ok',   text: 'SaveTube adapter synced' },
-          { type: 'info', text: 'Cache hit ratio · 96.4%' },
-          { type: 'ok',   text: 'SinhalaCartoons tunnel up' }
+          { type: 'info', text: 'CineSubz engine online' }, { type: 'ok',   text: 'API key issued · op_8f2a' },
+          { type: 'info', text: 'GET /v1/resolve · id=7842' }, { type: 'ok',   text: 'Direct link ready · 142ms' },
+          { type: 'warn', text: 'Rate limit at 82% of quota' }, { type: 'ok',   text: 'SaveTube adapter synced' },
+          { type: 'info', text: 'Cache hit ratio · 96.4%' }, { type: 'ok',   text: 'SinhalaCartoons tunnel up' }
         ];
         let logIndex = 0;
-        function pushLogLine() {
+        setInterval(() => {
           const msg  = messages[logIndex % messages.length];
           const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
           const line = document.createElement('div');
@@ -420,12 +391,11 @@
           requestAnimationFrame(() => line.classList.add('show'));
           while (botLogEl.children.length > 4) botLogEl.removeChild(botLogEl.firstChild);
           logIndex++;
-        }
-        pushLogLine(); pushLogLine(); pushLogLine();
-        setInterval(pushLogLine, 2000);
+        }, 2000);
       }
     })();
 
+    // ─── API & Logic Functions ───
     (function () {
       const DARKNESS_EXPIRY = 2 * 24 * 60 * 60 * 1000;
 
@@ -446,29 +416,24 @@
         localStorage.setItem('apex_user', JSON.stringify(user));
       }
 
-      // 10s Timeout එකක් එක්ක postJSON (Button හිරවෙන එක නවත්තන්න)
       async function postJSON(path, body) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
         try {
-          console.log(`[API Request] POST ${API_BASE}${path}`);
           const res = await fetch(API_BASE + path, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-            signal: controller.signal
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: controller.signal
           });
           clearTimeout(timeoutId);
           const data = await res.json().catch(() => ({}));
-          console.log(`[API Response] ${res.status}`, data);
           return { res, data };
         } catch (err) {
           clearTimeout(timeoutId);
-          if (err.name === 'AbortError') throw new Error('Request timed out. Please check your internet connection.');
+          if (err.name === 'AbortError') throw new Error('Request timed out. Please check your connection.');
           throw err;
         }
       }
 
+      // Darkness Security Logic
       const overlay = document.getElementById('darkness-overlay');
       const dIcon = document.getElementById('darkness-icon');
       const dTitle = document.getElementById('darkness-title');
@@ -513,7 +478,6 @@
           dIcon.innerHTML = '<div class="darkness-spinner"></div>';
           dTitle.textContent = 'Verifying browser';
           dDesc.textContent = 'Checking device fingerprint & security...';
-          
           setTimeout(() => dDesc.textContent = 'Analyzing hardware signature...', 800);
           setTimeout(() => dDesc.textContent = 'Solving cryptographic proof-of-work...', 1600);
 
@@ -525,16 +489,12 @@
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...pow, fingerprint })
               });
-              
               if (verifyRes.status === 404) {
-                // Backend එකෙන් Bot කියලා හඳුනාගත්තා
-                console.warn("[Darkness] 404 - Bot detected or invalid challenge");
                 dTitle.textContent = 'Verification Failed';
                 dDesc.textContent = 'Security check failed. Please disable VPN / AdBlocker and try again.';
                 setTimeout(() => { overlay.classList.remove('show'); resolve(null); }, 3000);
                 return;
               }
-
               if (!verifyRes.ok) throw new Error("Verification failed");
               
               const data = await verifyRes.json();
@@ -544,7 +504,6 @@
               localStorage.setItem('apex_darkness', JSON.stringify({ token: data.darknessToken, expires: Date.now() + DARKNESS_EXPIRY }));
               setTimeout(() => resolve(data.darknessToken), 1000);
             } catch (err) {
-              console.error("[Darkness Error]:", err);
               dTitle.textContent = 'Verification Failed';
               dDesc.textContent = err.message || 'Please refresh and try again.';
               setTimeout(() => { overlay.classList.remove('show'); resolve(null); }, 2000);
@@ -579,11 +538,7 @@
             }
             if (!darknessToken) {
               darknessToken = await runDarknessCheck();
-              if (!darknessToken) { 
-                btn.disabled = false; btn.textContent = original; 
-                setErr('login-error', 'Security check failed. Please check your connection.');
-                return; 
-              }
+              if (!darknessToken) { btn.disabled = false; btn.textContent = original; setErr('login-error', 'Security check failed. Please check your connection.'); return; }
             }
 
             const { res, data } = await postJSON('/api/auth/login', { email, password, darknessToken });
