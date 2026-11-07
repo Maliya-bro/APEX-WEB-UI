@@ -122,6 +122,16 @@
     .success-check { width: 40px; height: 20px; border-left: 5px solid #10b981; border-bottom: 5px solid #10b981; transform: rotate(-45deg); margin-top: -10px; animation: drawCheck 0.6s ease forwards; opacity: 0; }
     @keyframes drawCheck { 0% { opacity: 0; transform: rotate(-45deg) scale(0); } 100% { opacity: 1; transform: rotate(-45deg) scale(1); } }
     @keyframes pulseSuccess { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+
+    /* Cloudflare Modal CSS */
+    #cf-modal { position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
+    #cf-modal.show { display: flex; opacity: 1; }
+    .cf-box { background: #ffffff; border-radius: 1.2rem; width: 100%; max-width: 24rem; padding: 2.5rem 2rem; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; align-items: center; justify-content: center;}
+    #cf-modal.show .cf-box { transform: scale(1); }
+    .cf-spinner { width: 2.5rem; height: 2.5rem; border: 3px solid #e2e8f0; border-top-color: #6366f1; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1.5rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .cf-title { font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem; }
+    .cf-desc { font-size: 0.8rem; color: #64748b; line-height: 1.5; }
   </style>
 </head>
 
@@ -133,6 +143,20 @@
     <div class="absolute top-1/3 -right-40 w-[30rem] h-[30rem] rounded-full bg-violet-300/40 blur-3xl"></div>
     <div class="absolute bottom-0 left-1/3 w-[26rem] h-[26rem] rounded-full bg-sky-200/60 blur-3xl"></div>
     <div class="absolute top-1/2 left-1/2 w-[24rem] h-[24rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-fuchsia-200/30 blur-3xl"></div>
+  </div>
+
+  <!-- Cloudflare Turnstile Modal -->
+  <div id="cf-modal">
+    <div class="cf-box">
+      <div class="cf-spinner"></div>
+      <h3 class="cf-title">Checking your browser</h3>
+      <p class="cf-desc mb-6">Please wait while Cloudflare verifies your connection...</p>
+      
+      <!-- Cloudflare Turnstile Widget -->
+      <div id="turnstile-container" class="cf-turnstile" data-sitekey="0x4AAAAAAF3rteQGPTTioCnK" data-theme="light" data-callback="onTurnstileSuccess"></div>
+      
+      <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 1.5rem;">Protected by Cloudflare</div>
+    </div>
   </div>
 
   <header class="fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 py-3.5 flex items-center justify-between pointer-events-none">
@@ -232,9 +256,6 @@
                 <label>Password</label>
                 <input type="password" id="login-password" class="input" placeholder="••••••••" autocomplete="current-password" required>
               </div>
-              
-              <!-- Cloudflare Turnstile Widget -->
-              <div class="cf-turnstile flex justify-center mt-4 mb-2" data-sitekey="YOUR_TURNSTILE_SITE_KEY_HERE" data-theme="light"></div>
               
               <div class="flex items-center justify-between stagger" style="animation-delay: 2.55s">
                 <label class="checkbox"><input type="checkbox"> Remember me</label>
@@ -396,215 +417,240 @@
     })();
 
     // ─── API & Logic Functions ───
-    (function () {
-      function setErr(id, msg) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        if (msg) { el.textContent = msg; el.classList.add('show'); }
-        else { el.classList.remove('show'); }
-      }
+    let pendingLoginData = null; // Store email/pass temporarily
+    const cfModal = document.getElementById('cf-modal');
 
-      function saveSession(data) {
-        const token  = data.token || data.jwt;
-        const apiKey = data.apiKey || (data.user && data.user.apiKey) || data.key;
-        const user   = data.user || data.userData || data;
-        if (!token) throw new Error('Server did not return an auth token.');
+    function setErr(id, msg) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (msg) { el.textContent = msg; el.classList.add('show'); }
+      else { el.classList.remove('show'); }
+    }
+
+    function saveSession(data) {
+      const token  = data.token || data.jwt;
+      const apiKey = data.apiKey || (data.user && data.user.apiKey) || data.key;
+      const user   = data.user || data.userData || data;
+      if (!token) throw new Error('Server did not return an auth token.');
+      localStorage.setItem('apex_token', token);
+      if (apiKey) localStorage.setItem('apex_api_key', apiKey);
+      localStorage.setItem('apex_user', JSON.stringify(user));
+    }
+
+    async function postJSON(path, body) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      try {
+        const res = await fetch(API_BASE + path, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        const data = await res.json().catch(() => ({}));
+        return { res, data };
+      } catch (err) {
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') throw new Error('Request timed out. Please check your connection.');
+        throw err;
+      }
+    }
+
+    // ─── Cloudflare Turnstile Callback ───
+    window.onTurnstileSuccess = async function(token) {
+      if (!pendingLoginData) return;
+      
+      const { email, password, btn, originalText } = pendingLoginData;
+      
+      // Update modal text to show it's logging in
+      document.querySelector('.cf-title').textContent = 'Authenticating...';
+      document.querySelector('.cf-desc').textContent = 'Signing you in securely...';
+
+      try {
+        const { res, data } = await postJSON('/api/auth/login', { email, password, turnstileToken: token });
+        
+        if (!res.ok) {
+          throw new Error(data.message || data.error || 'Invalid credentials.');
+        }
+        
+        // SUCCESS! Auto Login
+        saveSession(data);
+        window.location.href = 'dashboard.html';
+
+      } catch (err) {
+        // Failed - close modal, show error, reset Turnstile
+        cfModal.classList.remove('show');
+        setErr('login-error', err.message || 'Unable to sign in.');
+        
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+
+        if (window.turnstile) {
+          window.turnstile.reset();
+        }
+        
+        // Reset modal text for next time
+        document.querySelector('.cf-title').textContent = 'Checking your browser';
+        document.querySelector('.cf-desc').textContent = 'Please wait while Cloudflare verifies your connection...';
+      } finally {
+        pendingLoginData = null;
+      }
+    };
+
+    // ─── Login Form Submit ───
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+      loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        setErr('login-error', '');
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+        const btn = document.getElementById('login-submit');
+        
+        if (!email || !password) { setErr('login-error', 'Please enter your email and password.'); return; }
+        if (!email.toLowerCase().endsWith('@gmail.com')) { setErr('login-error', 'Only @gmail.com emails are allowed.'); return; }
+
+        // Save data for after Turnstile completes
+        pendingLoginData = { email, password, btn, originalText: btn.textContent };
+
+        // Hide form / Show Cloudflare modal
+        btn.disabled = true;
+        btn.textContent = 'Verifying...';
+        cfModal.classList.add('show');
+
+        // Execute Turnstile (renders automatically)
+        if (window.turnstile) {
+          window.turnstile.render('#turnstile-container', {
+            sitekey: '0x4AAAAAAF3rteQGPTTioCnK',
+            callback: window.onTurnstileSuccess
+          });
+        }
+      });
+    }
+
+    // ─── Register & OTP Logic ───
+    const regForm = document.getElementById('register-form');
+    if (regForm) {
+      regForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        setErr('reg-error', '');
+        const name = document.getElementById('reg-name').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const password = document.getElementById('reg-password').value;
+        const btn = document.getElementById('reg-submit');
+
+        if (!name || !email || !password) { setErr('reg-error', 'Please fill in all fields.'); return; }
+        if (password.length < 6) { setErr('reg-error', 'Password must be at least 6 characters.'); return; }
+        if (!email.toLowerCase().endsWith('@gmail.com')) { setErr('reg-error', 'Only @gmail.com email addresses are allowed.'); return; }
+
+        const original = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Creating account…';
+        
+        try {
+          const { res, data } = await postJSON('/api/auth/register', { name, email, password });
+          if (!res.ok) throw new Error(data.error || 'Registration failed.');
+          
+          document.getElementById('verify-email-display').textContent = email;
+          document.getElementById('verify-code').value = '';
+          window.setMode('verify');
+          regForm.reset();
+        } catch (err) {
+          setErr('reg-error', err.message || 'Unable to register.');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = original;
+        }
+      });
+    }
+
+    const verifyForm = document.getElementById('verify-form');
+    if (verifyForm) {
+      verifyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        setErr('verify-error', '');
+        const email = document.getElementById('verify-email-display').textContent;
+        const code = document.getElementById('verify-code').value.trim();
+        const btn = document.getElementById('verify-submit');
+
+        if (!code || code.length !== 6) { setErr('verify-error', 'Please enter the 6-digit code.'); return; }
+
+        const original = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Verifying...';
+
+        try {
+          const { res, data } = await postJSON('/api/auth/verify-code', { email, code });
+          if (!res.ok) throw new Error(data.error || 'Invalid or expired code.');
+
+          verifyForm.style.display = 'none';
+          document.getElementById('success-mark').classList.add('show');
+          
+          saveSession(data);
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 1800);
+        } catch (err) {
+          setErr('verify-error', err.message || 'Verification failed.');
+          btn.disabled = false;
+          btn.textContent = original;
+        }
+      });
+    }
+
+    const resendLink = document.getElementById('resend-code-link');
+    if (resendLink) {
+      resendLink.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('verify-email-display').textContent;
+        resendLink.textContent = 'Sending...';
+        try {
+          await postJSON('/api/auth/register', { email, name: "Resend", password: "dummy" }); 
+          resendLink.textContent = 'Code Sent!';
+          setTimeout(() => resendLink.textContent = "Didn't receive code? Resend", 3000);
+        } catch (err) {
+          resendLink.textContent = 'Failed to resend';
+        }
+      });
+    }
+
+    // ─── Google Callback Handler ───
+    const params  = new URLSearchParams(window.location.search);
+    const token   = params.get('token');
+    const apiKey  = params.get('apiKey');
+    const userStr = params.get('user');
+    const error   = params.get('error');
+
+    if (error) {
+      window.history.replaceState({}, '', window.location.pathname);
+      let msg = 'Sign-in failed. Please try again.';
+      if (error === 'cancelled') msg = 'Google sign-in cancelled.';
+      if (error === 'oauth_failed') msg = 'Could not complete Google sign-in.';
+      setErr('login-error', msg);
+    } else if (token) {
+      try {
         localStorage.setItem('apex_token', token);
         if (apiKey) localStorage.setItem('apex_api_key', apiKey);
-        localStorage.setItem('apex_user', JSON.stringify(user));
-      }
-
-      async function postJSON(path, body) {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000);
-        try {
-          const res = await fetch(API_BASE + path, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: controller.signal
-          });
-          clearTimeout(timeoutId);
-          const data = await res.json().catch(() => ({}));
-          return { res, data };
-        } catch (err) {
-          clearTimeout(timeoutId);
-          if (err.name === 'AbortError') throw new Error('Request timed out. Please check your connection.');
-          throw err;
-        }
-      }
-
-      // LOGIN (Cloudflare Turnstile)
-      const loginForm = document.getElementById('login-form');
-      if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          setErr('login-error', '');
-          const email = document.getElementById('login-email').value.trim();
-          const password = document.getElementById('login-password').value;
-          const btn = document.getElementById('login-submit');
-          
-          if (!email || !password) { setErr('login-error', 'Please enter your email and password.'); return; }
-          if (!email.toLowerCase().endsWith('@gmail.com')) { setErr('login-error', 'Only @gmail.com emails are allowed.'); return; }
-
-          // Cloudflare Turnstile Token එක ගන්නවා
-          const turnstileToken = document.querySelector('[name="cf-turnstile-response"]').value;
-          if (!turnstileToken) {
-            setErr('login-error', 'Please complete the security check (Cloudflare).');
-            return;
-          }
-
-          const original = btn.textContent;
-          btn.disabled = true;
-          btn.textContent = 'Authenticating...';
-
-          try {
-            const { res, data } = await postJSON('/api/auth/login', { email, password, turnstileToken });
-            
-            if (!res.ok) {
-              throw new Error(data.message || data.error || 'Invalid credentials.');
-            }
-            
-            // SUCCESS!
-            saveSession(data);
-            window.location.href = 'dashboard.html';
-
-          } catch (err) {
-            setErr('login-error', err.message || 'Unable to sign in.');
-            btn.disabled = false;
-            btn.textContent = original;
-            
-            // Turnstile එක ආයේ Reset කරනවා (Token එක expire වෙච්ච නිසා)
-            if (window.turnstile) {
-              window.turnstile.reset();
-            }
-          }
-        });
-      }
-
-      // REGISTER
-      const regForm = document.getElementById('register-form');
-      if (regForm) {
-        regForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          setErr('reg-error', '');
-          const name = document.getElementById('reg-name').value.trim();
-          const email = document.getElementById('reg-email').value.trim();
-          const password = document.getElementById('reg-password').value;
-          const btn = document.getElementById('reg-submit');
-
-          if (!name || !email || !password) { setErr('reg-error', 'Please fill in all fields.'); return; }
-          if (password.length < 6) { setErr('reg-error', 'Password must be at least 6 characters.'); return; }
-          if (!email.toLowerCase().endsWith('@gmail.com')) { setErr('reg-error', 'Only @gmail.com email addresses are allowed.'); return; }
-
-          const original = btn.textContent;
-          btn.disabled = true;
-          btn.textContent = 'Creating account…';
-          
-          try {
-            const { res, data } = await postJSON('/api/auth/register', { name, email, password });
-            if (!res.ok) throw new Error(data.error || 'Registration failed.');
-            
-            document.getElementById('verify-email-display').textContent = email;
-            document.getElementById('verify-code').value = '';
-            window.setMode('verify');
-            regForm.reset();
-          } catch (err) {
-            setErr('reg-error', err.message || 'Unable to register.');
-          } finally {
-            btn.disabled = false;
-            btn.textContent = original;
-          }
-        });
-      }
-
-      // VERIFY OTP
-      const verifyForm = document.getElementById('verify-form');
-      if (verifyForm) {
-        verifyForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          setErr('verify-error', '');
-          const email = document.getElementById('verify-email-display').textContent;
-          const code = document.getElementById('verify-code').value.trim();
-          const btn = document.getElementById('verify-submit');
-
-          if (!code || code.length !== 6) { setErr('verify-error', 'Please enter the 6-digit code.'); return; }
-
-          const original = btn.textContent;
-          btn.disabled = true;
-          btn.textContent = 'Verifying...';
-
-          try {
-            const { res, data } = await postJSON('/api/auth/verify-code', { email, code });
-            if (!res.ok) throw new Error(data.error || 'Invalid or expired code.');
-
-            verifyForm.style.display = 'none';
-            document.getElementById('success-mark').classList.add('show');
-            
-            saveSession(data);
-            setTimeout(() => { window.location.href = 'dashboard.html'; }, 1800);
-          } catch (err) {
-            setErr('verify-error', err.message || 'Verification failed.');
-            btn.disabled = false;
-            btn.textContent = original;
-          }
-        });
-      }
-
-      // RESEND CODE
-      const resendLink = document.getElementById('resend-code-link');
-      if (resendLink) {
-        resendLink.addEventListener('click', async (e) => {
-          e.preventDefault();
-          const email = document.getElementById('verify-email-display').textContent;
-          resendLink.textContent = 'Sending...';
-          try {
-            await postJSON('/api/auth/register', { email, name: "Resend", password: "dummy" }); 
-            resendLink.textContent = 'Code Sent!';
-            setTimeout(() => resendLink.textContent = "Didn't receive code? Resend", 3000);
-          } catch (err) {
-            resendLink.textContent = 'Failed to resend';
-          }
-        });
-      }
-
-      // GOOGLE CALLBACK
-      const params  = new URLSearchParams(window.location.search);
-      const token   = params.get('token');
-      const apiKey  = params.get('apiKey');
-      const userStr = params.get('user');
-      const error   = params.get('error');
-
-      if (error) {
+        if (userStr) localStorage.setItem('apex_user', userStr);
         window.history.replaceState({}, '', window.location.pathname);
-        let msg = 'Sign-in failed. Please try again.';
-        if (error === 'cancelled') msg = 'Google sign-in cancelled.';
-        if (error === 'oauth_failed') msg = 'Could not complete Google sign-in.';
-        setErr('login-error', msg);
-      } else if (token) {
-        try {
-          localStorage.setItem('apex_token', token);
-          if (apiKey) localStorage.setItem('apex_api_key', apiKey);
-          if (userStr) localStorage.setItem('apex_user', userStr);
-          window.history.replaceState({}, '', window.location.pathname);
-          window.location.replace('dashboard.html');
-        } catch (err) { setErr('login-error', 'Could not save your session.'); }
-      } else {
-        const hasToken = !!localStorage.getItem('apex_token');
-        const hasKey   = !!localStorage.getItem('apex_api_key');
-        if (hasToken || hasKey) {
-          const pane = document.querySelector('.form-pane[data-pane="login"]');
-          if (pane) {
-            const banner = document.createElement('div');
-            banner.style.cssText = 'background:#eef2ff;border:1px solid #c7d2fe;border-radius:.7rem;padding:.7rem .9rem;margin-bottom:1rem;font-size:.78rem;color:#4338ca;text-align:center;line-height:1.55;font-weight:600;';
-            banner.innerHTML = 'You&rsquo;re already signed in. <a href="dashboard.html" style="font-weight:800;text-decoration:underline;color:#4f46e5;">Open dashboard →</a><br><a href="#" id="force-clear-session" style="font-size:.7rem;font-weight:600;color:#94a3b8;text-decoration:underline;margin-top:.3rem;display:inline-block;">Not you? Sign out</a>';
-            pane.insertBefore(banner, pane.firstChild);
-            document.getElementById('force-clear-session').addEventListener('click', (ev) => {
-              ev.preventDefault();
-              Object.keys(localStorage).forEach(k => { if (k.startsWith('apex_')) localStorage.removeItem(k); });
-              window.location.reload();
-            });
-          }
+        window.location.replace('dashboard.html');
+      } catch (err) { setErr('login-error', 'Could not save your session.'); }
+    } else {
+      const hasToken = !!localStorage.getItem('apex_token');
+      const hasKey   = !!localStorage.getItem('apex_api_key');
+      if (hasToken || hasKey) {
+        const pane = document.querySelector('.form-pane[data-pane="login"]');
+        if (pane) {
+          const banner = document.createElement('div');
+          banner.style.cssText = 'background:#eef2ff;border:1px solid #c7d2fe;border-radius:.7rem;padding:.7rem .9rem;margin-bottom:1rem;font-size:.78rem;color:#4338ca;text-align:center;line-height:1.55;font-weight:600;';
+          banner.innerHTML = 'You&rsquo;re already signed in. <a href="dashboard.html" style="font-weight:800;text-decoration:underline;color:#4f46e5;">Open dashboard →</a><br><a href="#" id="force-clear-session" style="font-size:.7rem;font-weight:600;color:#94a3b8;text-decoration:underline;margin-top:.3rem;display:inline-block;">Not you? Sign out</a>';
+          pane.insertBefore(banner, pane.firstChild);
+          document.getElementById('force-clear-session').addEventListener('click', (ev) => {
+            ev.preventDefault();
+            Object.keys(localStorage).forEach(k => { if (k.startsWith('apex_')) localStorage.removeItem(k); });
+            window.location.reload();
+          });
         }
       }
-    })();
+    }
   </script>
 </body>
 </html>
