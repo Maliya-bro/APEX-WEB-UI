@@ -523,6 +523,18 @@
         usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/yt/video?q=shape+of+you&api=<YOUR_API_KEY>"`
       },
       {
+        id: 'ai-tts',
+        category: 'media',
+        categoryLabel: 'Media',
+        name: 'Apex AI · Text to Speech',
+        method: 'GET',
+        path: '/api/v1/media/ai/tts?text={query}&voice=woman2&language=English',
+        description: 'Converts textual prompts into natural AI synthesized voice audio MP3 streams.',
+        testParam: 'text',
+        testPlaceholder: 'Hello, this is Apex AI Voice System',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/ai/tts?text=Hello+World&voice=woman2&language=English"`
+      },
+      {
         id: 'fitgirl-search',
         category: 'game',
         categoryLabel: 'Game',
