@@ -450,12 +450,7 @@
   </div>
 
   <script>
-    const API_BASE = (function () {
-      if (window.location.protocol === 'file:') return 'http://localhost:5000';
-      const o = window.location.origin;
-      if (!o || o === 'null') return 'http://localhost:5000';
-      return o;
-    })();
+    const API_BASE = 'https://apex-web-backend-production.up.railway.app';
 
     const DAILY_LIMIT = 50000;
     const AVATAR_GRADIENTS = [
