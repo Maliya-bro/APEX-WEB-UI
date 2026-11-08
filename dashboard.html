@@ -232,7 +232,19 @@ const ENDPOINTS=[
 {id:'slmix-search',category:'media',categoryLabel:'Media',name:'SLMix · Search',method:'GET',path:'/api/v1/media/slmix/search?q={query}',description:'Searches Sri Lankan remix tracks on slmix.lk and returns track listings with download stats.',testParam:'q',testPlaceholder:'dj remix',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/slmix/search?q=dj+remix"`},
 {id:'slmix-dl',category:'media',categoryLabel:'Media',name:'SLMix · Direct DL',method:'GET',path:'/api/v1/media/slmix/dl?url={url}',description:'Extracts direct MP3 audio stream URLs from slmix.lk track pages.',testParam:'url',testPlaceholder:'https://www.slmix.lk/song.php?id=123',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/slmix/dl?url=https://www.slmix.lk/song.php?id=123"`},
 {id:'an1-search',category:'app',categoryLabel:'App',name:'AN1 · Search',method:'GET',path:'/api/v1/apps/an1/search?q={query}',description:'Searches MOD applications and games on an1.com.',testParam:'q',testPlaceholder:'subway surfers',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/apps/an1/search?q=subway+surfers"`},
-{id:'an1-dl',category:'app',categoryLabel:'App',name:'AN1 · Direct DL',method:'GET',path:'/api/v1/apps/an1/dl?url={url}',description:'Extracts version, file size, and direct APK download URL from AN1 app page.',testParam:'url',testPlaceholder:'https://an1.com/624-subway-surfers-mod-apk.html',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/apps/an1/dl?url=https://an1.com/624-subway-surfers-mod-apk.html"`}
+{id:'an1-dl',category:'app',categoryLabel:'App',name:'AN1 · Direct DL',method:'GET',path:'/api/v1/apps/an1/dl?url={url}',description:'Extracts version, file size, and direct APK download URL from AN1 app page.',testParam:'url',testPlaceholder:'https://an1.com/624-subway-surfers-mod-apk.html',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/apps/an1/dl?url=https://an1.com/624-subway-surfers-mod-apk.html"`},
+  {
+        id: 'mediafire-dl',
+        category: 'media',
+        categoryLabel: 'Media',
+        name: 'MediaFire · Direct DL',
+        method: 'GET',
+        path: '/api/v1/media/mediafire/dl?url={url}',
+        description: 'Extracts direct high-speed CDN download links, file sizes, and MIME types from any MediaFire file link.',
+        testParam: 'url',
+        testPlaceholder: 'https://www.mediafire.com/file/abc123xyz/sample.zip/file',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/mediafire/dl?url=https://www.mediafire.com/file/abc123xyz/sample.zip/file"`
+      }
 ];
 
 function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
