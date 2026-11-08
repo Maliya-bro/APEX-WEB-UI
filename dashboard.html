@@ -244,6 +244,18 @@ const ENDPOINTS=[
         testParam: 'url',
         testPlaceholder: 'https://www.mediafire.com/file/abc123xyz/sample.zip/file',
         usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/mediafire/dl?url=https://www.mediafire.com/file/abc123xyz/sample.zip/file"`
+      },
+  {
+        id: 'microsoft-tts',
+        category: 'media',
+        categoryLabel: 'Media',
+        name: 'Microsoft · Neural TTS',
+        method: 'GET',
+        path: '/api/v1/media/microsoft/tts?text={text}&voice=en-US-AriaNeural&stream=true',
+        description: 'Synthesizes lifelike, human-grade speech using Microsoft Edge Neural TTS voices (English, Sinhala, Tamil, etc.).',
+        testParam: 'text',
+        testPlaceholder: 'Hello, welcome to Apex API high-speed developer mesh.',
+        usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/microsoft/tts?text=Hello+World&voice=en-US-AriaNeural&stream=true"`
       }
 ];
 
