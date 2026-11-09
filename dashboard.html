@@ -248,6 +248,18 @@ const ENDPOINTS=[
   testParam: 'q',
   testPlaceholder: 'What is the speed of light?',
   usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/ai/chat/ubi?q=What+is+the+speed+of+light?&api=<YOUR_API_KEY>"`
+},
+  {
+  id: 'tiktok-dl',
+  category: 'media',
+  categoryLabel: 'Media',
+  name: 'TikTok · No-Watermark HD DL',
+  method: 'GET',
+  path: '/api/v1/media/tiktok/dl?url={url}&api=<YOUR_API_KEY>',
+  description: 'Extracts direct original HD MP4 (no watermark), standard video, audio MP3, and photo slideshows from any public TikTok post.',
+  testParam: 'url',
+  testPlaceholder: 'https://www.tiktok.com/@exjaniyafreefire/video/7569612819264490770',
+  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/tiktok/dl?url=https://www.tiktok.com/@exjaniyafreefire/video/7569612819264490770&api=<YOUR_API_KEY>"`
 }
 ];
 
