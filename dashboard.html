@@ -221,6 +221,30 @@ const ENDPOINTS=[
 {id:'tamilmv-search',category:'movie',categoryLabel:'Movie',name:'1TamilMV · Search',method:'GET',path:'/api/v1/movies/tamilmv/search?q={query}&api=<YOUR_API_KEY>',description:'Searches 1TamilMV releases and returns forum topic URLs without any size limits.',testParam:'q',testPlaceholder:'leo',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/tamilmv/search?q=leo&api=<YOUR_API_KEY>"`},
 {id:'tamilmv-dl',category:'movie',categoryLabel:'Movie',name:'1TamilMV · DL & Magnets',method:'GET',path:'/api/v1/movies/tamilmv/dl?url={url}&api=<YOUR_API_KEY>',description:'Extracts all quality links (Direct CDN & Magnets) for movies from 1TamilMV without file size caps.',testParam:'url',testPlaceholder:'https://www.1tamilmv.lease/index.php?/forums/topic/12345-movie/',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/tamilmv/dl?url=https://www.1tamilmv.lease/index.php?/forums/topic/12345-movie/&api=<YOUR_API_KEY>"`},
   {
+  id: 'kmmovies-search',
+  category: 'movie',
+  categoryLabel: 'Movie',
+  name: 'KMMovies · Search Movies',
+  method: 'GET',
+  path: '/api/v1/movies/kmmovies/search?q={query}&api=<YOUR_API_KEY>',
+  description: 'Searches movies on kmmovies.autos and returns direct resolution endpoints for all WEB-DL links.',
+  testParam: 'q',
+  testPlaceholder: 'avatar',
+  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/kmmovies/search?q=avatar&api=<YOUR_API_KEY>"`
+},
+{
+  id: 'kmmovies-dl',
+  category: 'movie',
+  categoryLabel: 'Movie',
+  name: 'KMMovies · WEB-DL All Qualities',
+  method: 'GET',
+  path: '/api/v1/movies/kmmovies/dl?url={url}&api=<YOUR_API_KEY>',
+  description: 'Bypasses MagicLinks and SkyDrop for every available WEB-DL quality at once, producing auto-download links.',
+  testParam: 'url',
+  testPlaceholder: 'https://kmmovies.autos/movie/avatar-2009/',
+  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/kmmovies/dl?url=https://kmmovies.autos/movie/avatar-2009/&api=<YOUR_API_KEY>"`
+},
+  {
   id: 'cinesub-search',
   category: 'movie',
   categoryLabel: 'Movie',
