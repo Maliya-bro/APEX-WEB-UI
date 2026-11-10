@@ -260,6 +260,30 @@ const ENDPOINTS=[
   testParam: 'url',
   testPlaceholder: 'https://www.tiktok.com/@exjaniyafreefire/video/7569612819264490770',
   usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/tiktok/dl?url=https://www.tiktok.com/@exjaniyafreefire/video/7569612819264490770&api=<YOUR_API_KEY>"`
+},
+  {
+  id: 'cinesub-search',
+  category: 'movie',
+  categoryLabel: 'Movie',
+  name: 'CineSub · Search Movies',
+  method: 'GET',
+  path: '/api/v1/movies/cinesub/search?q={query}&api=<YOUR_API_KEY>',
+  description: 'Searches movies via TMDB and matches CineSub.lk Sinhala subtitle slugs and resolve paths.',
+  testParam: 'q',
+  testPlaceholder: 'spider man',
+  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesub/search?q=spider+man&api=<YOUR_API_KEY>"`
+},
+{
+  id: 'cinesub-resolve',
+  category: 'movie',
+  categoryLabel: 'Movie',
+  name: 'CineSub · Resolve & Subtitle DL',
+  method: 'GET',
+  path: '/api/v1/movies/cinesub/resolve?tmdbId={tmdbId}&api=<YOUR_API_KEY>',
+  description: 'Checks Firebase storage for Sinhala subtitles (.vtt) and generates direct auto-download proxy links and VidLink player streams.',
+  testParam: 'tmdbId',
+  testPlaceholder: '557',
+  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesub/resolve?tmdbId=557&api=<YOUR_API_KEY>"`
 }
 ];
 
