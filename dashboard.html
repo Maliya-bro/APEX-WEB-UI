@@ -245,6 +245,30 @@ const ENDPOINTS=[
   usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/kmmovies/dl?url=https://kmmovies.autos/movie/avatar-2009/&api=<YOUR_API_KEY>"`
 },
   {
+  id: 'cartoonslk-search',
+  category: 'movie',
+  categoryLabel: 'Movie',
+  name: 'Cartoons.lk · Search',
+  method: 'GET',
+  path: '/api/v1/movies/cartoonslk/search?q={query}&api=<YOUR_API_KEY>',
+  description: 'Searches Sinhala dubbed cartoons and movies on cartoons.lk and returns direct download endpoints.',
+  testParam: 'q',
+  testPlaceholder: 'frozen',
+  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cartoonslk/search?q=frozen&api=<YOUR_API_KEY>"`
+},
+{
+  id: 'cartoonslk-dl',
+  category: 'movie',
+  categoryLabel: 'Movie',
+  name: 'Cartoons.lk · Direct DL All Links',
+  method: 'GET',
+  path: '/api/v1/movies/cartoonslk/dl?url={url}&api=<YOUR_API_KEY>',
+  description: 'Resolves all available qualities at once from cartoons.lk with direct R2/CDN links and auto-download gateway URLs.',
+  testParam: 'url',
+  testPlaceholder: 'https://cartoons.lk/movies/frozen-2013/',
+  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cartoonslk/dl?url=https://cartoons.lk/movies/frozen-2013/&api=<YOUR_API_KEY>"`
+},
+  {
   id: 'cinesub-search',
   category: 'movie',
   categoryLabel: 'Movie',
