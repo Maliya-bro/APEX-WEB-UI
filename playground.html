@@ -31,6 +31,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialias
 .field-label{display:block;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--t-txt-4);margin-bottom:.45rem}
 .field-select,.field-input{width:100%;font-size:.84rem;background:var(--t-input);border:1.5px solid var(--t-input-border);border-radius:.7rem;padding:.72rem .9rem;color:var(--t-txt);transition:all .2s;font-family:'Plus Jakarta Sans',sans-serif}
 .field-select{cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right .7rem center;background-size:1rem;padding-right:2.2rem}
+.field-select option, .field-select optgroup{background:var(--t-card-solid);color:var(--t-txt)}
 .field-input{font-family:'JetBrains Mono',monospace;font-size:.82rem}
 .field-select:focus,.field-input:focus{outline:none;border-color:var(--t-accent);background:var(--t-card-solid);box-shadow:0 0 0 4px rgba(99,102,241,.12)}
 .btn-send{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:.55rem;font-weight:700;font-size:.85rem;padding:.85rem 1.3rem;border-radius:.7rem;border:none;cursor:pointer;color:#fff;background-image:linear-gradient(135deg,var(--t-accent),var(--t-accent-2));background-size:160% 160%;background-position:0% 50%;transition:background-position .5s,box-shadow .3s,transform .2s;box-shadow:0 14px 26px -12px var(--t-accent)}
@@ -107,7 +108,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialias
 <main class="max-w-7xl mx-auto px-6 py-10 space-y-6">
 <section class="anim-in" style="animation-delay:.05s">
 <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight" style="color:var(--t-txt)">API Playground</h1>
-<p class="mt-1.5 text-sm" style="color:var(--t-txt-3)">Pick an endpoint, enter a value, and send a live request to see the response.</p>
+<p class="mt-1.5 text-sm" style="color:var(--t-txt-3)">Pick any endpoint across AI, Movies, Media, Games, or Apps and test live.</p>
 </section>
 
 <section class="panel p-6 sm:p-7 anim-in" style="animation-delay:.12s">
@@ -124,8 +125,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialias
 <button class="icon-btn" onclick="copyUrl()" title="Copy URL" style="border-radius:0;border:none;border-left:1.5px solid var(--t-input-border);padding:0 .9rem"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
 </div>
 <div class="meta-row">
-<span class="meta-pill" id="pg-category-pill">Movie</span>
-<span class="meta-pill" id="pg-desc-pill">Searches titles on CineSubz</span>
+<span class="meta-pill" id="pg-category-pill">AI</span>
+<span class="meta-pill" id="pg-desc-pill">Fast AI text completions</span>
 </div>
 </div>
 </section>
@@ -193,14 +194,47 @@ document.getElementById('logout-btn').addEventListener('click',()=>{
 });
 
 const ENDPOINTS=[
-{id:'cinesubz-search',category:'movie',categoryLabel:'Movie',name:'CineSubz · Search',path:'/api/v1/movies/cinesubz/search',paramKey:'q',paramLabel:'Query',placeholder:'avatar',desc:'Searches titles on CineSubz'},
-{id:'cinesubz-info',category:'movie',categoryLabel:'Movie',name:'CineSubz · Info & Links',path:'/api/v1/movies/cinesubz/info',paramKey:'url',paramLabel:'Page URL',placeholder:'https://cinesubz.lk/movies/avatar',desc:'Scrapes qualities on CineSubz'},
-{id:'cinesubz-dl',category:'movie',categoryLabel:'Movie',name:'CineSubz · Direct Download',path:'/api/v1/movies/cinesubz/dl',paramKey:'directUrl',paramLabel:'Player URL',placeholder:'https://cinesubz.lk/player/avatar-1080p',desc:'Resolves player links to CDN'},
-{id:'sinhalacartoons-search',category:'movie',categoryLabel:'Movie',name:'sinhalacartoons.lk · Search',path:'/api/v1/movies/sinhalacartoons/search',paramKey:'q',paramLabel:'Query',placeholder:'tom and jerry',desc:'Searches SinhalaCartoons'},
-{id:'sinhalacartoons-dl',category:'movie',categoryLabel:'Movie',name:'sinhalacartoons.lk · DL',path:'/api/v1/movies/sinhalacartoons/dl',paramKey:'landingUrl',paramLabel:'Landing URL',placeholder:'https://sinhalacartoons.lk/cartoon/tom-and-jerry',desc:'Extracts download URLs'},
-{id:'yt-search',category:'media',categoryLabel:'Media',name:'YouTube · Search',path:'/api/v1/media/yt/search',paramKey:'q',paramLabel:'Query',placeholder:'shape of you',desc:'Searches YouTube videos'},
-{id:'yt-audio-dl',category:'media',categoryLabel:'Media',name:'YouTube · Audio DL',path:'/api/v1/media/yt/audio',paramKey:'q',paramLabel:'Query',placeholder:'shape of you',desc:'Returns direct audio stream'},
-{id:'yt-video-dl',category:'media',categoryLabel:'Media',name:'YouTube · Video DL',path:'/api/v1/media/yt/video',paramKey:'q',paramLabel:'Query',placeholder:'shape of you',desc:'Returns MP4 URLs'}
+  // 🤖 AI
+  {id:'chat-ubi',category:'ai',categoryLabel:'AI',name:'Gemini Mini · Chat AI',path:'/api/v1/ai/chat/ubi',paramKey:'q',paramLabel:'Prompt',placeholder:'Explain quantum computing in 2 sentences',desc:'Fast, clean AI text responses via Gemini Mini'},
+
+  // 🎬 MOVIES & ANIME
+  {id:'cinesub-search',category:'movie',categoryLabel:'Movie',name:'CineSub.lk · Search',path:'/api/v1/movies/cinesub/search',paramKey:'q',paramLabel:'Movie Name',placeholder:'spider man',desc:'Searches TMDB and matches CineSub.lk Sinhala subtitle slugs'},
+  {id:'cinesub-resolve',category:'movie',categoryLabel:'Movie',name:'CineSub.lk · Resolve & Sub DL',path:'/api/v1/movies/cinesub/resolve',paramKey:'tmdbId',paramLabel:'TMDB ID / URL',placeholder:'557',desc:'Extracts direct .vtt subtitle auto-download link & VidLink player'},
+  {id:'cinesubz-search',category:'movie',categoryLabel:'Movie',name:'CineSubz · Search',path:'/api/v1/movies/cinesubz/search',paramKey:'q',paramLabel:'Query',placeholder:'avatar',desc:'Searches titles on CineSubz'},
+  {id:'cinesubz-info',category:'movie',categoryLabel:'Movie',name:'CineSubz · Info & Links',path:'/api/v1/movies/cinesubz/info',paramKey:'url',paramLabel:'Page URL',placeholder:'https://cinesubz.co/movies/avatar',desc:'Scrapes qualities on CineSubz'},
+  {id:'cinesubz-dl',category:'movie',categoryLabel:'Movie',name:'CineSubz · Direct Download',path:'/api/v1/movies/cinesubz/dl',paramKey:'directUrl',paramLabel:'Player URL',placeholder:'https://cinesubz.co/player/avatar-1080p',desc:'Resolves player links to CDN'},
+  {id:'kmmovies-search',category:'movie',categoryLabel:'Movie',name:'KMMovies · Search',path:'/api/v1/movies/kmmovies/search',paramKey:'q',paramLabel:'Movie Name',placeholder:'leo',desc:'Searches movies on KMMovies'},
+  {id:'kmmovies-dl',category:'movie',categoryLabel:'Movie',name:'KMMovies · All Qualities DL',path:'/api/v1/movies/kmmovies/dl',paramKey:'url',paramLabel:'Movie URL',placeholder:'https://kmmovies.beer/leo-2023/',desc:'Resolves WEB-DL & Direct links for all qualities'},
+  {id:'cartoonslk-search',category:'movie',categoryLabel:'Movie',name:'Cartoons.lk · Search',path:'/api/v1/movies/cartoonslk/search',paramKey:'q',paramLabel:'Cartoon / Movie',placeholder:'frozen',desc:'Searches Sinhala dubbed cartoons & movies on cartoons.lk'},
+  {id:'cartoonslk-dl',category:'movie',categoryLabel:'Movie',name:'Cartoons.lk · Direct DL',path:'/api/v1/movies/cartoonslk/dl',paramKey:'url',paramLabel:'Page URL',placeholder:'https://cartoons.lk/movies/frozen-2013/',desc:'Resolves all qualities with direct R2/CDN auto-download links'},
+  {id:'sinhalacartoons-search',category:'movie',categoryLabel:'Movie',name:'SinhalaCartoons.lk · Search',path:'/api/v1/movies/sinhalacartoons/search',paramKey:'q',paramLabel:'Query',placeholder:'tom and jerry',desc:'Searches SinhalaCartoons catalogue'},
+  {id:'sinhalacartoons-dl',category:'movie',categoryLabel:'Movie',name:'SinhalaCartoons.lk · DL',path:'/api/v1/movies/sinhalacartoons/dl',paramKey:'landingUrl',paramLabel:'Landing URL',placeholder:'https://sinhalacartoons.com/dragon-nest-warriors-dawn-sinhala-dubbed/',desc:'Extracts direct Cloudflare R2 download links'},
+  {id:'tamilmv-search',category:'movie',categoryLabel:'Movie',name:'1TamilMV · Search',path:'/api/v1/movies/tamilmv/search',paramKey:'q',paramLabel:'Query',placeholder:'leo',desc:'Searches 1TamilMV forum topics'},
+  {id:'tamilmv-dl',category:'movie',categoryLabel:'Movie',name:'1TamilMV · DL & Magnets',path:'/api/v1/movies/tamilmv/dl',paramKey:'url',paramLabel:'Topic URL',placeholder:'https://www.1tamilmv.yt/index.php?/forums/topic/152345-movie/',desc:'Extracts all quality Direct CDN & Magnet links'},
+  {id:'yts-search',category:'movie',categoryLabel:'Movie',name:'YTS Movies · Search',path:'/api/v1/movies/yts/search',paramKey:'q',paramLabel:'Movie Name',placeholder:'avatar',desc:'Searches YTS official catalog with apexUrls'},
+  {id:'yts-dl',category:'movie',categoryLabel:'Movie',name:'YTS Movies · Torrents & Magnets',path:'/api/v1/movies/yts/dl',paramKey:'url',paramLabel:'Apex URL / Title',placeholder:'https://apex-api-pro.vercel.app/yts?title=Spider-Man:+Brand+New+Day',desc:'Fetches high-speed torrent files and direct magnets'},
+  {id:'animeheaven-search',category:'movie',categoryLabel:'Movie',name:'AnimeHeaven · Search',path:'/api/v1/media/animeheaven/search',paramKey:'q',paramLabel:'Anime Name',placeholder:'Magical Explorer',desc:'Searches anime series on AnimeHeaven'},
+  {id:'animeheaven-dl',category:'movie',categoryLabel:'Movie',name:'AnimeHeaven · All Episodes DL',path:'/api/v1/media/animeheaven/dl',paramKey:'url',paramLabel:'Anime URL',placeholder:'https://animeheaven.me/anime.php?gve9a',desc:'Extracts direct MP4 download links for all episodes'},
+
+  // 🎵 MEDIA & SOCIAL
+  {id:'tiktok-dl',category:'media',categoryLabel:'Media',name:'TikTok · No-Watermark HD DL',path:'/api/v1/media/tiktok/dl',paramKey:'url',paramLabel:'TikTok Video URL',placeholder:'https://www.tiktok.com/@exjaniyafreefire/video/7569612819264490770',desc:'Extracts original HD MP4 without watermark & MP3 audio'},
+  {id:'microsoft-tts',category:'media',categoryLabel:'Media',name:'Microsoft · Neural Multi-TTS',path:'/api/v1/media/microsoft/tts',paramKey:'text',paramLabel:'Text to Speak',placeholder:'Hello, welcome to Apex API!',desc:'Generates cute & expressive Microsoft Neural voice links'},
+  {id:'ai-tts',category:'media',categoryLabel:'Media',name:'Apex AI · Text to Speech',path:'/api/v1/media/ai/tts',paramKey:'text',paramLabel:'Text',placeholder:'Hello, this is Apex AI Voice System',extraParams:'&voice=woman2&language=English',desc:'Converts text into AI synthesized voice audio'},
+  {id:'yt-search',category:'media',categoryLabel:'Media',name:'YouTube · Search',path:'/api/v1/media/yt/search',paramKey:'q',paramLabel:'Query',placeholder:'shape of you',desc:'Searches YouTube videos with durations & IDs'},
+  {id:'yt-audio-dl',category:'media',categoryLabel:'Media',name:'YouTube · Audio DL',path:'/api/v1/media/yt/audio',paramKey:'q',paramLabel:'Query / URL',placeholder:'shape of you',desc:'Returns direct 128kbps audio stream'},
+  {id:'yt-video-dl',category:'media',categoryLabel:'Media',name:'YouTube · Video DL',path:'/api/v1/media/yt/video',paramKey:'q',paramLabel:'Query / URL',placeholder:'shape of you',desc:'Returns downloadable MP4 streams (480p/720p/1080p)'},
+  {id:'facebook-dl',category:'media',categoryLabel:'Media',name:'Facebook · Video DL',path:'/api/v1/media/facebook/dl',paramKey:'url',paramLabel:'Facebook Video URL',placeholder:'https://www.facebook.com/watch/?v=123456789',desc:'Resolves public Facebook videos & reels to HD/SD MP4'},
+  {id:'mediafire-dl',category:'media',categoryLabel:'Media',name:'MediaFire · Direct DL',path:'/api/v1/media/mediafire/dl',paramKey:'url',paramLabel:'MediaFire URL',placeholder:'https://www.mediafire.com/file/abc123xyz/sample.zip/file',desc:'Extracts direct CDN download link & file size'},
+  {id:'slmix-search',category:'media',categoryLabel:'Media',name:'SLMix · Search',path:'/api/v1/media/slmix/search',paramKey:'q',paramLabel:'Song / Remix',placeholder:'dj remix',desc:'Searches Sri Lankan remix tracks on slmix.lk'},
+  {id:'slmix-dl',category:'media',categoryLabel:'Media',name:'SLMix · Direct DL',path:'/api/v1/media/slmix/dl',paramKey:'url',paramLabel:'Track URL',placeholder:'https://www.slmix.lk/song.php?id=123',desc:'Extracts direct MP3 audio stream URLs'},
+
+  // 🎮 GAMES
+  {id:'fitgirl-search',category:'game',categoryLabel:'Game',name:'FitGirl · Search',path:'/api/v1/games/fitgirl/search',paramKey:'q',paramLabel:'Game Name',placeholder:'need for speed',desc:'Searches PC repack titles from FitGirl Repacks'},
+  {id:'fitgirl-dl',category:'game',categoryLabel:'Game',name:'FitGirl · Direct DL',path:'/api/v1/games/fitgirl/dl',paramKey:'url',paramLabel:'Game Post URL',placeholder:'https://fitgirl-repacks.site/game-title/',desc:'Bypasses FuckingFast mirrors for direct part downloads'},
+
+  // 👾 APPS
+  {id:'an1-search',category:'app',categoryLabel:'App',name:'AN1 · Search',path:'/api/v1/apps/an1/search',paramKey:'q',paramLabel:'App / Game Name',placeholder:'subway surfers',desc:'Searches MOD APKs and games on an1.com'},
+  {id:'an1-dl',category:'app',categoryLabel:'App',name:'AN1 · Direct DL',path:'/api/v1/apps/an1/dl',paramKey:'url',paramLabel:'App URL',placeholder:'https://an1.com/624-subway-surfers-mod-apk.html',desc:'Extracts version, size & direct APK download URL'}
 ];
 
 const endpointSelect=document.getElementById('pg-endpoint'),paramInput=document.getElementById('pg-param'),paramLabel=document.getElementById('pg-param-label'),urlBox=document.getElementById('pg-url'),reqPreview=document.getElementById('pg-req-preview'),resPreview=document.getElementById('pg-res-preview'),statusEl=document.getElementById('pg-status'),sendBtn=document.getElementById('pg-send'),categoryPill=document.getElementById('pg-category-pill'),descPill=document.getElementById('pg-desc-pill');
@@ -209,6 +243,7 @@ let currentResponse=null,currentEndpoint=null;
 function buildUrl(ep,value){
   const encoded=encodeURIComponent(value||'{'+ep.paramKey+'}');
   let url=API_BASE+ep.path+'?'+ep.paramKey+'='+encoded;
+  if(ep.extraParams)url+=ep.extraParams;
   if(API_KEY)url+='&api='+API_KEY;
   return url;
 }
@@ -237,7 +272,30 @@ function selectEndpoint(id){
   updateUrlPreview();
 }
 function populateEndpoints(){
-  ENDPOINTS.forEach(ep=>{const o=document.createElement('option');o.value=ep.id;o.textContent=ep.name;endpointSelect.appendChild(o)});
+  const groups={
+    ai:{label:'🤖 AI & Intelligence',items:[]},
+    movie:{label:'🎬 Movies & Cartoons',items:[]},
+    media:{label:'🎵 Media & Audio',items:[]},
+    game:{label:'🎮 PC Games',items:[]},
+    app:{label:'👾 Android Apps',items:[]}
+  };
+
+  ENDPOINTS.forEach(ep=>{
+    if(groups[ep.category])groups[ep.category].items.push(ep);
+  });
+
+  Object.values(groups).forEach(g=>{
+    if(g.items.length===0)return;
+    const og=document.createElement('optgroup');
+    og.label=g.label;
+    g.items.forEach(ep=>{
+      const o=document.createElement('option');
+      o.value=ep.id;
+      o.textContent=ep.name;
+      og.appendChild(o);
+    });
+    endpointSelect.appendChild(og);
+  });
 }
 function setStatus(type,text){statusEl.className='status-badge status-'+type;statusEl.innerHTML='<span class="status-dot"></span>'+text}
 function syntaxHighlight(json){
