@@ -108,7 +108,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialias
 <main class="max-w-7xl mx-auto px-6 py-10 space-y-6">
 <section class="anim-in" style="animation-delay:.05s">
 <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight" style="color:var(--t-txt)">API Playground</h1>
-<p class="mt-1.5 text-sm" style="color:var(--t-txt-3)">Pick any endpoint across AI, Movies, Media, Games, or Apps and test live.</p>
+<p class="mt-1.5 text-sm" style="color:var(--t-txt-3)">Pick any endpoint across AI, Movies, Media, Games, Apps, or Adult (18+) and test live.</p>
 </section>
 
 <section class="panel p-6 sm:p-7 anim-in" style="animation-delay:.12s">
@@ -234,7 +234,11 @@ const ENDPOINTS=[
 
   // 👾 APPS
   {id:'an1-search',category:'app',categoryLabel:'App',name:'AN1 · Search',path:'/api/v1/apps/an1/search',paramKey:'q',paramLabel:'App / Game Name',placeholder:'subway surfers',desc:'Searches MOD APKs and games on an1.com'},
-  {id:'an1-dl',category:'app',categoryLabel:'App',name:'AN1 · Direct DL',path:'/api/v1/apps/an1/dl',paramKey:'url',paramLabel:'App URL',placeholder:'https://an1.com/624-subway-surfers-mod-apk.html',desc:'Extracts version, size & direct APK download URL'}
+  {id:'an1-dl',category:'app',categoryLabel:'App',name:'AN1 · Direct DL',path:'/api/v1/apps/an1/dl',paramKey:'url',paramLabel:'App URL',placeholder:'https://an1.com/624-subway-surfers-mod-apk.html',desc:'Extracts version, size & direct APK download URL'},
+
+  // 🔞 ADULT (18+)
+  {id:'ph-search',category:'adult',categoryLabel:'Adult (18+)',name:'PH · Video Search (Top 25)',path:'/api/v1/adult/ph/search',paramKey:'q',paramLabel:'Search Query',placeholder:'trending',desc:'Searches videos and returns top 25 results with resolve links'},
+  {id:'ph-dl',category:'adult',categoryLabel:'Adult (18+)',name:'PH · Direct & Stream DL',path:'/api/v1/adult/ph/dl',paramKey:'url',paramLabel:'Video URL',placeholder:'https://www.pornhub.com/view_video.php?viewkey=12345',desc:'Extracts all MP4 resolutions with direct CDN & proxy stream URLs'}
 ];
 
 const endpointSelect=document.getElementById('pg-endpoint'),paramInput=document.getElementById('pg-param'),paramLabel=document.getElementById('pg-param-label'),urlBox=document.getElementById('pg-url'),reqPreview=document.getElementById('pg-req-preview'),resPreview=document.getElementById('pg-res-preview'),statusEl=document.getElementById('pg-status'),sendBtn=document.getElementById('pg-send'),categoryPill=document.getElementById('pg-category-pill'),descPill=document.getElementById('pg-desc-pill');
@@ -277,7 +281,8 @@ function populateEndpoints(){
     movie:{label:'🎬 Movies & Cartoons',items:[]},
     media:{label:'🎵 Media & Audio',items:[]},
     game:{label:'🎮 PC Games',items:[]},
-    app:{label:'👾 Android Apps',items:[]}
+    app:{label:'👾 Android Apps',items:[]},
+    adult:{label:'🔞 Adult (18+)',items:[]}
   };
 
   ENDPOINTS.forEach(ep=>{
