@@ -7,13 +7,13 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script>tailwind.config={theme:{extend:{fontFamily:{sans:['"Plus Jakarta Sans"','ui-sans-serif','system-ui','sans-serif']}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['"Plus Jakarta Sans"','ui-sans-serif','system-ui','sans-serif'],mono:['"JetBrains Mono"','monospace']}}}}</script>
 <style>
 :root,[data-theme="white"]{--t-txt:#0f172a;--t-txt-2:#475569;--t-txt-3:#64748b;--t-txt-4:#94a3b8;--t-card:rgba(255,255,255,.96);--t-card-solid:#fff;--t-border:rgba(226,232,240,.9);--t-header:rgba(255,255,255,.8);--t-input:#f8fafc;--t-accent:#6366f1;--t-accent-2:#8b5cf6;--t-shadow:0 20px 50px -30px rgba(15,23,42,.25);--t-orb-1:rgba(165,180,252,.4);--t-orb-2:rgba(196,181,253,.4);--t-orb-3:rgba(186,230,253,.6);--t-bg:radial-gradient(1200px 800px at 15% 5%,#e0e7ff 0%,transparent 60%),radial-gradient(1000px 700px at 85% 20%,#ede9fe 0%,transparent 55%),radial-gradient(900px 600px at 50% 100%,#e0f2fe 0%,transparent 60%),linear-gradient(180deg,#f8fafc 0%,#eef2ff 45%,#f8fafc 100%)}
 [data-theme="black"]{--t-txt:#e8eaf6;--t-txt-2:#cbd5e1;--t-txt-3:#a5b4fc;--t-txt-4:#64748b;--t-card:rgba(20,22,45,.85);--t-card-solid:#14162d;--t-border:rgba(99,102,241,.25);--t-header:rgba(15,17,40,.82);--t-input:rgba(30,35,65,.6);--t-accent:#818cf8;--t-accent-2:#a78bfa;--t-shadow:0 20px 60px -30px rgba(0,0,0,.8);--t-orb-1:rgba(99,102,241,.3);--t-orb-2:rgba(139,92,246,.3);--t-orb-3:rgba(56,189,248,.22);--t-bg:radial-gradient(1200px 800px at 15% 5%,rgba(99,102,241,.18) 0%,transparent 60%),radial-gradient(1000px 700px at 85% 20%,rgba(139,92,246,.18) 0%,transparent 55%),radial-gradient(900px 600px at 50% 100%,rgba(56,189,248,.12) 0%,transparent 60%),linear-gradient(180deg,#0a0a18 0%,#0f0f24 45%,#0a0a18 100%)}
 html{scroll-behavior:smooth}
-body{font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased;color:var(--t-txt);background:var(--t-bg);background-attachment:fixed;transition:background .8s,color .6s}
+body{font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased;color:var(--t-txt);background:var(--t-bg);background-attachment:fixed;transition:background .8s,color .6s;overflow:hidden}
 .t-theme-btn{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--t-txt-3);transition:all .28s;cursor:pointer;border:none;background:transparent}
 .t-theme-btn:hover{background:rgba(99,102,241,.12);color:var(--t-accent)}
 .t-theme-btn.active{background:linear-gradient(135deg,var(--t-accent),var(--t-accent-2));color:#fff;box-shadow:0 4px 12px -4px var(--t-accent)}
@@ -22,40 +22,141 @@ body{font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialias
 [data-theme="black"] .text-slate-500,[data-theme="black"] .text-slate-400{color:var(--t-txt-3)!important}
 [data-theme="black"] .text-slate-600,[data-theme="black"] .text-slate-300{color:var(--t-txt-2)!important}
 [data-theme="black"] .border-slate-200,[data-theme="black"] .border-slate-100,[data-theme="black"] .border-slate-200\/80,[data-theme="black"] .border-slate-200\/90{border-color:var(--t-border)!important}
-[data-theme="black"] .bg-indigo-50,[data-theme="black"] .bg-violet-50,[data-theme="black"] .bg-emerald-50{background:rgba(99,102,241,.15)!important}
-/* LOADER */
-#loader{background:var(--t-card-solid);transition:opacity .8s,visibility .8s}
-#loader.hidden{opacity:0;visibility:hidden}
-@keyframes spinSlow{to{transform:rotate(360deg)}}
-.glow-pulse{animation:floatGlow 2s ease-in-out infinite}
-@keyframes floatGlow{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(1.25);opacity:.9}}
-@keyframes shimmerMove{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}
-.bar-shimmer{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);width:45%;animation:shimmerMove 1.15s ease-in-out infinite}
-@keyframes dotBounce{0%,80%,100%{transform:translateY(0);opacity:.35}40%{transform:translateY(-5px);opacity:1}}
-.dot{animation:dotBounce 1.2s infinite ease-in-out}
-.dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.30s}
-.loader-ring-1{position:absolute;inset:0;border-radius:50%;border:4px solid transparent;border-top-color:#6c63ff;border-right-color:rgba(108,99,255,.25);border-left-color:rgba(108,99,255,.25);animation:spinSlow 1.8s linear infinite;box-shadow:0 0 14px rgba(108,99,255,.4)}
-.loader-ring-2{position:absolute;inset:12px;border-radius:50%;border:3px solid transparent;border-right-color:#00e5ff;border-bottom-color:rgba(0,229,255,.25);animation:spinSlow 2.6s linear infinite reverse;box-shadow:0 0 12px rgba(0,229,255,.35)}
-.loader-ring-3{position:absolute;inset:24px;border-radius:50%;border:3px solid transparent;border-top-color:rgba(224,64,251,.8);animation:spinSlow 3.2s linear infinite;box-shadow:0 0 10px rgba(224,64,251,.3)}
-@keyframes iconBreath{0%,100%{box-shadow:0 8px 30px rgba(108,99,255,.5);transform:scale(1)}50%{box-shadow:0 8px 50px rgba(108,99,255,.85);transform:scale(1.05)}}
-.loader-icon{position:absolute;inset:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;animation:iconBreath 2s ease-in-out infinite}
-.loader-logo-wrap{position:relative;width:140px;height:140px;margin-bottom:28px}
-.loader-particle{position:absolute;width:4px;height:4px;border-radius:50%;opacity:0;animation:particleFloat var(--dur,6s) ease-in-out infinite;animation-delay:var(--delay,0s)}
-@keyframes particleFloat{0%{opacity:0;transform:translateY(100vh) scale(.5)}10%{opacity:.6}90%{opacity:.4}100%{opacity:0;transform:translateY(-10vh) scale(1.2)}}
-@keyframes charIn{from{opacity:0;transform:translateY(14px) scale(.85)}to{opacity:1;transform:translateY(0) scale(1)}}
-.loader-char{display:inline-block;opacity:0;animation:charIn .38s cubic-bezier(.34,1.56,.64,1) forwards}
 
-/* ============ INTRO ANIMATION (post-loader stagger) ============ */
-@keyframes introIn{
-  from{opacity:0;transform:translateY(28px)}
-  to{opacity:1;transform:translateY(0)}
+/* ═══════ CINEMATIC LOADER ═══════ */
+#cinema-loader{position:fixed;inset:0;z-index:100;overflow:hidden;background:#000;transition:opacity 1s ease .15s}
+#cinema-loader.gone{display:none}
+#fx{position:absolute;inset:0;width:100%;height:100%;z-index:1;display:block}
+
+.letterbox{position:absolute;left:0;right:0;height:6vh;background:#000;z-index:40;transition:height 1.2s cubic-bezier(.76,0,.24,1) .4s}
+.letterbox.lb-top{top:0;box-shadow:0 2px 40px rgba(0,0,0,1)}
+.letterbox.lb-bottom{bottom:0;box-shadow:0 -2px 40px rgba(0,0,0,1)}
+#cinema-loader.done .letterbox{height:0}
+
+.grain{position:absolute;inset:0;pointer-events:none;z-index:50;opacity:.055;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grainShift .4s steps(2) infinite;mix-blend-mode:overlay}
+@keyframes grainShift{0%{transform:translate(0,0)}33%{transform:translate(-2%,1.5%)}66%{transform:translate(1.5%,-1%)}100%{transform:translate(-1%,-2%)}}
+
+.vignette{position:absolute;inset:0;pointer-events:none;z-index:45;background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,.85) 100%)}
+.chroma{position:absolute;inset:0;pointer-events:none;z-index:46;background:linear-gradient(90deg,rgba(255,0,80,.15) 0%,transparent 3%,transparent 97%,rgba(0,150,255,.15) 100%);mix-blend-mode:screen;opacity:.6}
+
+/* HUD */
+.hud{position:absolute;inset:0;pointer-events:none;z-index:55;font-family:'JetBrains Mono',monospace;color:#fff}
+.hud-corner{position:absolute;width:44px;height:44px;border:1px solid rgba(196,181,253,.5);opacity:.8}
+.hud-corner.tl{top:calc(6vh + 14px);left:14px;border-right:none;border-bottom:none;border-top-width:2px;border-left-width:2px}
+.hud-corner.tr{top:calc(6vh + 14px);right:14px;border-left:none;border-bottom:none;border-top-width:2px;border-right-width:2px}
+.hud-corner.bl{bottom:calc(6vh + 14px);left:14px;border-right:none;border-top:none;border-bottom-width:2px;border-left-width:2px}
+.hud-corner.br{bottom:calc(6vh + 14px);right:14px;border-left:none;border-top:none;border-bottom-width:2px;border-right-width:2px}
+
+.hud-tl{position:absolute;top:calc(6vh + 30px);left:34px;font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:rgba(196,181,253,.7);font-weight:600}
+.hud-tl .scene-num{display:block;font-size:24px;font-weight:800;color:#fff;letter-spacing:-.02em;line-height:1;margin-bottom:4px;text-shadow:0 0 20px rgba(139,92,246,.6);font-variant-numeric:tabular-nums}
+.hud-tl .scene-label{color:#22d3ee;text-shadow:0 0 10px rgba(34,211,238,.7)}
+.hud-tl .scene-name{display:block;font-size:8.5px;color:rgba(196,181,253,.5);margin-top:6px;letter-spacing:.35em}
+
+.hud-tr{position:absolute;top:calc(6vh + 30px);right:34px;text-align:right}
+.hud-rec{display:inline-flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.28em;text-transform:uppercase;font-weight:600;color:rgba(239,68,68,.95)}
+.hud-rec::before{content:'';width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 12px #ef4444;animation:recBlink 1.2s ease-in-out infinite}
+@keyframes recBlink{0%,100%{opacity:.35;transform:scale(.9)}50%{opacity:1;transform:scale(1.1)}}
+.hud-fps{margin-top:8px;font-size:9px;color:rgba(196,181,253,.5);letter-spacing:.2em}
+
+.hud-bl{position:absolute;bottom:calc(6vh + 30px);left:34px;max-width:340px}
+.hud-timecode{font-size:11px;letter-spacing:.18em;color:rgba(196,181,253,.65);font-weight:600;margin-bottom:10px}
+.hud-timecode .cur{color:#fff}
+.hud-timecode .milli{color:#22d3ee;font-size:10px}
+.hud-bar-track{width:260px;height:2px;background:rgba(139,92,246,.18);border-radius:2px;overflow:hidden;position:relative}
+.hud-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#6366f1,#8b5cf6,#22d3ee);border-radius:2px;transition:width .3s linear;box-shadow:0 0 12px rgba(139,92,246,.9)}
+.hud-bar-marker{position:absolute;top:-2px;left:0;width:2px;height:6px;background:#fff;box-shadow:0 0 8px #fff;transition:left .3s linear}
+.hud-timeline{position:relative;margin-top:10px;width:260px;display:flex;justify-content:space-between;font-size:7.5px;letter-spacing:.16em;color:rgba(196,181,253,.35)}
+.hud-timeline .tl-dot{position:absolute;top:-8px;width:1px;height:4px;background:rgba(196,181,253,.3)}
+.hud-timeline .tl-dot.passed{background:#22d3ee;box-shadow:0 0 6px #22d3ee}
+
+.hud-br{position:absolute;bottom:calc(6vh + 30px);right:34px;text-align:right}
+.hud-pct-label{font-size:9px;letter-spacing:.32em;color:rgba(196,181,253,.55);text-transform:uppercase;margin-bottom:4px}
+.hud-pct{font-size:64px;font-weight:800;letter-spacing:-.04em;line-height:1;color:#fff;font-variant-numeric:tabular-nums;text-shadow:0 0 40px rgba(139,92,246,.6),0 0 80px rgba(139,92,246,.35)}
+.hud-pct .pct-sign{font-size:24px;color:rgba(196,181,253,.7);margin-left:4px;vertical-align:top;line-height:1;position:relative;top:8px}
+.hud-status{margin-top:10px;font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:rgba(34,211,238,.85);text-shadow:0 0 8px rgba(34,211,238,.4);font-weight:600}
+.hud-status.warn{color:#fbbf24;text-shadow:0 0 8px rgba(251,191,36,.6);animation:statusPulse .35s ease-in-out infinite}
+.hud-status.danger{color:#ef4444;text-shadow:0 0 12px rgba(239,68,68,.9);animation:statusPulse .2s ease-in-out infinite}
+@keyframes statusPulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+.hud-scene-pill{position:absolute;top:calc(6vh + 20px);left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:6px 16px;background:rgba(10,8,25,.6);border:1px solid rgba(139,92,246,.25);border-radius:20px;font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:rgba(196,181,253,.8);font-weight:600;backdrop-filter:blur(8px)}
+.hud-scene-pill .dot-live{width:6px;height:6px;border-radius:50%;background:#22d3ee;box-shadow:0 0 8px #22d3ee;animation:dotLive 1.5s ease-in-out infinite}
+@keyframes dotLive{0%,100%{opacity:.5;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
+
+/* ═══ LOGO (Scene 7) ═══ */
+.logo-stage{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:35;display:flex;flex-direction:column;align-items:center;opacity:0;pointer-events:none}
+.logo-stage.show{opacity:1}
+.logo-main{font-size:96px;font-weight:800;letter-spacing:-.045em;line-height:1;text-align:center;background:linear-gradient(135deg,#fff 0%,#c4b5fd 45%,#22d3ee 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;filter:drop-shadow(0 0 40px rgba(139,92,246,.7)) drop-shadow(0 0 80px rgba(34,211,238,.4));font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center}
+
+/* Speed-up: letters build in 0.6s total, hold 2s */
+.logo-main .ltr{display:inline-block;opacity:0;transform:translateY(60px) scale(.3) rotateX(-120deg);filter:blur(12px)}
+.logo-stage.show .logo-main .ltr{animation:ltrIgnite .4s cubic-bezier(.34,1.56,.64,1) forwards}
+.logo-main .ltr.space{width:.3em}
+@keyframes ltrIgnite{0%{opacity:0;transform:translateY(60px) scale(.3) rotateX(-120deg);filter:blur(12px)}55%{opacity:1;filter:blur(0)}80%{transform:translateY(-6px) scale(1.08) rotateX(6deg)}100%{opacity:1;transform:translateY(0) scale(1) rotateX(0);filter:blur(0)}}
+
+/* Breathing glow while holding */
+.logo-stage.show .logo-main{animation:logoBreath 2.2s ease-in-out .9s infinite}
+@keyframes logoBreath{0%,100%{filter:drop-shadow(0 0 40px rgba(139,92,246,.7)) drop-shadow(0 0 80px rgba(34,211,238,.4))}50%{filter:drop-shadow(0 0 60px rgba(139,92,246,1)) drop-shadow(0 0 130px rgba(34,211,238,.65))}}
+
+.logo-underline{width:0;height:2px;background:linear-gradient(90deg,transparent,#22d3ee,#8b5cf6,#22d3ee,transparent);margin-top:20px;box-shadow:0 0 20px rgba(34,211,238,.9);filter:blur(.3px)}
+.logo-stage.show .logo-underline{animation:underlineGrow .3s cubic-bezier(.16,1,.3,1) .4s forwards}
+@keyframes underlineGrow{to{width:100%}}
+
+.logo-sub{margin-top:22px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.55em;color:rgba(196,181,253,.9);text-transform:uppercase;font-weight:600;opacity:0;transform:translateY(8px);text-shadow:0 0 20px rgba(139,92,246,.8)}
+.logo-stage.show .logo-sub{animation:subReveal .25s ease .5s forwards}
+@keyframes subReveal{to{opacity:1;transform:translateY(0)}}
+
+/* Flash + shake */
+.flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,#fff 0%,#c4b5fd 40%,#6366f1 80%,transparent 100%);opacity:0;pointer-events:none;z-index:70;mix-blend-mode:screen}
+.flash.fire{animation:flashFire .9s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes flashFire{0%{opacity:0;transform:scale(.5)}10%{opacity:1;transform:scale(1.2)}25%{opacity:1;transform:scale(1.3)}100%{opacity:0;transform:scale(1.6)}}
+
+#cinema-loader.shake{animation:shakeHard .5s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes shakeHard{0%,100%{transform:translate(0,0)}10%{transform:translate(-6px,-4px)}20%{transform:translate(6px,4px)}30%{transform:translate(-5px,3px)}40%{transform:translate(5px,-3px)}50%{transform:translate(-4px,2px)}60%{transform:translate(4px,-2px)}70%{transform:translate(-2px,1px)}80%{transform:translate(2px,-1px)}90%{transform:translate(-1px,1px)}}
+
+/* Mobile */
+@media (max-width:640px){
+  .letterbox{height:4vh}
+  .hud-corner{width:26px;height:26px}
+  .hud-tl{font-size:8px;letter-spacing:.24em;top:calc(4vh + 20px);left:22px}
+  .hud-tl .scene-num{font-size:18px}
+  .hud-tl .scene-name{font-size:7px;letter-spacing:.28em}
+  .hud-tr{top:calc(4vh + 20px);right:22px}
+  .hud-rec{font-size:8px;letter-spacing:.22em}
+  .hud-fps{font-size:7px}
+  .hud-bl{bottom:calc(4vh + 20px);left:22px;max-width:200px}
+  .hud-timecode{font-size:9px;letter-spacing:.14em}
+  .hud-bar-track{width:170px}
+  .hud-timeline{width:170px;font-size:6.5px}
+  .hud-br{bottom:calc(4vh + 20px);right:22px}
+  .hud-pct{font-size:42px}
+  .hud-pct .pct-sign{font-size:16px;top:5px}
+  .hud-pct-label{font-size:7px}
+  .hud-status{font-size:7.5px;letter-spacing:.18em}
+  .hud-scene-pill{top:calc(4vh + 12px);font-size:7px;letter-spacing:.24em;padding:4px 12px}
+  .logo-main{font-size:52px}
+  .logo-sub{font-size:8.5px;letter-spacing:.4em;margin-top:16px}
+  .logo-underline{margin-top:14px}
 }
+@media (max-width:380px){
+  .logo-main{font-size:40px}
+  .hud-bar-track,.hud-timeline{width:140px}
+  .hud-pct{font-size:36px}
+}
+
+/* PAGE INTRO */
+@keyframes introFadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes introBadge{from{opacity:0;transform:translateY(-14px) scale(.85)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes introTitle{from{opacity:0;transform:translateY(44px) scale(.94);filter:blur(12px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+@keyframes introCard{from{opacity:0;transform:translateY(60px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
 .intro-item{opacity:0;will-change:opacity,transform}
-body.intro-ready .intro-item{
-  animation:introIn .75s cubic-bezier(.16,1,.3,1) var(--d,0s) forwards;
-}
+body.intro-ready .intro-item{animation:introFadeUp .9s cubic-bezier(.16,1,.3,1) var(--d,0s) forwards}
+body.intro-ready .intro-badge{animation:introBadge .75s cubic-bezier(.34,1.56,.64,1) var(--d,0s) forwards}
+body.intro-ready .intro-title{animation:introTitle 1.15s cubic-bezier(.16,1,.3,1) var(--d,0s) forwards}
+body.intro-ready .intro-card{animation:introCard 1.05s cubic-bezier(.16,1,.3,1) var(--d,0s) forwards}
+header{opacity:0;transform:translateY(-24px);transition:opacity .7s ease .1s,transform .7s cubic-bezier(.16,1,.3,1) .1s}
+body.intro-ready header{opacity:1;transform:translateY(0)}
+body.intro-ready{overflow:auto!important}
 
-/* MAIN */
 .btn-primary{background-image:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);background-size:160% 160%;background-position:0% 50%;transition:background-position .5s,box-shadow .3s,transform .2s;box-shadow:0 10px 25px -8px rgba(99,102,241,.65)}
 .btn-primary:hover{background-position:100% 50%;box-shadow:0 18px 34px -10px rgba(99,102,241,.75);transform:translateY(-2px)}
 .btn-ghost{transition:all .25s;box-shadow:0 1px 2px rgba(15,23,42,.05)}
@@ -72,26 +173,78 @@ body.intro-ready .intro-item{
 </head>
 <body class="antialiased">
 
-<!-- ============ LOADER ============ -->
-<div id="loader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center">
-<div class="absolute w-72 h-72 rounded-full bg-indigo-500/20 blur-3xl glow-pulse"></div>
-<div id="loaderParticles" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
-<div class="loader-logo-wrap"><div class="loader-ring-1"></div><div class="loader-ring-2"></div><div class="loader-ring-3"></div>
-<div class="loader-icon"><svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13l0-8z"/></svg></div></div>
-<h2 id="loaderBrand" class="text-2xl font-extrabold tracking-tight mb-2" style="color:var(--t-txt)"></h2>
-<p id="loader-status" class="text-sm mb-7 font-medium" style="color:var(--t-txt-3)">Preparing your workspace</p>
-<div class="w-64"><div class="relative h-1.5 w-full rounded-full overflow-hidden" style="background:rgba(99,102,241,.15)"><div id="load-bar" class="relative h-full w-0 rounded-full bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 overflow-hidden transition-[width] duration-100 ease-out"><span class="bar-shimmer"></span></div></div>
-<div class="flex justify-between items-center mt-3"><div class="flex items-center gap-1.5"><span class="dot w-1.5 h-1.5 rounded-full bg-indigo-500"></span><span class="dot w-1.5 h-1.5 rounded-full bg-indigo-500"></span><span class="dot w-1.5 h-1.5 rounded-full bg-indigo-500"></span></div><span id="load-pct" class="text-xs font-semibold tabular-nums" style="color:var(--t-txt-3)">0%</span></div></div>
+<div id="cinema-loader">
+  <canvas id="fx"></canvas>
+  <div class="letterbox lb-top"></div>
+  <div class="letterbox lb-bottom"></div>
+  <div class="vignette"></div>
+  <div class="chroma"></div>
+  <div class="grain"></div>
+
+  <div class="hud">
+    <div class="hud-corner tl"></div>
+    <div class="hud-corner tr"></div>
+    <div class="hud-corner bl"></div>
+    <div class="hud-corner br"></div>
+
+    <div class="hud-tl">
+      <span class="scene-num" id="hudNum">01</span>
+      <span class="scene-label" id="hudLabel">INITIALIZATION</span>
+      <span class="scene-name" id="hudName">APEX RESOLVER · SEQ 01</span>
+    </div>
+
+    <div class="hud-tr">
+      <div class="hud-rec">REC</div>
+      <div class="hud-fps" id="hudFps">60 FPS</div>
+    </div>
+
+    <div class="hud-scene-pill">
+      <span class="dot-live"></span>
+      <span id="hudPhase">PHASE 01 · DARKNESS</span>
+    </div>
+
+    <div class="hud-bl">
+      <div class="hud-timecode">
+        <span class="cur" id="hudCur">00:00</span><span class="milli" id="hudMilli">.000</span> / 00:10
+      </div>
+      <div class="hud-bar-track">
+        <div class="hud-bar-fill" id="hudBarFill"></div>
+        <div class="hud-bar-marker" id="hudBarMarker"></div>
+      </div>
+      <div class="hud-timeline" id="hudTimeline">
+        <span class="tl-dot" style="left:0%" data-t="1"></span>
+        <span class="tl-dot" style="left:10%" data-t="2"></span>
+        <span class="tl-dot" style="left:22%" data-t="3"></span>
+        <span class="tl-dot" style="left:36%" data-t="4"></span>
+        <span class="tl-dot" style="left:52%" data-t="5"></span>
+        <span class="tl-dot" style="left:66%" data-t="6"></span>
+        <span class="tl-dot" style="left:72%" data-t="7"></span>
+        <span class="tl-dot" style="left:100%" data-t="8"></span>
+      </div>
+    </div>
+
+    <div class="hud-br">
+      <div class="hud-pct-label">PROGRESS</div>
+      <div class="hud-pct"><span id="hudPct">0</span><span class="pct-sign">%</span></div>
+      <div class="hud-status" id="hudStatus">STANDING BY</div>
+    </div>
+  </div>
+
+  <div class="logo-stage" id="logoStage">
+    <div class="logo-main" id="logoMain"></div>
+    <div class="logo-underline"></div>
+    <div class="logo-sub">System Online</div>
+  </div>
+
+  <div class="flash" id="flash"></div>
 </div>
 
-<!-- BG ORBS -->
 <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
 <div class="orb orb-1 absolute -top-40 -left-32 w-[34rem] h-[34rem] rounded-full blur-3xl"></div>
 <div class="orb orb-2 absolute top-1/3 -right-40 w-[30rem] h-[30rem] rounded-full blur-3xl"></div>
 <div class="orb orb-3 absolute bottom-0 left-1/3 w-[26rem] h-[26rem] rounded-full blur-3xl"></div>
 </div>
 
-<!-- HEADER -->
 <header class="sticky top-0 z-30 t-header backdrop-blur-xl border-b t-border">
 <div class="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between gap-4">
 <a href="#" class="flex items-center gap-3 group">
@@ -113,21 +266,17 @@ body.intro-ready .intro-item{
 </div>
 </header>
 
-<!-- MAIN -->
 <main class="relative max-w-7xl mx-auto px-6">
-
-<!-- HERO -->
 <section class="text-center pt-20 pb-20 md:pt-28 md:pb-24">
-<span class="intro-item inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-indigo-400 border t-border shadow-sm px-4 py-1.5 rounded-full backdrop-blur" style="--d:.10s;background:rgba(99,102,241,.08)"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>High-speed stream resolver mesh</span>
-<h1 class="intro-item mt-7 text-4xl sm:text-5xl md:text-6xl lg:text-[4.2rem] font-extrabold tracking-tight leading-[1.05] max-w-4xl mx-auto t-text" style="--d:.30s">Modular entertainment &amp; <span class="bg-gradient-to-r from-indigo-500 to-violet-500 bg-clip-text text-transparent">media decryption API</span></h1>
-<p class="intro-item mt-6 max-w-2xl mx-auto text-lg leading-relaxed t-text-3" style="--d:.50s">A decentralized, isolated microservice architecture delivering pure direct streaming links — with zero persistent file storage.</p>
-<div class="intro-item mt-10 flex flex-wrap items-center justify-center gap-4" style="--d:.70s">
+<span class="intro-item intro-badge inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-indigo-400 border t-border shadow-sm px-4 py-1.5 rounded-full backdrop-blur" style="--d:.15s;background:rgba(99,102,241,.08)"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>High-speed stream resolver mesh</span>
+<h1 class="intro-item intro-title mt-7 text-4xl sm:text-5xl md:text-6xl lg:text-[4.2rem] font-extrabold tracking-tight leading-[1.05] max-w-4xl mx-auto t-text" style="--d:.35s">Modular entertainment &amp; <span class="bg-gradient-to-r from-indigo-500 to-violet-500 bg-clip-text text-transparent">media decryption API</span></h1>
+<p class="intro-item mt-6 max-w-2xl mx-auto text-lg leading-relaxed t-text-3" style="--d:.55s">A decentralized, isolated microservice architecture delivering pure direct streaming links — with zero persistent file storage.</p>
+<div class="intro-item mt-10 flex flex-wrap items-center justify-center gap-4" style="--d:.75s">
 <a href="login.html" class="btn-primary inline-flex items-center gap-2 text-white text-base font-bold px-8 py-3.5 rounded-xl">Get Started<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
 <a href="dashboard.html" class="btn-ghost inline-flex items-center gap-2 border t-border t-text-2 text-base font-bold px-8 py-3.5 rounded-xl backdrop-blur" style="background:var(--t-card)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13.5"/><path d="M8 10h8M8 14h5"/></svg>View Docs</a>
 </div>
 </section>
 
-<!-- METRICS -->
 <section id="metrics">
 <div class="intro-item t-card t-shadow backdrop-blur-sm border rounded-3xl p-6 md:p-9" style="--d:1.00s">
 <div class="intro-item flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-7 border-b t-border" style="--d:1.20s">
@@ -142,31 +291,28 @@ body.intro-ready .intro-item{
 </div>
 </section>
 
-<!-- FEATURES -->
 <section id="features" class="grid grid-cols-1 md:grid-cols-3 gap-6 py-20">
-<div class="intro-item card-hover t-card t-shadow backdrop-blur-sm border rounded-2xl p-7" style="--d:1.70s">
+<div class="intro-item intro-card card-hover t-card t-shadow backdrop-blur-sm border rounded-2xl p-7" style="--d:1.70s">
 <div class="w-11 h-11 rounded-xl bg-indigo-500/15 flex items-center justify-center mb-5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
 <span class="text-xs font-bold tracking-widest text-indigo-500">01</span>
 <h3 class="mt-2 text-lg font-extrabold tracking-tight t-text">Isolated engines</h3>
 <p class="mt-2 text-sm leading-relaxed t-text-3">CineSubz, SaveTube and SinhalaCartoons run in independent sandboxes. A failure never propagates to the rest of the mesh.</p>
 </div>
-<div class="intro-item card-hover t-card t-shadow backdrop-blur-sm border rounded-2xl p-7" style="--d:1.90s">
+<div class="intro-item intro-card card-hover t-card t-shadow backdrop-blur-sm border rounded-2xl p-7" style="--d:1.90s">
 <div class="w-11 h-11 rounded-xl bg-violet-500/15 flex items-center justify-center mb-5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13l0-8z"/></svg></div>
 <span class="text-xs font-bold tracking-widest text-violet-500">02</span>
 <h3 class="mt-2 text-lg font-extrabold tracking-tight t-text">Zero server overhead</h3>
 <p class="mt-2 text-sm leading-relaxed t-text-3">No gigabyte file streaming on backend compute. Link resolvers generate direct streamable URLs instantly.</p>
 </div>
-<div class="intro-item card-hover t-card t-shadow backdrop-blur-sm border rounded-2xl p-7" style="--d:2.10s">
+<div class="intro-item intro-card card-hover t-card t-shadow backdrop-blur-sm border rounded-2xl p-7" style="--d:2.10s">
 <div class="w-11 h-11 rounded-xl bg-emerald-500/15 flex items-center justify-center mb-5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2M17 6l2 2M14 9l2 2"/></svg></div>
 <span class="text-xs font-bold tracking-widest text-emerald-500">03</span>
 <h3 class="mt-2 text-lg font-extrabold tracking-tight t-text">Unified credentials</h3>
 <p class="mt-2 text-sm leading-relaxed t-text-3">One secure API key authorizes every current and future endpoint, with automatic rate-limit metering.</p>
 </div>
 </section>
-
 </main>
 
-<!-- FOOTER -->
 <footer class="intro-item border-t t-border backdrop-blur" style="--d:2.30s;background:var(--t-header)">
 <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs t-text-3 font-medium">
 <span>© 2026 Apex API System. All rights reserved.</span>
@@ -192,49 +338,649 @@ body.intro-ready .intro-item{
   });
 })();
 
-/* LOADER + INTRO TRIGGER */
+/* CINEMATIC LOADER — 10 SECONDS + 2S LOGO HOLD */
 (function(){
-  const box=document.getElementById('loaderParticles');
-  const colors=['#6c63ff','#00e5ff','#e040fb','#00e676','#ff6d00'];
-  for(let i=0;i<30;i++){
-    const p=document.createElement('div');p.className='loader-particle';
-    p.style.cssText=`left:${Math.random()*100}%;--dur:${5+Math.random()*8}s;--delay:${Math.random()*6}s;background:${colors[Math.floor(Math.random()*colors.length)]};width:${3+Math.random()*5}px;height:${3+Math.random()*5}px;`;
-    box.appendChild(p);
+  const loader = document.getElementById('cinema-loader');
+  const canvas = document.getElementById('fx');
+  const ctx = canvas.getContext('2d', { alpha: true });
+  const IS_MOBILE = window.innerWidth < 768;
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  let W=0,H=0,CX=0,CY=0;
+  function resize(){
+    W=window.innerWidth; H=window.innerHeight;
+    canvas.width=W*DPR; canvas.height=H*DPR;
+    canvas.style.width=W+'px'; canvas.style.height=H+'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    CX=W/2; CY=H/2;
   }
-  const brand=document.getElementById('loaderBrand');
-  'Apex API'.split('').forEach((ch,i)=>{const s=document.createElement('span');s.className='loader-char';s.style.animationDelay=(0.1+i*0.06)+'s';s.textContent=ch===' '?'\u00A0':ch;brand.appendChild(s)});
-  const loader=document.getElementById('loader'),bar=document.getElementById('load-bar'),pct=document.getElementById('load-pct'),status=document.getElementById('loader-status');
-  const stages=[{at:0,text:'Preparing your workspace'},{at:25,text:'Connecting to service mesh'},{at:55,text:'Warming up resolver engines'},{at:80,text:'Syncing telemetry streams'},{at:100,text:'Almost ready'}];
-  const DURATION=2800,start=performance.now();
-  function frame(now){
-    const t=Math.min((now-start)/DURATION,1),eased=1-Math.pow(1-t,3),val=Math.round(eased*100);
-    bar.style.width=val+'%';pct.textContent=val+'%';
-    const st=[...stages].reverse().find(s=>val>=s.at);
-    if(st&&status.textContent!==st.text)status.textContent=st.text;
-    if(t<1)requestAnimationFrame(frame);
-    else{
-      status.textContent='✓ Ready';
-      setTimeout(()=>{
-        /* Trigger intro animations at SAME TIME as loader starts fading */
-        document.body.classList.add('intro-ready');
-        loader.classList.add('hidden');
-        setTimeout(()=>{
-          loader.remove();
-          initChart();
-        },800);
-      },250);
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+
+  /* ★★★ 10-SECOND TIMELINE ★★★ */
+  const T = {
+    S1: 0,     S1e: 1000,
+    S2: 1000,  S2e: 2200,
+    S3: 2200,  S3e: 3600,
+    S4: 3600,  S4e: 5200,
+    S5: 5200,  S5e: 6600,
+    S6: 6600,  S6e: 7200,
+    S7: 7200,  S7e: 10000,  /* ★ Logo builds 7200-8000, holds 8000-10000 */
+    TOTAL: 10000             /* ★ Total 10 seconds */
+  };
+
+  const SCENE_META = [
+    { n:1, num:'01', label:'INITIALIZATION', phase:'PHASE 01 · DARKNESS',  name:'APEX · SEQ 01' },
+    { n:2, num:'02', label:'IGNITION',       phase:'PHASE 02 · SPARK',     name:'APEX · SEQ 02' },
+    { n:3, num:'03', label:'EXPANSION',      phase:'PHASE 03 · DIVERGENCE',name:'APEX · SEQ 03' },
+    { n:4, num:'04', label:'NETWORK',        phase:'PHASE 04 · SYNCING',   name:'APEX · SEQ 04' },
+    { n:5, num:'05', label:'CONVERGENCE',    phase:'PHASE 05 · UPLINK',    name:'APEX · SEQ 05' },
+    { n:6, num:'06', label:'CRITICAL',       phase:'PHASE 06 · OVERLOAD',  name:'APEX · SEQ 06' },
+    { n:7, num:'07', label:'EMERGENCE',      phase:'PHASE 07 · ONLINE',    name:'APEX · SEQ 07' },
+  ];
+
+  /* Starfield */
+  const stars = [];
+  const STAR_COUNT = IS_MOBILE ? 120 : 240;
+  for (let i = 0; i < STAR_COUNT; i++) {
+    stars.push({
+      x: Math.random(), y: Math.random(),
+      z: 0.3 + Math.random() * 0.7,
+      size: 0.4 + Math.random() * 1.4,
+      baseAlpha: 0.3 + Math.random() * 0.6,
+      twinklePhase: Math.random() * Math.PI * 2,
+      twinkleSpeed: 0.8 + Math.random() * 1.5,
+      appearAt: 0.2 + Math.random() * 0.7
+    });
+  }
+
+  /* Nebulae */
+  const nebulae = [];
+  const NEB_COLORS = [[99,102,241],[139,92,246],[34,211,238],[167,139,250],[255,60,100]];
+  for (let i = 0; i < 6; i++) {
+    nebulae.push({
+      x: Math.random(), y: Math.random(),
+      r: 200 + Math.random() * 250,
+      color: NEB_COLORS[i % NEB_COLORS.length],
+      driftX: (Math.random()-0.5)*0.02, driftY: (Math.random()-0.5)*0.02,
+      phase: Math.random()*Math.PI*2
+    });
+  }
+
+  /* Dust */
+  const dust = [];
+  const DUST_COUNT = IS_MOBILE ? 80 : 200;
+  for (let i = 0; i < DUST_COUNT; i++) {
+    dust.push({
+      x: Math.random(), y: Math.random(),
+      size: 0.5 + Math.random()*1.8,
+      vx: (Math.random()-0.5)*0.0004,
+      vy: -0.0003 - Math.random()*0.0008,
+      baseAlpha: 0.15 + Math.random()*0.4,
+      twinkle: Math.random()*Math.PI*2
+    });
+  }
+
+  /* Mesh nodes */
+  const NODE_COUNT = 8;
+  const nodes = [];
+  const NODE_RADIUS_FRAC = 0.22;
+  for (let i = 0; i < NODE_COUNT; i++) {
+    const ang = (i/NODE_COUNT)*Math.PI*2 - Math.PI/2;
+    nodes.push({ ang, i, currentR:0, currentX:0, currentY:0, glow:0, pulsePhase: Math.random()*Math.PI*2 });
+  }
+  const ringEdges = [];
+  for (let i = 0; i < NODE_COUNT; i++) {
+    ringEdges.push({ from:i, to:(i+1)%NODE_COUNT, drawProgress:0, appearAt: i*0.08 });
+  }
+  const radials = [];
+  for (let i = 0; i < NODE_COUNT; i++) radials.push({ toNode:i, drawProgress:0, appearAt: i*0.1 });
+
+  /* Pulses / particles */
+  const dataPulses = [];
+  function spawnPulse(){
+    const edge = ringEdges[Math.floor(Math.random()*ringEdges.length)];
+    dataPulses.push({
+      edge, t:0, speed:0.003+Math.random()*0.004,
+      size:2+Math.random()*2.5,
+      color: Math.random()>0.5 ? [34,211,238] : [167,139,250]
+    });
+  }
+  const shockwaves = [];
+  function spawnShockwave(x,y,maxR,color,dur){ shockwaves.push({x,y,r:0,maxR,t:0,dur,color}); }
+  const explosionParticles = [];
+  function spawnExplosion(){
+    const count = IS_MOBILE ? 140 : 280;
+    for (let i = 0; i < count; i++) {
+      const a = Math.random()*Math.PI*2;
+      const speed = 2 + Math.random()*9;
+      const c = Math.random();
+      explosionParticles.push({
+        x:CX, y:CY, vx:Math.cos(a)*speed, vy:Math.sin(a)*speed,
+        life:0, maxLife:40+Math.random()*40,
+        size:1.5+Math.random()*3.5,
+        color: c>.7 ? [34,211,238] : c>.4 ? [167,139,250] : [255,255,255]
+      });
     }
   }
+  const convergeParticles = [];
+
+  /* Utils */
+  const lerp = (a,b,t)=>a+(b-a)*t;
+  const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+  const easeOutCubic = t=>1-Math.pow(1-t,3);
+  const easeInCubic = t=>t*t*t;
+  const easeInOut = t=> t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
+  function sceneProgress(t,s,e){ return clamp((t-s)/(e-s),0,1); }
+  function getScene(t){
+    if (t < T.S1e) return 1;
+    if (t < T.S2e) return 2;
+    if (t < T.S3e) return 3;
+    if (t < T.S4e) return 4;
+    if (t < T.S5e) return 5;
+    if (t < T.S6e) return 6;
+    return 7;
+  }
+
+  /* Draw layers */
+  function drawBackground(t, scene){
+    let bg = [0,0,0];
+    if (scene >= 2) { const s = sceneProgress(t,T.S2,T.S2e); bg=[lerp(0,8,s),0,lerp(0,20,s)]; }
+    if (scene >= 3) { const s = sceneProgress(t,T.S3,T.S3e); bg=[lerp(bg[0],12,s),lerp(bg[1],5,s),lerp(bg[2],30,s)]; }
+    if (scene >= 4) { const s = sceneProgress(t,T.S4,T.S4e); bg=[lerp(bg[0],20,s),lerp(bg[1],6,s),lerp(bg[2],45,s)]; }
+    if (scene >= 5) { const s = sceneProgress(t,T.S5,T.S5e); bg=[lerp(bg[0],38,s),lerp(bg[1],8,s),lerp(bg[2],70,s)]; }
+    if (scene === 6) { const s = sceneProgress(t,T.S6,T.S6e); bg=[lerp(bg[0],255,s),lerp(bg[1],255,s),lerp(bg[2],255,s)]; }
+    if (scene === 7) {
+      /* ★ FAST 800ms fade to dark, then STAY dark for logo hold */
+      const s = clamp((t - T.S7) / 800, 0, 1);
+      bg = [lerp(255,10,s), lerp(255,10,s), lerp(255,24,s)];
+    }
+    ctx.fillStyle = `rgb(${bg[0]|0},${bg[1]|0},${bg[2]|0})`;
+    ctx.fillRect(0,0,W,H);
+  }
+
+  function drawNebula(t, scene){
+    ctx.globalCompositeOperation = 'lighter';
+    const intensity = scene <= 1 ? 0 : scene === 6 ? 0.3 : 1;
+    nebulae.forEach(n => {
+      n.x += n.driftX*0.01; n.y += n.driftY*0.01;
+      if (n.x < -0.2) n.x = 1.2; if (n.x > 1.2) n.x = -0.2;
+      if (n.y < -0.2) n.y = 1.2; if (n.y > 1.2) n.y = -0.2;
+      const pulse = 0.6 + Math.sin(t*0.001 + n.phase)*0.4;
+      const [r,g,b] = n.color;
+      const alpha = 0.06*intensity*pulse;
+      const cx = n.x*W, cy = n.y*H;
+      const grad = ctx.createRadialGradient(cx,cy,0,cx,cy,n.r);
+      grad.addColorStop(0,`rgba(${r},${g},${b},${alpha})`);
+      grad.addColorStop(0.5,`rgba(${r},${g},${b},${alpha*0.4})`);
+      grad.addColorStop(1,`rgba(${r},${g},${b},0)`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(cx-n.r,cy-n.r,n.r*2,n.r*2);
+    });
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function drawStars(t, scene){
+    const globalFade = scene === 6 ? clamp(1 - sceneProgress(t,T.S6,T.S6e)*1.5, 0, 1) : 1;
+    if (globalFade <= 0) return;
+    stars.forEach(s => {
+      let reveal = 1;
+      if (scene === 1) {
+        const p = sceneProgress(t,T.S1,T.S1e);
+        reveal = clamp((p - s.appearAt*0.7)*2, 0, 1);
+      }
+      if (reveal <= 0) return;
+      const twinkle = 0.6 + Math.sin(t*0.001*s.twinkleSpeed + s.twinklePhase)*0.4;
+      const alpha = s.baseAlpha*twinkle*reveal*globalFade;
+      const camOffset = (1-s.z)*6;
+      const px = s.x*W + Math.sin(t*0.0002 + s.x*10)*camOffset;
+      const py = s.y*H + Math.cos(t*0.0002 + s.y*10)*camOffset;
+      const size = s.size*(1+(1-s.z)*0.8);
+      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+      ctx.beginPath(); ctx.arc(px,py,size,0,Math.PI*2); ctx.fill();
+      if (s.size > 1.4 && alpha > 0.5) {
+        ctx.strokeStyle = `rgba(196,181,253,${alpha*0.3})`;
+        ctx.lineWidth = 0.6;
+        ctx.beginPath();
+        ctx.moveTo(px-size*4,py); ctx.lineTo(px+size*4,py);
+        ctx.moveTo(px,py-size*4); ctx.lineTo(px,py+size*4);
+        ctx.stroke();
+      }
+    });
+  }
+
+  function drawDust(t, scene){
+    if (scene === 6) return;
+    dust.forEach(d => {
+      d.x += d.vx; d.y += d.vy;
+      if (d.y < -0.05) { d.y = 1.05; d.x = Math.random(); }
+      if (d.x < -0.05) d.x = 1.05;
+      if (d.x > 1.05) d.x = -0.05;
+      const twinkle = 0.5 + Math.sin(t*0.0015 + d.twinkle)*0.5;
+      const alpha = d.baseAlpha*twinkle;
+      ctx.fillStyle = `rgba(196,181,253,${alpha})`;
+      ctx.beginPath(); ctx.arc(d.x*W, d.y*H, d.size, 0, Math.PI*2); ctx.fill();
+    });
+  }
+
+  function drawCore(t, scene){
+    if (scene === 7) return;
+    let coreR = 0, coreIntensity = 0;
+    if (scene === 1) {
+      const p = sceneProgress(t,300,T.S1e);
+      if (p > 0) {
+        const beat = Math.sin(t*0.008)*0.5+0.5;
+        coreR = 1.5 + beat*1.5;
+        coreIntensity = p*(0.4+beat*0.4);
+      }
+    } else if (scene === 2) {
+      const p = sceneProgress(t,T.S2,T.S2e);
+      const eased = easeOutCubic(p);
+      coreR = lerp(3,38,eased);
+      coreIntensity = lerp(1,1.6,eased);
+      coreR *= 1 + Math.sin(t*0.006)*0.08;
+    } else if (scene === 3) {
+      const p = sceneProgress(t,T.S3,T.S3e);
+      coreR = lerp(38,14,easeOutCubic(p));
+      coreIntensity = lerp(1.6,1.1,p);
+    } else if (scene === 4) {
+      coreR = 14 + Math.sin(t*0.004)*2;
+      coreIntensity = 1.1;
+    } else if (scene === 5) {
+      const p = sceneProgress(t,T.S5,T.S5e);
+      const eased = easeInCubic(p);
+      coreR = lerp(14,55,eased);
+      coreIntensity = lerp(1.1,2.2,eased);
+    } else if (scene === 6) {
+      const p = sceneProgress(t,T.S6,T.S6e);
+      if (p < 0.4) { coreR = lerp(55,80,p/0.4); coreIntensity = 2.2; }
+    }
+    if (coreR > 0 && coreIntensity > 0) {
+      ctx.globalCompositeOperation = 'lighter';
+      for (let i = 3; i >= 1; i--) {
+        const r = coreR*i*0.9;
+        const a = (coreIntensity/i)*0.4;
+        const grad = ctx.createRadialGradient(CX,CY,0,CX,CY,r*1.6);
+        grad.addColorStop(0,`rgba(255,255,255,${a})`);
+        grad.addColorStop(0.3,`rgba(196,181,253,${a*0.7})`);
+        grad.addColorStop(0.7,`rgba(139,92,246,${a*0.35})`);
+        grad.addColorStop(1,`rgba(99,102,241,0)`);
+        ctx.fillStyle = grad;
+        ctx.fillRect(CX-r*1.6,CY-r*1.6,r*3.2,r*3.2);
+      }
+      ctx.fillStyle = `rgba(255,255,255,${clamp(coreIntensity*0.5,0,1)})`;
+      ctx.beginPath(); ctx.arc(CX,CY,coreR*0.6,0,Math.PI*2); ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+    }
+  }
+
+  function drawMesh(t, scene){
+    if (scene < 3) return;
+    const meshRadius = Math.min(W,H)*NODE_RADIUS_FRAC;
+    nodes.forEach((n,i) => {
+      if (scene === 3) {
+        const rad = radials[i];
+        const localP = clamp((sceneProgress(t,T.S3,T.S3e) - rad.appearAt)/0.25, 0, 1);
+        rad.drawProgress = easeOutCubic(localP);
+        n.currentR = meshRadius*rad.drawProgress;
+        n.glow = rad.drawProgress;
+      } else if (scene === 4) {
+        n.currentR = meshRadius;
+        n.glow = 1 + Math.sin(t*0.003+n.pulsePhase)*0.3;
+      } else if (scene === 5) {
+        const p = sceneProgress(t,T.S5,T.S5e);
+        const eased = easeInCubic(p);
+        n.currentR = meshRadius*(1-eased);
+        n.glow = 1 - eased*0.7;
+      } else { n.currentR = 0; n.glow = 0; }
+      n.currentX = CX + Math.cos(n.ang)*n.currentR;
+      n.currentY = CY + Math.sin(n.ang)*n.currentR;
+    });
+    let rot = 0;
+    if (scene === 4) rot = sceneProgress(t,T.S4,T.S4e)*0.35;
+    else if (scene === 5) rot = 0.35;
+
+    ctx.globalCompositeOperation = 'lighter';
+    nodes.forEach((n,i) => {
+      if (n.currentR < 2) return;
+      const rad = radials[i];
+      if (rad.drawProgress <= 0) return;
+      const ang = n.ang + rot;
+      const ex = CX + Math.cos(ang)*n.currentR;
+      const ey = CY + Math.sin(ang)*n.currentR;
+      const alpha = rad.drawProgress*(0.4 + Math.sin(t*0.005+i)*0.15);
+      ctx.strokeStyle = `rgba(99,102,241,${alpha*0.6})`; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(CX,CY); ctx.lineTo(ex,ey); ctx.stroke();
+      ctx.strokeStyle = `rgba(196,181,253,${alpha})`; ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.moveTo(CX,CY); ctx.lineTo(ex,ey); ctx.stroke();
+    });
+
+    if (scene >= 4) {
+      ringEdges.forEach((edge,i) => {
+        const localP = clamp((sceneProgress(t,T.S4,T.S4e) - edge.appearAt)/0.3, 0, 1);
+        edge.drawProgress = easeOutCubic(localP);
+        if (edge.drawProgress <= 0) return;
+        const from = nodes[edge.from], to = nodes[edge.to];
+        if (from.currentR < 2 || to.currentR < 2) return;
+        const angF = from.ang+rot, angT = to.ang+rot;
+        const fx = CX+Math.cos(angF)*from.currentR;
+        const fy = CY+Math.sin(angF)*from.currentR;
+        const tx = CX+Math.cos(angT)*to.currentR;
+        const ty = CY+Math.sin(angT)*to.currentR;
+        const drawT = edge.drawProgress;
+        const midX = lerp(fx,tx,drawT), midY = lerp(fy,ty,drawT);
+        const alpha = edge.drawProgress*0.5;
+        ctx.strokeStyle = `rgba(139,92,246,${alpha*0.5})`; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(midX,midY); ctx.stroke();
+        ctx.strokeStyle = `rgba(167,139,250,${alpha})`; ctx.lineWidth = 0.7;
+        ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(midX,midY); ctx.stroke();
+      });
+    }
+
+    nodes.forEach(n => {
+      if (n.currentR < 2 || n.glow <= 0.01) return;
+      const ang = n.ang + rot;
+      const x = CX+Math.cos(ang)*n.currentR;
+      const y = CY+Math.sin(ang)*n.currentR;
+      const pulse = 0.85 + Math.sin(t*0.005+n.pulsePhase)*0.15;
+      const r = 4*n.glow*pulse;
+      const grad = ctx.createRadialGradient(x,y,0,x,y,r*5);
+      grad.addColorStop(0,`rgba(196,181,253,${0.9*n.glow})`);
+      grad.addColorStop(0.4,`rgba(139,92,246,${0.4*n.glow})`);
+      grad.addColorStop(1,'rgba(99,102,241,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(x,y,r*5,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = `rgba(255,255,255,${n.glow})`;
+      ctx.beginPath(); ctx.arc(x,y,r*0.6,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle = `rgba(34,211,238,${0.6*n.glow})`; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(x,y,r*1.8,0,Math.PI*2); ctx.stroke();
+    });
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function drawDataPulses(t, scene){
+    if (scene !== 4 && scene !== 5) return;
+    if (scene === 4 && Math.random() < 0.15) spawnPulse();
+    let rot = scene === 4 ? sceneProgress(t,T.S4,T.S4e)*0.35 : 0.35;
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = dataPulses.length-1; i >= 0; i--) {
+      const p = dataPulses[i];
+      p.t += p.speed;
+      if (p.t > 1.2) { dataPulses.splice(i,1); continue; }
+      if (p.t > 1) continue;
+      const edge = p.edge;
+      const from = nodes[edge.from], to = nodes[edge.to];
+      if (from.currentR < 2 || to.currentR < 2) continue;
+      const angF = from.ang+rot, angT = to.ang+rot;
+      const fx = CX+Math.cos(angF)*from.currentR;
+      const fy = CY+Math.sin(angF)*from.currentR;
+      const tx = CX+Math.cos(angT)*to.currentR;
+      const ty = CY+Math.sin(angT)*to.currentR;
+      const x = lerp(fx,tx,p.t), y = lerp(fy,ty,p.t);
+      for (let trail = 4; trail >= 0; trail--) {
+        const tt = clamp(p.t - trail*0.06, 0, 1);
+        const ttx = lerp(fx,tx,tt), tty = lerp(fy,ty,tt);
+        const ta = (1-trail/5)*0.7;
+        const [r,g,b] = p.color;
+        ctx.fillStyle = `rgba(${r},${g},${b},${ta})`;
+        ctx.beginPath(); ctx.arc(ttx,tty,p.size*(1-trail*0.15),0,Math.PI*2); ctx.fill();
+      }
+      const [r,g,b] = p.color;
+      const grad = ctx.createRadialGradient(x,y,0,x,y,p.size*4);
+      grad.addColorStop(0,'rgba(255,255,255,0.9)');
+      grad.addColorStop(0.3,`rgba(${r},${g},${b},0.8)`);
+      grad.addColorStop(1,`rgba(${r},${g},${b},0)`);
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(x,y,p.size*4,0,Math.PI*2); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function drawConvergence(t, scene){
+    if (scene !== 5) return;
+    const p = sceneProgress(t,T.S5,T.S5e);
+    if (Math.random() < 0.6 && p < 0.95) {
+      const node = nodes[Math.floor(Math.random()*nodes.length)];
+      if (node.currentR > 10) {
+        convergeParticles.push({
+          fromX: node.currentX, fromY: node.currentY,
+          t: 0, speed: 0.008+Math.random()*0.006,
+          size: 1+Math.random()*2.5,
+          color: Math.random()>0.5 ? [34,211,238] : [167,139,250]
+        });
+      }
+    }
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = convergeParticles.length-1; i >= 0; i--) {
+      const p2 = convergeParticles[i];
+      p2.t += p2.speed;
+      if (p2.t > 1) { convergeParticles.splice(i,1); continue; }
+      const eased = easeInCubic(p2.t);
+      const x = lerp(p2.fromX,CX,eased), y = lerp(p2.fromY,CY,eased);
+      for (let trail = 3; trail >= 0; trail--) {
+        const tt = clamp(p2.t - trail*0.05, 0, 1);
+        const e2 = easeInCubic(tt);
+        const tx = lerp(p2.fromX,CX,e2), ty = lerp(p2.fromY,CY,e2);
+        const ta = (1-trail/4)*0.6;
+        const [r,g,b] = p2.color;
+        ctx.fillStyle = `rgba(${r},${g},${b},${ta})`;
+        ctx.beginPath(); ctx.arc(tx,ty,p2.size,0,Math.PI*2); ctx.fill();
+      }
+      const [r,g,b] = p2.color;
+      ctx.fillStyle = `rgba(${r},${g},${b},0.9)`;
+      ctx.beginPath(); ctx.arc(x,y,p2.size*1.2,0,Math.PI*2); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function drawShockwaves(){
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = shockwaves.length-1; i >= 0; i--) {
+      const s = shockwaves[i];
+      s.t += 1;
+      const p = s.t/s.dur;
+      if (p > 1) { shockwaves.splice(i,1); continue; }
+      s.r = s.maxR*easeOutCubic(p);
+      const alpha = (1-p)*0.9;
+      const [r,g,b] = s.color;
+      ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+      ctx.lineWidth = (1-p)*3+0.5;
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.stroke();
+      ctx.strokeStyle = `rgba(${r},${g},${b},${alpha*0.3})`;
+      ctx.lineWidth = (1-p)*12+2;
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.stroke();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function drawExplosion(){
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = explosionParticles.length-1; i >= 0; i--) {
+      const p = explosionParticles[i];
+      p.x += p.vx; p.y += p.vy;
+      p.vx *= 0.965; p.vy *= 0.965; p.vy += 0.05;
+      p.life++;
+      if (p.life > p.maxLife) { explosionParticles.splice(i,1); continue; }
+      const fade = 1-(p.life/p.maxLife);
+      const [r,g,b] = p.color;
+      const grad = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.size*5);
+      grad.addColorStop(0,`rgba(${r},${g},${b},${fade})`);
+      grad.addColorStop(1,`rgba(${r},${g},${b},0)`);
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.size*5,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = `rgba(255,255,255,${fade*0.9})`;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.size*0.7,0,Math.PI*2); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /* HUD */
+  const hudNum = document.getElementById('hudNum');
+  const hudLabel = document.getElementById('hudLabel');
+  const hudName = document.getElementById('hudName');
+  const hudPhase = document.getElementById('hudPhase');
+  const hudPct = document.getElementById('hudPct');
+  const hudCur = document.getElementById('hudCur');
+  const hudMilli = document.getElementById('hudMilli');
+  const hudBarFill = document.getElementById('hudBarFill');
+  const hudBarMarker = document.getElementById('hudBarMarker');
+  const hudStatus = document.getElementById('hudStatus');
+  const hudFps = document.getElementById('hudFps');
+  const timelineDots = document.querySelectorAll('.tl-dot');
+  let lastScene = 0, lastFpsUpdate = 0, frameCount = 0;
+
+  function updateHUD(t, scene, overallPct){
+    if (scene !== lastScene) {
+      lastScene = scene;
+      const meta = SCENE_META[scene-1];
+      hudNum.textContent = meta.num;
+      hudLabel.textContent = meta.label;
+      hudName.textContent = meta.name;
+      hudPhase.textContent = meta.phase;
+      timelineDots.forEach(dot => {
+        const idx = parseInt(dot.dataset.t);
+        dot.classList.toggle('passed', idx <= scene);
+      });
+    }
+    hudPct.textContent = overallPct;
+    const sec = Math.floor(t/1000), ms = Math.floor(t%1000);
+    /* ★ Now shows up to 10 seconds */
+    hudCur.textContent = `00:${String(Math.min(10,sec)).padStart(2,'0')}`;
+    hudMilli.textContent = '.' + String(ms).padStart(3,'0');
+    hudBarFill.style.width = overallPct + '%';
+    hudBarMarker.style.left = overallPct + '%';
+
+    let statusText = 'STANDING BY', statusClass = '';
+    if (scene === 2) statusText = 'IGNITING';
+    else if (scene === 3) statusText = 'EXPANDING';
+    else if (scene === 4) statusText = 'SYNCING';
+    else if (scene === 5) statusText = 'CONVERGING';
+    else if (scene === 6) { statusText = 'CRITICAL'; statusClass = 'danger'; }
+    else if (scene === 7) statusText = 'EMERGING';
+    if (hudStatus.textContent !== statusText) {
+      hudStatus.textContent = statusText;
+      hudStatus.className = 'hud-status ' + statusClass;
+    }
+
+    frameCount++;
+    if (t - lastFpsUpdate > 500) {
+      const fps = Math.round(frameCount * 1000 / (t-lastFpsUpdate));
+      frameCount = 0; lastFpsUpdate = t;
+      if (hudFps) hudFps.textContent = fps + ' FPS';
+    }
+  }
+
+  /* Logo build */
+  const logoStage = document.getElementById('logoStage');
+  const logoMain = document.getElementById('logoMain');
+  const LOGO_TEXT = 'APEX API';
+  function buildLogo(){
+    logoMain.innerHTML = '';
+    [...LOGO_TEXT].forEach((ch, i) => {
+      const span = document.createElement('span');
+      span.className = 'ltr' + (ch === ' ' ? ' space' : '');
+      /* ★ FAST delays so logo completes by 8000ms (2s hold) */
+      span.style.animationDelay = (0.02 + i * 0.03) + 's';
+      span.textContent = ch === ' ' ? '\u00A0' : ch;
+      logoMain.appendChild(span);
+    });
+  }
+  function showLogo(){
+    buildLogo();
+    logoStage.classList.add('show');
+  }
+
+  /* Reveal */
+  function triggerReveal(){
+    document.body.classList.add('intro-ready');
+    initChart();
+    setTimeout(() => { loader.style.opacity = '0'; }, 200);
+    setTimeout(() => {
+      loader.classList.add('gone');
+      document.body.style.overflow = '';
+    }, 1400);
+  }
+
+  /* MAIN LOOP */
+  const START = performance.now();
+  let revealTriggered = false, explosionTriggered = false, flashTriggered = false, logoTriggered = false, lastShockwaveAt = -1;
+
+  function frame(now){
+    const t = Math.min(now - START, T.TOTAL);
+    const scene = getScene(t);
+    const overallPct = Math.round((t / T.TOTAL) * 100);
+
+    const trailAlpha = scene >= 6 ? 0.65 : 0.22;
+    ctx.fillStyle = `rgba(0,0,0,${trailAlpha})`;
+    ctx.fillRect(0,0,W,H);
+
+    drawBackground(t, scene);
+    drawNebula(t, scene);
+    drawStars(t, scene);
+    drawDust(t, scene);
+
+    if (scene === 2 && t > 1050 && lastShockwaveAt < 1050) {
+      lastShockwaveAt = 1050;
+      spawnShockwave(CX,CY,180,[139,92,246],60);
+      spawnShockwave(CX,CY,260,[34,211,238],75);
+    }
+    if (scene === 3 && t > T.S3+500 && lastShockwaveAt < T.S3+500) {
+      lastShockwaveAt = T.S3+500;
+      spawnShockwave(CX,CY,200,[34,211,238],65);
+    }
+    if (scene === 5 && t > T.S5+800 && Math.random() < 0.15) {
+      spawnShockwave(CX,CY,60+Math.random()*40,[255,200,100],35);
+    }
+    if (scene === 6 && !explosionTriggered) {
+      explosionTriggered = true;
+      spawnExplosion();
+      spawnShockwave(CX,CY,300,[255,255,255],55);
+      spawnShockwave(CX,CY,450,[167,139,250],70);
+      spawnShockwave(CX,CY,600,[34,211,238],85);
+      loader.classList.add('shake');
+      setTimeout(() => loader.classList.remove('shake'), 600);
+      if (!flashTriggered) {
+        flashTriggered = true;
+        document.getElementById('flash').classList.add('fire');
+      }
+    }
+
+    /* ★ Scene 7 entry: trigger logo build */
+    if (scene === 7 && !logoTriggered) {
+      logoTriggered = true;
+      showLogo();
+      spawnShockwave(CX,CY,380,[34,211,238],70);
+      spawnShockwave(CX,CY,480,[167,139,250],85);
+    }
+
+    drawCore(t, scene);
+    drawMesh(t, scene);
+    drawDataPulses(t, scene);
+    drawConvergence(t, scene);
+    drawShockwaves();
+    drawExplosion();
+
+    updateHUD(t, scene, overallPct);
+
+    if (t >= T.TOTAL && !revealTriggered) {
+      revealTriggered = true;
+      triggerReveal();
+    } else {
+      requestAnimationFrame(frame);
+    }
+  }
+
+  document.body.style.overflow = 'hidden';
   requestAnimationFrame(frame);
 })();
 
 /* CHART */
 function initChart(){
-  const canvas=document.getElementById('metricsChart');if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  const g1=ctx.createLinearGradient(0,0,0,320);g1.addColorStop(0,'#6366f1');g1.addColorStop(1,'#c7d2fe');
-  const g2=ctx.createLinearGradient(0,0,0,320);g2.addColorStop(0,'#a78bfa');g2.addColorStop(1,'#ede9fe');
-  window.__apexChart=new Chart(ctx,{
+  const canvas = document.getElementById('metricsChart');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const g1 = ctx.createLinearGradient(0,0,0,320); g1.addColorStop(0,'#6366f1'); g1.addColorStop(1,'#c7d2fe');
+  const g2 = ctx.createLinearGradient(0,0,0,320); g2.addColorStop(0,'#a78bfa'); g2.addColorStop(1,'#ede9fe');
+  window.__apexChart = new Chart(ctx,{
     type:'bar',
     data:{labels:['00:00','04:00','08:00','12:00','16:00','20:00','24:00'],datasets:[
       {label:'Requests resolved',data:[180,390,620,1150,1420,1200,1680],backgroundColor:g1,hoverBackgroundColor:'#4f46e5',borderRadius:8,borderSkipped:false,barPercentage:.62,categoryPercentage:.7},
