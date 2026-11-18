@@ -89,6 +89,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialias
 .detail-title{font-size:1.55rem;font-weight:800;letter-spacing:-0.02em;line-height:1.2;color:var(--t-txt);margin-top:.8rem}
 .detail-desc{font-size:.9rem;line-height:1.65;color:var(--t-txt-3);margin-top:.65rem}
 .detail-section{background:var(--t-card);border:1px solid var(--t-border);border-radius:1.1rem;padding:1.4rem;box-shadow:var(--t-shadow)}
+.guide-box{background:var(--t-input);border:1px solid var(--t-input-border);border-radius:.85rem;padding:1rem 1.1rem}
+.preset-btn{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:600;padding:.38rem .7rem;border-radius:.5rem;background:var(--t-input);border:1px solid var(--t-input-border);color:var(--t-txt-2);cursor:pointer;transition:all .2s}
+.preset-btn:hover{border-color:var(--t-accent);color:var(--t-accent);background:rgba(99,102,241,.08)}
 @media(max-width:520px){.test-row{flex-direction:column}.btn-test{width:100%}}
 .orb{transition:background .8s}.orb-1{background:var(--t-orb-1)}.orb-2{background:var(--t-orb-2)}.orb-3{background:var(--t-orb-3)}
 </style>
@@ -156,7 +159,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialias
 <section class="reveal">
 <div class="flex flex-wrap gap-2.5">
 <button onclick="filterCategory('all', this)" class="filter-btn active" data-cat="all">All services</button>
-<button onclick="filterCategory('movie', this)" class="filter-btn" data-cat="movie">🎬 Movies</button>
+<button onclick="filterCategory('movie', this)" class="filter-btn" data-cat="movie">🎬 Movies & TV</button>
 <button onclick="filterCategory('media', this)" class="filter-btn" data-cat="media">🎵 Media</button>
 <button onclick="filterCategory('game', this)" class="filter-btn" data-cat="game">🎮 Games</button>
 <button onclick="filterCategory('app', this)" class="filter-btn" data-cat="app">👾 Apps</button>
@@ -215,14 +218,97 @@ document.getElementById('logout-btn').addEventListener('click',()=>{
 });
 
 const ENDPOINTS=[
-{id:'cinesubz-search',category:'movie',categoryLabel:'Movie',name:'CineSubz · Search',method:'GET',path:'/api/v1/movies/cinesubz/search?q={query}&api=<YOUR_API_KEY>',description:'Searches titles and returns thumbnail artwork, ratings, seasons, and internal content URLs.',testParam:'q',testPlaceholder:'avatar',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/search?q=avatar&api=<YOUR_API_KEY>"`},
-{id:'cinesubz-info',category:'movie',categoryLabel:'Movie',name:'CineSubz · Info & Links',method:'GET',path:'/api/v1/movies/cinesubz/info?url={url}&api=<YOUR_API_KEY>',description:'Scrapes available qualities without file size limits, extracting csplayer direct stream links.',testParam:'url',testPlaceholder:'https://cinesubz.co/movies/avatar',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/info?url=https://cinesubz.co/movies/avatar&api=<YOUR_API_KEY>"`},
-{id:'cinesubz-dl',category:'movie',categoryLabel:'Movie',name:'CineSubz · Direct Download',method:'GET',path:'/api/v1/movies/cinesubz/dl?directUrl={directUrl}&api=<YOUR_API_KEY>',description:'Resolves internal csplayer and sonic-cloud links into direct Terracloud / Pixeldrain CDN links.',testParam:'directUrl',testPlaceholder:'https://cinesubz.co/player/avatar-1080p',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/dl?directUrl=https://cinesubz.co/player/avatar-1080p&api=<YOUR_API_KEY>"`},
+{
+  id:'cinesubz-search',
+  category:'movie',
+  categoryLabel:'Movie & TV',
+  name:'CineSubz · Search (Movies & TV)',
+  method:'GET',
+  path:'/api/v1/movies/cinesubz/search?q={query}&api=<YOUR_API_KEY>',
+  description:'Unified search for both Movies and TV Shows on CineSubz. Returns title, content type (movie/tvshow), release year, and content URL.',
+  testParam:'q',
+  testPlaceholder:'spider man',
+  testPresets:[
+    {label:'🎬 Search Movie: Spider-Man',value:'spider man'},
+    {label:'📺 Search TV Show: Game Of Thrones',value:'game of thrones'}
+  ],
+  usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/search?q=spider+man&api=<YOUR_API_KEY>"`
+},
+{
+  id:'cinesubz-info',
+  category:'movie',
+  categoryLabel:'Movie & TV',
+  name:'CineSubz · Info, Qualities & Seasons',
+  method:'GET',
+  path:'/api/v1/movies/cinesubz/info?url={url}&api=<YOUR_API_KEY>',
+  description:'Unified metadata endpoint for Movies and TV Shows. Returns direct ZT/Drive links for Movies, or a list of Seasons (?season=1) for TV Shows.',
+  testParam:'url',
+  testPlaceholder:'https://cinesubz.lk/tvshows/the-boys/',
+  guideHtml:`
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div class="guide-box">
+        <div class="flex items-center gap-2 mb-1.5">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-rose-500 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded">🎬 For Movies</span>
+        </div>
+        <p class="text-xs leading-relaxed" style="color:var(--t-txt-2)">Pass a <strong>/movies/</strong> URL from Search. Returns movie details + <code class="text-indigo-400">downloadLinks</code> (containing <code class="text-indigo-400">driveUrl</code> / <code class="text-indigo-400">ztUrl</code>) to pass into the DL endpoint.</p>
+        <div class="endpoint-path mt-2 text-[11px]">https://cinesubz.lk/movies/spider-man/</div>
+      </div>
+      <div class="guide-box">
+        <div class="flex items-center gap-2 mb-1.5">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-500 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded">📺 For TV Shows</span>
+        </div>
+        <p class="text-xs leading-relaxed" style="color:var(--t-txt-2)">Pass a <strong>/tvshows/</strong> URL from Search. Returns show details + <code class="text-indigo-400">seasons</code> list with <code class="text-indigo-400">?season=1</code> links to fetch all episodes in DL.</p>
+        <div class="endpoint-path mt-2 text-[11px]">https://cinesubz.lk/tvshows/the-boys/</div>
+      </div>
+    </div>
+  `,
+  testPresets:[
+    {label:'📺 TV Show: Game Of Thrones',value:'https://cinesubz.lk/tvshows/game-of-thrones-2011-sinhala-subtitles/'},
+    {label:'🎬 Movie: Spider-Man ',value:'https://cinesubz.lk/movies/spider-man-brand-new-day-2026-sinhala-subtitles/'}
+  ],
+  usage:`# Movie Info & Qualities:\ncurl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/info?url=https://cinesubz.lk/movies/spider-man/&api=<YOUR_API_KEY>"\n\n# TV Show Info & Seasons:\ncurl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/info?url=https://cinesubz.lk/tvshows/the-boys/&api=<YOUR_API_KEY>"`
+},
+{
+  id:'cinesubz-dl',
+  category:'movie',
+  categoryLabel:'Movie & TV',
+  name:'CineSubz · Direct DL (Movies & Full Seasons)',
+  method:'GET',
+  path:'/api/v1/movies/cinesubz/dl?url={url}&api=<YOUR_API_KEY>',
+  description:'Smart unified resolver: pass a Movie Drive/ZT link for a direct .r2.dev download URL, OR pass a TV Show Season link (?season=1) to resolve all episodes at once.',
+  testParam:'url',
+  testPlaceholder:'https://cinesubz.lk/tvshows/the-boys/?season=1',
+  guideHtml:`
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div class="guide-box">
+        <div class="flex items-center justify-between gap-2 mb-1.5">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-rose-500 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded">🎬 1. Movie Download</span>
+          <span class="text-[10px] font-mono" style="color:var(--t-txt-4)">Input: driveUrl / ztUrl</span>
+        </div>
+        <p class="text-xs leading-relaxed" style="color:var(--t-txt-2)">Copy <code class="text-indigo-400">driveUrl</code> or <code class="text-indigo-400">ztUrl</code> from the <strong>Info</strong> endpoint and pass it to <code class="text-indigo-400">?url=</code>. Bypasses Cloudflare/R2 and returns the final playable/downloadable <code class="text-emerald-500">.r2.dev</code> URL.</p>
+        <div class="endpoint-path mt-2 text-[11px]">https://drive.csplayer2.space/server4/movie.mp4?ext=mp4</div>
+      </div>
+      <div class="guide-box">
+        <div class="flex items-center justify-between gap-2 mb-1.5">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-500 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded">📺 2. TV Series (Full Season)</span>
+          <span class="text-[10px] font-mono" style="color:var(--t-txt-4)">Input: ?season=1 link</span>
+        </div>
+        <p class="text-xs leading-relaxed" style="color:var(--t-txt-2)">Copy the season <code class="text-indigo-400">url</code> (e.g. <code class="text-indigo-400">?season=1</code>) from the <strong>Info</strong> endpoint and pass it to <code class="text-indigo-400">?url=</code>. Scrapes all episodes in that season and returns clean JSON with final <code class="text-emerald-500">episodes</code> DL links.</p>
+        <div class="endpoint-path mt-2 text-[11px]">https://cinesubz.lk/tvshows/the-boys/?season=1</div>
+      </div>
+    </div>
+  `,
+  testPresets:[
+    {label:'📺 Season 1 URL (TV Show)',value:'https://cinesubz.lk/tvshows/game-of-thrones-2011-sinhala-subtitles/Season01'},
+    {label:'🎬 Drive URL (Movie)',value:'https://drive.csplayer2.space/PYSiy89hq67EVd_EO_p8SFXL1gzSj_jqFvo_mkQtBg6Dz_KMznwJ9Q7jVhGE_KiVFBX4Wtv-cmHTyzYrvOzZgSNthnSjQsu6Eq3r-fW9O5cSJqXA56NvIujS3_GWW85LLN9AhQXUEmmHaPnu49qR3xvtAG8VHg-9hP8idCpTLRyj56dIgVwzehTLIQl0ZGJITnFjn663vc-qP8_CG-FtOHBW'}
+  ],
+  usage:`# 1. Fetching all Episode DL Links for Season 1 (TV Show):\ncurl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/dl?url=https://cinesubz.lk/tvshows/the-boys/?season=1&api=<YOUR_API_KEY>"\n\n# 2. Bypassing R2 for a Final Download (Movie):\ncurl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/dl?url=https://drive.csplayer2.space/server4/movie.mp4?ext=mp4&api=<YOUR_API_KEY>"`
+},
 {id:'sinhalacartoons-search',category:'movie',categoryLabel:'Movie',name:'sinhalacartoons.lk · Search',method:'GET',path:'/api/v1/movies/sinhalacartoons/search?q={query}&api=<YOUR_API_KEY>',description:'Searches the SinhalaCartoons catalogue and returns matched series with episode counts and URLs.',testParam:'q',testPlaceholder:'tom and jerry',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/sinhalacartoons/search?q=tom+and+jerry&api=<YOUR_API_KEY>"`},
 {id:'sinhalacartoons-dl',category:'movie',categoryLabel:'Movie',name:'sinhalacartoons.lk · DL',method:'GET',path:'/api/v1/movies/sinhalacartoons/dl?landingUrl={landingUrl}&api=<YOUR_API_KEY>',description:'Extracts direct force-download Cloudflare R2 links from movies and cartoon series.',testParam:'landingUrl',testPlaceholder:'https://sinhalacartoons.com/dragon-nest-warriors-dawn-sinhala-dubbed/',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/sinhalacartoons/dl?landingUrl=https://sinhalacartoons.com/dragon-nest-warriors-dawn-sinhala-dubbed/&api=<YOUR_API_KEY>"`},
 {id:'tamilmv-search',category:'movie',categoryLabel:'Movie',name:'1TamilMV · Search',method:'GET',path:'/api/v1/movies/tamilmv/search?q={query}&api=<YOUR_API_KEY>',description:'Searches 1TamilMV releases and returns forum topic URLs without any size limits.',testParam:'q',testPlaceholder:'leo',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/tamilmv/search?q=leo&api=<YOUR_API_KEY>"`},
 {id:'tamilmv-dl',category:'movie',categoryLabel:'Movie',name:'1TamilMV · DL & Magnets',method:'GET',path:'/api/v1/movies/tamilmv/dl?url={url}&api=<YOUR_API_KEY>',description:'Extracts all quality links (Direct CDN & Magnets) for movies from 1TamilMV without file size caps.',testParam:'url',testPlaceholder:'https://www.1tamilmv.lease/index.php?/forums/topic/12345-movie/',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/tamilmv/dl?url=https://www.1tamilmv.lease/index.php?/forums/topic/12345-movie/&api=<YOUR_API_KEY>"`},
-  {
+{
   id: 'kmmovies-search',
   category: 'movie',
   categoryLabel: 'Movie',
@@ -246,7 +332,7 @@ const ENDPOINTS=[
   testPlaceholder: 'https://kmmovies.autos/movie/avatar-2009/',
   usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/kmmovies/dl?url=https://kmmovies.autos/movie/avatar-2009/&api=<YOUR_API_KEY>"`
 },
-  {
+{
   id: 'cartoonslk-search',
   category: 'movie',
   categoryLabel: 'Movie',
@@ -270,7 +356,7 @@ const ENDPOINTS=[
   testPlaceholder: 'https://cartoons.lk/movies/frozen-2013/',
   usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cartoonslk/dl?url=https://cartoons.lk/movies/frozen-2013/&api=<YOUR_API_KEY>"`
 },
-  {
+{
   id: 'cinesub-search',
   category: 'movie',
   categoryLabel: 'Movie',
@@ -311,7 +397,7 @@ const ENDPOINTS=[
 {id:'an1-dl',category:'app',categoryLabel:'App',name:'AN1 · Direct DL',method:'GET',path:'/api/v1/apps/an1/dl?url={url}&api=<YOUR_API_KEY>',description:'Extracts version, file size, and direct APK download URL from AN1 app page.',testParam:'url',testPlaceholder:'https://an1.com/624-subway-surfers-mod-apk.html',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/apps/an1/dl?url=https://an1.com/624-subway-surfers-mod-apk.html&api=<YOUR_API_KEY>"`},
 {id:'mediafire-dl',category:'media',categoryLabel:'Media',name:'MediaFire · Direct DL',method:'GET',path:'/api/v1/media/mediafire/dl?url={url}&api=<YOUR_API_KEY>',description:'Extracts direct high-speed CDN download links, file sizes, and MIME types from any MediaFire file link.',testParam:'url',testPlaceholder:'https://www.mediafire.com/file/abc123xyz/sample.zip/file',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/mediafire/dl?url=https://www.mediafire.com/file/abc123xyz/sample.zip/file&api=<YOUR_API_KEY>"`},
 {id:'microsoft-tts',category:'media',categoryLabel:'Media',name:'Microsoft · Neural Multi-TTS',method:'GET',path:'/api/v1/media/microsoft/tts?text={text}&api=<YOUR_API_KEY>',description:'Generates direct auto-download audio links for all available Microsoft Neural voices (US, UK, Sinhala, Tamil).',testParam:'text',testPlaceholder:'Hello, welcome to Apex API high-speed developer mesh.',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/microsoft/tts?text=Hello+World&api=<YOUR_API_KEY>"`},
-    {
+{
   id: 'tiktok-dl',
   category: 'media',
   categoryLabel: 'Media',
@@ -323,7 +409,7 @@ const ENDPOINTS=[
   testPlaceholder: 'https://www.tiktok.com/@exjaniyafreefire/video/7569612819264490770',
   usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/tiktok/dl?url=https://www.tiktok.com/@exjaniyafreefire/video/7569612819264490770&api=<YOUR_API_KEY>"`
 },
-  {
+{
   id: 'chat-ubi',
   category: 'ai',
   categoryLabel: 'AI',
@@ -335,7 +421,7 @@ const ENDPOINTS=[
   testPlaceholder: 'What is the speed of light?',
   usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/ai/chat/ubi?q=What+is+the+speed+of+light?&api=<YOUR_API_KEY>"`
 },
-  {
+{
   id: 'ph-search',
   category: 'adult',
   categoryLabel: 'Adult (18+)',
@@ -359,8 +445,6 @@ const ENDPOINTS=[
   testPlaceholder: 'https://www.pornhub.com/view_video.php?viewkey=12345',
   usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/adult/ph/dl?url=https://www.pornhub.com/view_video.php?viewkey=12345&api=<YOUR_API_KEY>"`
 }
-
-
 ];
 
 function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
@@ -416,6 +500,18 @@ function renderCard(ep){
 }
 
 function buildDetailHTML(ep){
+  const guideSection = ep.guideHtml ? `
+    <div class="detail-item detail-section mt-5" style="--d:.12s">
+      <h4 class="section-label">Supported Input Links & Usage Guide</h4>
+      ${ep.guideHtml}
+    </div>` : '';
+
+  const presetsRow = Array.isArray(ep.testPresets) && ep.testPresets.length ? `
+    <div class="flex flex-wrap items-center gap-2 mb-3">
+      <span class="text-[11px] font-bold" style="color:var(--t-txt-4)">Quick fill:</span>
+      ${ep.testPresets.map((p,i)=>`<button type="button" class="preset-btn" data-preset-idx="${i}">${escapeHtml(p.label)}</button>`).join('')}
+    </div>` : '';
+
   return `
     <div class="detail-item" style="--d:0s"><button class="back-btn" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back to endpoints</button></div>
     <div class="detail-item detail-header-card mt-5" style="--d:.08s">
@@ -427,12 +523,14 @@ function buildDetailHTML(ep){
       <p class="detail-desc">${ep.description}</p>
       <div class="endpoint-path mt-4">${ep.path}</div>
     </div>
+    ${guideSection}
     <div class="detail-item detail-section mt-5" style="--d:.16s">
       <h4 class="section-label">Usage example</h4>
       <pre class="code-block"><code>${escapeHtml(ep.usage)}</code></pre>
     </div>
     <div class="detail-item detail-section mt-4" style="--d:.24s">
       <h4 class="section-label">Live test</h4>
+      ${presetsRow}
       <div class="test-row">
         <input class="test-input" type="text" placeholder="${escapeHtml(ep.testPlaceholder)}" aria-label="Test value">
         <button class="btn-test" type="button">Send request</button>
@@ -450,6 +548,15 @@ function openDetail(id){
   detail.innerHTML=buildDetailHTML(ep);
   detail.querySelector('.back-btn').addEventListener('click',backToList);
   const testBtn=detail.querySelector('.btn-test'),testInput=detail.querySelector('.test-input');
+  detail.querySelectorAll('.preset-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const idx=Number(btn.dataset.presetIdx);
+      if(ep.testPresets && ep.testPresets[idx]){
+        testInput.value=ep.testPresets[idx].value;
+        testInput.focus();
+      }
+    });
+  });
   testBtn.addEventListener('click',()=>runTest(detail,ep,testInput.value.trim()));
   testInput.addEventListener('keydown',(e)=>{if(e.key==='Enter'){e.preventDefault();runTest(detail,ep,testInput.value.trim())}});
   switchView('detailView');
