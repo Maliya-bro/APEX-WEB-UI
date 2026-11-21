@@ -311,13 +311,13 @@ const ENDPOINTS=[
   name: 'MovieBox · Search',
   method: 'GET',
   path: '/api/v1/movies/moviebox/search?q={query}&api=<YOUR_API_KEY>',
-  description: 'Search any movie or TV series by name to get its ID.',
+  paramKey: 'q',
+  paramLabel: 'Movie / Series Name',
+  placeholder: 'Breaking Bad',
+  desc: 'Search any movie or TV series by name',
+  description: 'Search any movie or TV series by name to get its subject_id and type.',
   testParam: 'q',
   testPlaceholder: 'Breaking Bad',
-  testPresets:[
-    {label:'📺 TV Series: Breaking Bad',value:'Breaking Bad'},
-    {label:'🎬 Movie: Avatar',value:'Avatar'}
-  ],
   usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/search?q=Breaking+Bad&api=<YOUR_API_KEY>"`
 },
 {
@@ -327,6 +327,10 @@ const ENDPOINTS=[
   name: 'MovieBox · Info',
   method: 'GET',
   path: '/api/v1/movies/moviebox/detail?id={subject_id}&api=<YOUR_API_KEY>',
+  paramKey: 'id',
+  paramLabel: 'Subject ID',
+  placeholder: '8906247916759695608',
+  desc: 'Get story, rating, and details',
   description: 'Get movie or TV series details, story, rating, and other languages.',
   testParam: 'id',
   testPlaceholder: '8906247916759695608',
@@ -339,6 +343,10 @@ const ENDPOINTS=[
   name: 'MovieBox · Season',
   method: 'GET',
   path: '/api/v1/movies/moviebox/epi?id={subject_id}&api=<YOUR_API_KEY>',
+  paramKey: 'id',
+  paramLabel: 'TV Series ID',
+  placeholder: '6207982430134357800',
+  desc: 'Get seasons list for a TV series',
   description: 'Get all seasons and episode counts for a TV series.',
   testParam: 'id',
   testPlaceholder: '6207982430134357800',
@@ -350,15 +358,15 @@ const ENDPOINTS=[
   categoryLabel: 'Movie & TV',
   name: 'MovieBox · Download',
   method: 'GET',
-  path: '/api/v1/movies/moviebox/dl?id={subject_id}&api=<YOUR_API_KEY>',
-  description: 'Get direct download links and Sinhala/English subtitles for a movie (add &se=1 to get all episodes of a TV season).',
+  path: '/api/v1/movies/moviebox/dl?id={id_or_season_link}&api=<YOUR_API_KEY>',
+  paramKey: 'id',
+  paramLabel: 'Movie ID or Season Link',
+  placeholder: '8906247916759695608',
+  desc: 'Paste a Movie ID or Season link to get all download links and subtitles',
+  description: 'Paste a Movie ID or a Season dl_endpoint link to get direct download links (with headers) and 30-min cached Sinhala/English subtitles.',
   testParam: 'id',
   testPlaceholder: '8906247916759695608',
-  testPresets:[
-    {label:'🎬 Movie: Avatar',value:'8906247916759695608'},
-    {label:'📺 TV Season 1: Breaking Bad',value:'6207982430134357800&se=1'}
-  ],
-  usage: `# Download a Movie:\ncurl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/dl?id=8906247916759695608&api=<YOUR_API_KEY>"\n\n# Download All Episodes in Season 1:\ncurl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/dl?id=6207982430134357800&se=1&api=<YOUR_API_KEY>"`
+  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/dl?id=8906247916759695608&api=<YOUR_API_KEY>"`
 },
 {id:'sinhalacartoons-search',category:'movie',categoryLabel:'Movie',name:'sinhalacartoons.lk · Search',method:'GET',path:'/api/v1/movies/sinhalacartoons/search?q={query}&api=<YOUR_API_KEY>',description:'Searches the SinhalaCartoons catalogue and returns matched series with episode counts and URLs.',testParam:'q',testPlaceholder:'tom and jerry',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/sinhalacartoons/search?q=tom+and+jerry&api=<YOUR_API_KEY>"`},
 {id:'sinhalacartoons-dl',category:'movie',categoryLabel:'Movie',name:'sinhalacartoons.lk · DL',method:'GET',path:'/api/v1/movies/sinhalacartoons/dl?landingUrl={landingUrl}&api=<YOUR_API_KEY>',description:'Extracts direct force-download Cloudflare R2 links from movies and cartoon series.',testParam:'landingUrl',testPlaceholder:'https://sinhalacartoons.com/dragon-nest-warriors-dawn-sinhala-dubbed/',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/sinhalacartoons/dl?landingUrl=https://sinhalacartoons.com/dragon-nest-warriors-dawn-sinhala-dubbed/&api=<YOUR_API_KEY>"`},
