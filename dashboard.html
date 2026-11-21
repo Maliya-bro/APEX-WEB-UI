@@ -264,7 +264,7 @@ const ENDPOINTS=[
   `,
   testPresets:[
     {label:'📺 TV Show: Game Of Thrones',value:'https://cinesubz.lk/tvshows/game-of-thrones-2011-sinhala-subtitles/'},
-    {label:'🎬 Movie: Spider-Man ',value:'https://cinesubz.lk/movies/spider-man-brand-new-day-2026-sinhala-subtitles/'}
+    {label:'🎬 Movie: Spider-Man',value:'https://cinesubz.lk/movies/spider-man-brand-new-day-2026-sinhala-subtitles/'}
   ],
   usage:`# Movie Info & Qualities:\ncurl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/info?url=https://cinesubz.lk/movies/spider-man/&api=<YOUR_API_KEY>"\n\n# TV Show Info & Seasons:\ncurl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/info?url=https://cinesubz.lk/tvshows/the-boys/&api=<YOUR_API_KEY>"`
 },
@@ -303,6 +303,74 @@ const ENDPOINTS=[
     {label:'🎬 Drive URL (Movie)',value:'https://drive.csplayer2.space/PYSiy89hq67EVd_EO_p8SFXL1gzSj_jqFvo_mkQtBg6Dz_KMznwJ9Q7jVhGE_KiVFBX4Wtv-cmHTyzYrvOzZgSNthnSjQsu6Eq3r-fW9O5cSJqXA56NvIujS3_GWW85LLN9AhQXUEmmHaPnu49qR3xvtAG8VHg-9hP8idCpTLRyj56dIgVwzehTLIQl0ZGJITnFjn663vc-qP8_CG-FtOHBW'}
   ],
   usage:`# 1. Fetching all Episode DL Links for Season 1 (TV Show):\ncurl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/dl?url=https://cinesubz.lk/tvshows/the-boys/?season=1&api=<YOUR_API_KEY>"\n\n# 2. Bypassing R2 for a Final Download (Movie):\ncurl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesubz/dl?url=https://drive.csplayer2.space/server4/movie.mp4?ext=mp4&api=<YOUR_API_KEY>"`
+},
+{
+  id: 'moviebox-search',
+  category: 'movie',
+  categoryLabel: 'Movie & TV',
+  name: 'MovieBox · Search',
+  method: 'GET',
+  path: '/api/v1/movies/moviebox/search?q={query}&api=<YOUR_API_KEY>',
+  description: 'Searches Movies & TV Series on MovieBox v3 and returns subject_id, cover art, IMDb ratings, and next-step Apex endpoints.',
+  testParam: 'q',
+  testPlaceholder: 'Breaking Bad',
+  testPresets:[
+    {label:'📺 Search TV Series: Breaking Bad',value:'Breaking Bad'},
+    {label:'🎬 Search Movie: Avatar',value:'Avatar'}
+  ],
+  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/search?q=Breaking+Bad&api=<YOUR_API_KEY>"`
+},
+{
+  id: 'moviebox-detail',
+  category: 'movie',
+  categoryLabel: 'Movie & TV',
+  name: 'MovieBox · Full Metadata & Dubs',
+  method: 'GET',
+  path: '/api/v1/movies/moviebox/detail?id={subject_id}&api=<YOUR_API_KEY>',
+  description: 'Fetches full synopsis, release date, IMDb rating, cover art, and available language dub subject IDs.',
+  testParam: 'id',
+  testPlaceholder: '8906247916759695608',
+  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/detail?id=8906247916759695608&api=<YOUR_API_KEY>"`
+},
+{
+  id: 'moviebox-epi',
+  category: 'movie',
+  categoryLabel: 'Movie & TV',
+  name: 'MovieBox · TV Series Seasons',
+  method: 'GET',
+  path: '/api/v1/movies/moviebox/epi?id={subject_id}&api=<YOUR_API_KEY>',
+  description: 'TV Series Step 1: Lists all seasons and episode counts with direct Apex batch download endpoints.',
+  testParam: 'id',
+  testPlaceholder: '6207982430134357800',
+  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/epi?id=6207982430134357800&api=<YOUR_API_KEY>"`
+},
+{
+  id: 'moviebox-dl',
+  category: 'movie',
+  categoryLabel: 'Movie & TV',
+  name: 'MovieBox · Movie & Batch Series DL',
+  method: 'GET',
+  path: '/api/v1/movies/moviebox/dl?id={subject_id}&api=<YOUR_API_KEY>',
+  description: 'Pass ?id={id} for Movie streams + 30m cached Apex EN/SI SRT subtitles, OR add &se=1 to batch all episodes in Season 1.',
+  testParam: 'id',
+  testPlaceholder: '8906247916759695608',
+  testPresets:[
+    {label:'🎬 Movie: Avatar',value:'8906247916759695608'},
+    {label:'📺 TV Series Season 1: Breaking Bad',value:'6207982430134357800&se=1'}
+  ],
+  usage: `# Movie DL + Apex 30m Cached Subtitles:\ncurl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/dl?id=8906247916759695608&api=<YOUR_API_KEY>"\n\n# TV Series Batch Season 1:\ncurl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/dl?id=6207982430134357800&se=1&api=<YOUR_API_KEY>"`
+},
+{
+  id: 'moviebox-sub',
+  category: 'movie',
+  categoryLabel: 'Movie & TV',
+  name: 'MovieBox · Subtitle Cache Server (30m)',
+  method: 'GET',
+  path: '/api/v1/movies/moviebox/sub?id={subject_id}&lang={en|si}&api=<YOUR_API_KEY>',
+  description: 'Serves English (en) and Sinhala (si) .srt subtitles cached for 30 minutes on Apex servers (supports &se=1&ep=1 for series).',
+  testParam: 'id',
+  testPlaceholder: '8906247916759695608',
+  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/sub?id=8906247916759695608&lang=si&api=<YOUR_API_KEY>"`
 },
 {id:'sinhalacartoons-search',category:'movie',categoryLabel:'Movie',name:'sinhalacartoons.lk · Search',method:'GET',path:'/api/v1/movies/sinhalacartoons/search?q={query}&api=<YOUR_API_KEY>',description:'Searches the SinhalaCartoons catalogue and returns matched series with episode counts and URLs.',testParam:'q',testPlaceholder:'tom and jerry',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/sinhalacartoons/search?q=tom+and+jerry&api=<YOUR_API_KEY>"`},
 {id:'sinhalacartoons-dl',category:'movie',categoryLabel:'Movie',name:'sinhalacartoons.lk · DL',method:'GET',path:'/api/v1/movies/sinhalacartoons/dl?landingUrl={landingUrl}&api=<YOUR_API_KEY>',description:'Extracts direct force-download Cloudflare R2 links from movies and cartoon series.',testParam:'landingUrl',testPlaceholder:'https://sinhalacartoons.com/dragon-nest-warriors-dawn-sinhala-dubbed/',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/sinhalacartoons/dl?landingUrl=https://sinhalacartoons.com/dragon-nest-warriors-dawn-sinhala-dubbed/&api=<YOUR_API_KEY>"`},
@@ -379,54 +447,6 @@ const ENDPOINTS=[
   testParam: 'tmdbId',
   testPlaceholder: '557',
   usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/cinesub/resolve?tmdbId=557&api=<YOUR_API_KEY>"`
-},
-  {
-  id: 'moviebox-search',
-  category: 'movie',
-  categoryLabel: 'Movie',
-  name: 'MovieBox · Search',
-  method: 'GET',
-  path: '/api/v1/movies/moviebox/search?q={query}&api=<YOUR_API_KEY>',
-  paramKey: 'q',
-  paramLabel: 'Movie / Series Name',
-  placeholder: 'Avatar',
-  desc: 'Searches movies and TV series on MovieBox v3 and returns subject IDs',
-  description: 'Searches movies and TV series on MovieBox v3 and returns subject IDs, cover art, IMDb ratings, and direct stream endpoints.',
-  testParam: 'q',
-  testPlaceholder: 'Avatar',
-  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/search?q=Avatar&api=<YOUR_API_KEY>"`
-},
-{
-  id: 'moviebox-detail',
-  category: 'movie',
-  categoryLabel: 'Movie',
-  name: 'MovieBox · Info & Episodes',
-  method: 'GET',
-  path: '/api/v1/movies/moviebox/detail?id={subject_id}&api=<YOUR_API_KEY>',
-  paramKey: 'id',
-  paramLabel: 'Subject ID',
-  placeholder: '8906247916759695608',
-  desc: 'Fetches synopsis, audio dubs, and season/episode lists for TV shows',
-  description: 'Fetches full metadata, audio dub subject IDs, and season/episode counts for any MovieBox title.',
-  testParam: 'id',
-  testPlaceholder: '8906247916759695608',
-  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/detail?id=8906247916759695608&api=<YOUR_API_KEY>"`
-},
-{
-  id: 'moviebox-dl',
-  category: 'movie',
-  categoryLabel: 'Movie',
-  name: 'MovieBox · Streams & Subtitles DL',
-  method: 'GET',
-  path: '/api/v1/movies/moviebox/dl?id={subject_id}&api=<YOUR_API_KEY>',
-  paramKey: 'id',
-  paramLabel: 'Subject ID (add &se=1&ep=1 for series)',
-  placeholder: '8906247916759695608',
-  desc: 'Returns 1080p/720p/480p MP4 links, multi-language SRT subtitles, and proxy auto-download URLs',
-  description: 'Extracts 1080p/720p/480p MP4 streams, multi-language .srt subtitles, and generates header-free proxy auto-download links.',
-  testParam: 'id',
-  testPlaceholder: '8906247916759695608',
-  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/dl?id=8906247916759695608&api=<YOUR_API_KEY>"`
 },
 {id:'animeheaven-search',category:'movie',categoryLabel:'Movie',name:'AnimeHeaven · Search',method:'GET',path:'/api/v1/media/animeheaven/search?q={query}&api=<YOUR_API_KEY>',description:'Searches anime series on AnimeHeaven and returns matched show pages.',testParam:'q',testPlaceholder:'Magical Explorer',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/animeheaven/search?q=Magical+Explorer&api=<YOUR_API_KEY>"`},
 {id:'animeheaven-dl',category:'movie',categoryLabel:'Movie',name:'AnimeHeaven · All Episodes DL',method:'GET',path:'/api/v1/media/animeheaven/dl?url={url}&api=<YOUR_API_KEY>',description:'Extracts direct MP4 download and streaming links for every available episode in an anime series.',testParam:'url',testPlaceholder:'https://animeheaven.me/anime.php?gve9a',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/media/animeheaven/dl?url=https://animeheaven.me/anime.php?gve9a&api=<YOUR_API_KEY>"`},
