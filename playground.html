@@ -198,59 +198,16 @@ const ENDPOINTS=[
   {id:'chat-ubi',category:'ai',categoryLabel:'AI',name:'Gemini Mini · Chat AI',path:'/api/v1/ai/chat/ubi',paramKey:'q',paramLabel:'Prompt',placeholder:'Explain quantum computing in 2 sentences',desc:'Fast, clean AI text responses via Gemini Mini'},
 
   // 🎬 MOVIES & ANIME
-  {
-  id: 'moviebox-search',
-  category: 'movie',
-  categoryLabel: 'Movie',
-  name: 'MovieBox · Search',
-  method: 'GET',
-  path: '/api/v1/movies/moviebox/search?q={query}&api=<YOUR_API_KEY>',
-  paramKey: 'q',
-  paramLabel: 'Movie / Series Name',
-  placeholder: 'Avatar',
-  desc: 'Searches movies and TV series on MovieBox v3 and returns subject IDs',
-  description: 'Searches movies and TV series on MovieBox v3 and returns subject IDs, cover art, IMDb ratings, and direct stream endpoints.',
-  testParam: 'q',
-  testPlaceholder: 'Avatar',
-  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/search?q=Avatar&api=<YOUR_API_KEY>"`
-},
-{
-  id: 'moviebox-detail',
-  category: 'movie',
-  categoryLabel: 'Movie',
-  name: 'MovieBox · Info & Episodes',
-  method: 'GET',
-  path: '/api/v1/movies/moviebox/detail?id={subject_id}&api=<YOUR_API_KEY>',
-  paramKey: 'id',
-  paramLabel: 'Subject ID',
-  placeholder: '8906247916759695608',
-  desc: 'Fetches synopsis, audio dubs, and season/episode lists for TV shows',
-  description: 'Fetches full metadata, audio dub subject IDs, and season/episode counts for any MovieBox title.',
-  testParam: 'id',
-  testPlaceholder: '8906247916759695608',
-  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/detail?id=8906247916759695608&api=<YOUR_API_KEY>"`
-},
-{
-  id: 'moviebox-dl',
-  category: 'movie',
-  categoryLabel: 'Movie',
-  name: 'MovieBox · Streams & Subtitles DL',
-  method: 'GET',
-  path: '/api/v1/movies/moviebox/dl?id={subject_id}&api=<YOUR_API_KEY>',
-  paramKey: 'id',
-  paramLabel: 'Subject ID (add &se=1&ep=1 for series)',
-  placeholder: '8906247916759695608',
-  desc: 'Returns 1080p/720p/480p MP4 links, multi-language SRT subtitles, and proxy auto-download URLs',
-  description: 'Extracts 1080p/720p/480p MP4 streams, multi-language .srt subtitles, and generates header-free proxy auto-download links.',
-  testParam: 'id',
-  testPlaceholder: '8906247916759695608',
-  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/dl?id=8906247916759695608&api=<YOUR_API_KEY>"`
-},
+  {id:'moviebox-search',category:'movie',categoryLabel:'Movie & TV',name:'MovieBox · Search',path:'/api/v1/movies/moviebox/search',paramKey:'q',paramLabel:'Movie / Series Name',placeholder:'Breaking Bad',desc:'Searches Movies & TV Series to get subject_id'},
+  {id:'moviebox-detail',category:'movie',categoryLabel:'Movie & TV',name:'MovieBox · Detail & Dubs',path:'/api/v1/movies/moviebox/detail',paramKey:'id',paramLabel:'Subject ID',placeholder:'8906247916759695608',desc:'Fetches full synopsis, rating, and language dubs'},
+  {id:'moviebox-epi',category:'movie',categoryLabel:'Movie & TV',name:'MovieBox · TV Series Seasons',path:'/api/v1/movies/moviebox/epi',paramKey:'id',paramLabel:'Series Subject ID',placeholder:'6207982430134357800',desc:'Lists all seasons and episode counts with Apex DL endpoints'},
+  {id:'moviebox-dl',category:'movie',categoryLabel:'Movie & TV',name:'MovieBox · Movie & Batch Series DL',path:'/api/v1/movies/moviebox/dl',paramKey:'id',paramLabel:'Subject ID (add &se=1 for TV Season)',placeholder:'8906247916759695608',desc:'Returns direct CDN links + headers and 30m cached Apex SRT subtitles'},
+  {id:'moviebox-sub',category:'movie',categoryLabel:'Movie & TV',name:'MovieBox · Subtitle Cache Server',path:'/api/v1/movies/moviebox/sub',paramKey:'id',paramLabel:'Subject ID',placeholder:'8906247916759695608',extraParams:'&lang=si',desc:'Serves 30-minute cached English & Sinhala .srt subtitle files'},
   {id:'cinesub-search',category:'movie',categoryLabel:'Movie',name:'CineSub.lk · Search',path:'/api/v1/movies/cinesub/search',paramKey:'q',paramLabel:'Movie Name',placeholder:'spider man',desc:'Searches TMDB and matches CineSub.lk Sinhala subtitle slugs'},
   {id:'cinesub-resolve',category:'movie',categoryLabel:'Movie',name:'CineSub.lk · Resolve & Sub DL',path:'/api/v1/movies/cinesub/resolve',paramKey:'tmdbId',paramLabel:'TMDB ID / URL',placeholder:'557',desc:'Extracts direct .vtt subtitle auto-download link & VidLink player'},
-  {id:'cinesubz-search',category:'movie',categoryLabel:'Movie',name:'CineSubz · Search',path:'/api/v1/movies/cinesubz/search',paramKey:'q',paramLabel:'Query',placeholder:'avatar',desc:'Searches titles on CineSubz'},
-  {id:'cinesubz-info',category:'movie',categoryLabel:'Movie',name:'CineSubz · Info & Links',path:'/api/v1/movies/cinesubz/info',paramKey:'url',paramLabel:'Page URL',placeholder:'https://cinesubz.co/movies/avatar',desc:'Scrapes qualities on CineSubz'},
-  {id:'cinesubz-dl',category:'movie',categoryLabel:'Movie',name:'CineSubz · Direct Download',path:'/api/v1/movies/cinesubz/dl',paramKey:'directUrl',paramLabel:'Player URL',placeholder:'https://cinesubz.co/player/avatar-1080p',desc:'Resolves player links to CDN'},
+  {id:'cinesubz-search',category:'movie',categoryLabel:'Movie & TV',name:'CineSubz · Search',path:'/api/v1/movies/cinesubz/search',paramKey:'q',paramLabel:'Query',placeholder:'avatar',desc:'Searches Movies & TV Shows on CineSubz'},
+  {id:'cinesubz-info',category:'movie',categoryLabel:'Movie & TV',name:'CineSubz · Info & Seasons',path:'/api/v1/movies/cinesubz/info',paramKey:'url',paramLabel:'Page URL',placeholder:'https://cinesubz.lk/movies/avatar',desc:'Scrapes qualities for Movies or seasons list for TV Shows'},
+  {id:'cinesubz-dl',category:'movie',categoryLabel:'Movie & TV',name:'CineSubz · Direct Download',path:'/api/v1/movies/cinesubz/dl',paramKey:'url',paramLabel:'Drive / Season URL',placeholder:'https://cinesubz.lk/tvshows/the-boys/?season=1',desc:'Resolves Movie R2 links or batch TV Show Season episodes'},
   {id:'kmmovies-search',category:'movie',categoryLabel:'Movie',name:'KMMovies · Search',path:'/api/v1/movies/kmmovies/search',paramKey:'q',paramLabel:'Movie Name',placeholder:'leo',desc:'Searches movies on KMMovies'},
   {id:'kmmovies-dl',category:'movie',categoryLabel:'Movie',name:'KMMovies · All Qualities DL',path:'/api/v1/movies/kmmovies/dl',paramKey:'url',paramLabel:'Movie URL',placeholder:'https://kmmovies.beer/leo-2023/',desc:'Resolves WEB-DL & Direct links for all qualities'},
   {id:'cartoonslk-search',category:'movie',categoryLabel:'Movie',name:'Cartoons.lk · Search',path:'/api/v1/movies/cartoonslk/search',paramKey:'q',paramLabel:'Cartoon / Movie',placeholder:'frozen',desc:'Searches Sinhala dubbed cartoons & movies on cartoons.lk'},
@@ -293,8 +250,9 @@ const endpointSelect=document.getElementById('pg-endpoint'),paramInput=document.
 let currentResponse=null,currentEndpoint=null;
 
 function buildUrl(ep,value){
+  const cleanPath=ep.path.split('?')[0];
   const encoded=encodeURIComponent(value||'{'+ep.paramKey+'}');
-  let url=API_BASE+ep.path+'?'+ep.paramKey+'='+encoded;
+  let url=API_BASE+cleanPath+'?'+ep.paramKey+'='+encoded;
   if(ep.extraParams)url+=ep.extraParams;
   if(API_KEY)url+='&api='+API_KEY;
   return url;
@@ -326,7 +284,7 @@ function selectEndpoint(id){
 function populateEndpoints(){
   const groups={
     ai:{label:'🤖 AI & Intelligence',items:[]},
-    movie:{label:'🎬 Movies & Cartoons',items:[]},
+    movie:{label:'🎬 Movies, TV & Cartoons',items:[]},
     media:{label:'🎵 Media & Audio',items:[]},
     game:{label:'🎮 PC Games',items:[]},
     app:{label:'👾 Android Apps',items:[]},
