@@ -368,6 +368,30 @@ const ENDPOINTS=[
   testPlaceholder: '8906247916759695608',
   usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/moviebox/dl?id=8906247916759695608&api=<YOUR_API_KEY>"`
 },
+  {
+  id: 'nkiri-search',
+  category: 'movie',
+  categoryLabel: 'Movie',
+  name: 'Nkiri · Search',
+  method: 'GET',
+  path: '/api/v1/movies/nkiri/search?q={query}&api=<YOUR_API_KEY>',
+  description: 'Searches Korean series, TV shows, anime, and movies on thenkiri.org.ng.',
+  testParam: 'q',
+  testPlaceholder: 'Oh! My Guard',
+  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/nkiri/search?q=Oh!%20My%20Guard&api=<YOUR_API_KEY>"`
+},
+{
+  id: 'nkiri-dl',
+  category: 'movie',
+  categoryLabel: 'Movie',
+  name: 'Nkiri · All Episodes Direct DL',
+  method: 'GET',
+  path: '/api/v1/movies/nkiri/dl?url={url}&api=<YOUR_API_KEY>',
+  description: 'Resolves all episodes or movie direct download links (Wideshares, Downloadwella, Loadedfiles, Wildshare) with file sizes.',
+  testParam: 'url',
+  testPlaceholder: 'https://thenkiri.org.ng/2026/11/21/oh-my-guard-s01-korean-series/',
+  usage: `curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/nkiri/dl?url=https://thenkiri.org.ng/2026/11/21/oh-my-guard-s01-korean-series/&api=<YOUR_API_KEY>"`
+},
 {id:'sinhalacartoons-search',category:'movie',categoryLabel:'Movie',name:'sinhalacartoons.lk · Search',method:'GET',path:'/api/v1/movies/sinhalacartoons/search?q={query}&api=<YOUR_API_KEY>',description:'Searches the SinhalaCartoons catalogue and returns matched series with episode counts and URLs.',testParam:'q',testPlaceholder:'tom and jerry',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/sinhalacartoons/search?q=tom+and+jerry&api=<YOUR_API_KEY>"`},
 {id:'sinhalacartoons-dl',category:'movie',categoryLabel:'Movie',name:'sinhalacartoons.lk · DL',method:'GET',path:'/api/v1/movies/sinhalacartoons/dl?landingUrl={landingUrl}&api=<YOUR_API_KEY>',description:'Extracts direct force-download Cloudflare R2 links from movies and cartoon series.',testParam:'landingUrl',testPlaceholder:'https://sinhalacartoons.com/dragon-nest-warriors-dawn-sinhala-dubbed/',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/sinhalacartoons/dl?landingUrl=https://sinhalacartoons.com/dragon-nest-warriors-dawn-sinhala-dubbed/&api=<YOUR_API_KEY>"`},
 {id:'tamilmv-search',category:'movie',categoryLabel:'Movie',name:'1TamilMV · Search',method:'GET',path:'/api/v1/movies/tamilmv/search?q={query}&api=<YOUR_API_KEY>',description:'Searches 1TamilMV releases and returns forum topic URLs without any size limits.',testParam:'q',testPlaceholder:'leo',usage:`curl -H "Authorization: Bearer $APEX_KEY" \\\n  "https://apex-web-api.vercel.app/api/v1/movies/tamilmv/search?q=leo&api=<YOUR_API_KEY>"`},
